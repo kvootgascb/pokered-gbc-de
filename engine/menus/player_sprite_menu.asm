@@ -190,7 +190,10 @@ ShowPlayerSpriteMenu:
 	ld [hl], "▷"
 	ld a, [wSpriteMenuCursorRow]
 	cp 2
-	jr z, .drawArrow
+	jr nz, .optionCursor
+	hlcoord 1, 16
+	jr .drawArrow
+.optionCursor
 	and a
 	jr z, .genderCursor
 	ld a, [wModeMenuChoice]

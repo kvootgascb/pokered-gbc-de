@@ -757,6 +757,23 @@ tap("left")
 tap("right")
 tap("down")
 tap("down")
+assert p.memory[a("wSpriteMenuCursorRow")] == 2
+assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED, "Back cursor is not visible"
+assert p.memory[a("wTileMap") + 8 * 20 + 9] == 0xEC, "Mode retained the solid cursor"
+# Back must have its own cursor position for either active mode.
+for direction, mode in [("left", 0), ("right", 1)]:
+    tap("up")
+    assert p.memory[a("wSpriteMenuCursorRow")] == 1
+    tap(direction)
+    assert p.memory[a("wGameplayModeCache")] == mode
+    mode_x = 1 if mode == 0 else 9
+    assert p.memory[a("wTileMap") + 8 * 20 + mode_x] == 0xED
+    assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0x7F
+    tap("down")
+    assert p.memory[a("wSpriteMenuCursorRow")] == 2
+    assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED
+    assert p.memory[a("wTileMap") + 8 * 20 + mode_x] == 0xEC
+    assert p.memory[a("wTileMap") + 3 * 20 + 13] == 0xEC
 tap("left")
 assert not closed and p.memory[a("wPlayerGender")] == 1
 assert p.memory[a("wGameplayModeCache")] == 1
