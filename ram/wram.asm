@@ -2067,7 +2067,7 @@ wFeatureAccessResult:: db
 wFeatureAccessLow:: db
 wFeatureAccessHigh:: db
 wFeatureAccessValue:: db
-	ds 1
+wPostgameAction:: db
 
 wTownVisitedFlag:: flag_array NUM_CITY_MAPS
 

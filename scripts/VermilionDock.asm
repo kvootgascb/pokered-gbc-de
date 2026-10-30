@@ -211,7 +211,22 @@ endr
 VermilionDock_TextPointers:
 	def_text_pointers
 	dw_const VermilionDockUnusedText, TEXT_VERMILIONDOCK_UNUSED
+	dw_const VermilionDockTruckFrontText, TEXT_VERMILIONDOCK_TRUCK_FRONT
+	dw_const VermilionDockTruckRearText, TEXT_VERMILIONDOCK_TRUCK_REAR
 
 VermilionDockUnusedText:
 	text_far _VermilionDockUnusedText
 	text_end
+
+VermilionDockTruckFrontText:
+	text_asm
+	ld a, 1
+	ld [wSpecialSuperRod], a ; transient interaction-side scratch
+	farcall InvestigateMewTruck
+	jp TextScriptEnd
+VermilionDockTruckRearText:
+	text_asm
+	ld a, 2
+	ld [wSpecialSuperRod], a
+	farcall InvestigateMewTruck
+	jp TextScriptEnd

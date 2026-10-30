@@ -340,6 +340,34 @@ call("ResolveOakPostgameBattle")
 assert p.memory[3, 0xD00E] == 0
 print("PASS: three Oak reward species, pending gift persistence, and no reward on loss")
 
+restore()
+p.memory[a("wGameplayModeCache")] = 1
+p.memory[3, 0xD006] = 0
+p.memory[a("wSpecialSuperRod")] = 1
+call("DetermineMewTruckAction")
+assert p.memory[3, 0xD006] == 2 and p.memory[a("wPostgameAction")] == 1
+call("DetermineMewTruckAction")
+assert p.memory[3, 0xD006] == 2 and p.memory[a("wPostgameAction")] == 2
+p.memory[a("wSpecialSuperRod")] = 2
+p.register_file.A = 1
+call("MewTruckRoll")
+assert p.memory[3, 0xD006] == 1
+p.register_file.A = 0
+call("MewTruckRoll")
+assert p.memory[3, 0xD006] == 3
+call("SetupMewTruckBattle")
+assert p.memory[a("wCurEnemyLVL")] == 30
+assert p.memory[a("wCurOpponent")] == 0x15
+call("DetermineMewTruckAction")
+assert p.memory[a("wPostgameAction")] == 0
+call("RegisterChampionVictory")
+assert p.memory[3, 0xD006] == 3
+call("SaveSAVtoSRAM0")
+p.memory[3, 0xD006] = 0
+call("LoadSAV0")
+assert p.memory[3, 0xD006] == 3
+print("PASS: first Mew attempt fails, same-side attempts do not roll, and consumed encounter persists")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [
