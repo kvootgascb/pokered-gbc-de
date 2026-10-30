@@ -14,13 +14,22 @@ und keine neue Hauptgeschichte als Bestandteil dieses Konzepts.
 bekannten Kampfeigenheiten und Fehler. Moderne Typen, Fähigkeiten und eine
 neue physisch/spezielle Schadensaufteilung sind nicht vorgesehen.
 
+**Die Pokémon-Movesets beziehungsweise Attacken-Lernlisten sollen aus Pokémon
+Gelb übernommen werden – in Classic und Erweitert gleichermaßen.** Das ist eine
+bewusste Ausnahme von der Rot-/Blau-Originaltreue in Classic und verändert die
+Lerndaten, nicht die Gen-1-Kampfregeln oder deren Eigenheiten. Diese Änderung
+ist vorerst nur geplant, nicht implementiert. Bei der Umsetzung sind
+Startattacken, Level-up-Lernlisten und TM-/VM-Kompatibilität mit Gelb
+abzugleichen; besondere Begegnungsattacken wie Surfer bei dem seltenen
+Kraftwerk-Pikachu bleiben als eigener Konzeptpunkt erhalten.
+
 Weniger umständliche Bedienung und zusätzliche Beschaffungswege sollen die
 ursprünglichen Konsequenzen verpasster Chancen nicht aufheben.
 
 ## Modi und Geheimmenü
 
 - Classic spielt weitestgehend wie das Original, mit Junge-/Green-Auswahl.
-- Größerer Beutel und größeres PC-Item-Lager gelten ausdrücklich in beiden Modi.
+- Größerer Beutel, größeres PC-Item-Lager und die Movesets aus Pokémon Gelb gelten ausdrücklich in beiden Modi.
 - Vor dem Spielstart wird der Modus gewählt und im Spielstand gespeichert.
 - Der Modus soll jederzeit über das Geheimmenü wechselbar sein.
 - Bereits erhaltene Pokémon, Items und Fortschritte bleiben beim Wechsel erhalten.
@@ -62,6 +71,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Kontextabhängige VMs | Nein | Ja | Zerschneider, Stärke und Surfer per A am passenden Hindernis aktivieren, wenn ein Team-Pokémon die VM beherrscht. Ordenvoraussetzungen bleiben erhalten. |
 | Größere Münzkäufe | Nein | Ja | In der Spielhalle mehr Münzen auf einmal kaufen. Mengen und Preise offen. |
 | Fangsymbol bei wilden Pokémon | Nein | Ja | Anzeigen, ob die Art bereits gefangen wurde. |
+| Attacken-Lernlisten aus Pokémon Gelb | Ja | Ja | Gelb als gemeinsame Moveset-Grundlage; bisher nur geplant. Gen-1-Kampfmechanik unverändert. |
 | EP-Leiste | Nein | Ja | Vorhandene EP-Leiste in Erweitert beibehalten, in Classic ausblenden. |
 | Hinweis auf volle Box | Nein | Ja | Nur ein Hinweis; kein automatischer Boxwechsel. |
 | Registrierbares Basis-Item | Nein | Ja | Ein Basis-Item auf Select legen, z. B. Fahrrad oder Angel. Außerhalb des Optionsmenüs direkt verwendbar. |
