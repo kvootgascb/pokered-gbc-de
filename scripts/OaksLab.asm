@@ -734,7 +734,7 @@ OaksLab_TextPointers:
 	dw_const OaksLabOak2Text,                     TEXT_OAKSLAB_OAK2
 	dw_const OaksLabGirlText,                     TEXT_OAKSLAB_GIRL
 	dw_const OaksLabScientistText,                TEXT_OAKSLAB_SCIENTIST1
-	dw_const OaksLabScientistText,                TEXT_OAKSLAB_SCIENTIST2
+	dw_const OaksLabTradeBackTrainerText,         TEXT_OAKSLAB_SCIENTIST2
 	dw_const OaksLabOakDontGoAwayYetText,         TEXT_OAKSLAB_OAK_DONT_GO_AWAY_YET
 	dw_const OaksLabRivalIllTakeThisOneText,      TEXT_OAKSLAB_RIVAL_ILL_TAKE_THIS_ONE
 	dw_const OaksLabRivalReceivedMonText,         TEXT_OAKSLAB_RIVAL_RECEIVED_MON
@@ -763,7 +763,7 @@ OaksLab_TextPointers2:
 	dw OaksLabOak2Text
 	dw OaksLabGirlText
 	dw OaksLabScientistText
-	dw OaksLabScientistText
+	dw OaksLabTradeBackTrainerText
 
 OaksLabRivalText:
 	text_asm
@@ -1224,6 +1224,14 @@ OaksLabOakThatWasMyDreamText:
 OaksLabRivalLeaveItAllToMeText:
 	text_far _OaksLabRivalLeaveItAllToMeText
 	text_end
+
+OaksLabTradeBackTrainerText:
+	text_asm
+	farcall TradeBackTrainerTalk
+	jp c, TextScriptEnd
+	ld hl, OaksLabScientistText.Text
+	call PrintText
+	jp TextScriptEnd
 
 OaksLabScientistText:
 	text_asm

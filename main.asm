@@ -991,3 +991,5 @@ INCLUDE "engine/events/expanded_coin_shop.asm"
 INCLUDE "engine/events/extra_prizes.asm"
 
 INCLUDE "engine/events/move_tutors.asm"
+
+INCLUDE "engine/events/trade_back.asm"

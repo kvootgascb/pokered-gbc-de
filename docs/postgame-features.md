@@ -68,6 +68,27 @@ Attackenwechsel; zum Ersetzen einer VM ist vorher der Verlerner da.
 Die gemeinsame Umstellung auf Gelb-Lerndaten bleibt ein eigener geplanter
 Schritt. Die Helfer verwenden jeweils die aktuell im ROM enthaltenen Daten.
 
+## Tausch-zurück-Trainer
+
+Der rechte Assistent in Eichs Labor bietet in Erweitert nach der Starterwahl
+einen kostenlosen Linkkabel-Test an. Nach Bestätigung wählt der Spieler ein
+Team-Pokémon aus und bekommt es sofort zurück. Kadabra, Maschock, Georok und
+Alpollo entwickeln sich über die ursprüngliche Tauschentwicklungsroutine.
+Andere Arten werden unverändert zurückgegeben; insbesondere werden keine
+Level- oder Steinentwicklungen ausgelöst. Ein zweites Gerät ist nicht nötig.
+
+Das Pokémon verlässt seine Teamposition nicht, wechselt weder Besitzer noch
+Trainer-ID und erhält dadurch keinen Fremdtrainer-EP-Bonus. Spitzname, Erfahrung,
+DVs, Stat-EP, Attacken und AP bleiben erhalten; normale Entwicklungsänderungen
+an Art, Typen und Statuswerten gelten weiterhin. Beim aktuellen Level regulär
+angebotene Entwicklungsattacken nutzt die ursprüngliche Lernroutine.
+Classic behält den bisherigen Dialog des Assistenten. Es gibt keinen neuen
+persistenten Zwischenzustand und keine Änderung am Saveformat.
+
+Die Emulator-Tests prüfen alle vier Entwicklungen, unveränderte Pokémon-Daten,
+ein nicht entwickelbares Pokémon, die Classic-Sperre sowie den echten Dialog
+mit Teamauswahl, Entwicklung und Rückkehr ins Labor.
+
 ## Speicher und Prüfung
 
 Alle dauerhaften Zustände nutzen das bestehende Feature-Saveformat mit

@@ -66,7 +66,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Laufschuhe | Nein | Ja | Umgesetzt: B halten für doppeltes normales Gehtempo, auch in Innenräumen. Kein Extra-Tempo beim Surfen, Fahrrad, Springen oder geskripteten Bewegungen. |
 | Kampf gegen Professor Eich | Nein | Ja | Nach jedem Top-Vier-Sieg einmal verfügbar, danach bis zum nächsten Top-Vier-Sieg gesperrt. Ein Sieg über Eich gibt einen zufälligen Starter als Preis. |
 | Arena-Rückkämpfe | Nein | Ja | Geplant: nach jedem Top-Vier-Sieg jeder Leiter einmal erneut herausforderbar; Gelegenheiten sammeln sich nicht an. Teams und Level noch offen. |
-| Tausch-zurück-Trainer | Nein | Ja | In Eichs Labor: testet ein zuvor wackeliges Linkkabel. Tauscht ein Pokémon und gibt es sofort zurück; ermöglicht Tauschentwicklungen ohne externen Tauschpartner. |
+| Tausch-zurück-Trainer | Nein | Ja | Umgesetzt: rechter Assistent in Eichs Labor, nach der Starterwahl. Testet das zuvor wackelige Linkkabel; Pokémon wird sofort zurückgegeben und kann sich durch Tausch entwickeln. |
 | Alle 151 Pokémon erhältlich | Nein | Ja | Jede Art soll ohne externen Tausch in einem Spielstand erhältlich sein. Einmal pro Art genügt; keine Fanggarantie. |
 | Wiederverwendbare TMs | Nein | Ja | TMs werden beim Einsatz nicht verbraucht. |
 | Rückkehr der M.S. Anne | Nein | Ja | Kehrt nach jedem Top-Vier-Sieg zurück. Nach dem Verlassen fährt sie wieder ab; für die nächste Rückkehr sind die Top Vier erneut zu besiegen. |

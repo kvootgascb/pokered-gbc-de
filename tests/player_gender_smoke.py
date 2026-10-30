@@ -127,7 +127,7 @@ def restore():
     p.load_state(base)
 
 
-def call(n, limit=180):
+def call(n, limit=180, auto_button=None):
     bank, pc = sym[n]
     # A frame snapshot can be inside an interrupt. Enable interrupts before
     # invoking routines which wait for VBlank, then return to a ROM0 loop.
@@ -139,7 +139,9 @@ def call(n, limit=180):
         p.memory[0x2000] = bank
         p.memory[a("hLoadedROMBank")] = bank
     p.register_file.PC = 0x100
-    for _ in range(limit):
+    for frame in range(limit):
+        if auto_button and frame % 20 == 0:
+            p.button(auto_button, 2)
         p.tick(1, False)
         if p.register_file.PC in (0x108, 0x109):
             return
@@ -450,12 +452,12 @@ print(
 
 # Enter the real bow map and speak to each new NPC through the overworld.
 # A fresh stack and LCD mode restore leave the subroutine-test trampoline.
-def enter_tutor_map(x, moves):
+def enter_npc_map(x, moves, species=0x55, map_id=0x63, width=10, y=6):
     restore()
     p.tick(120, False)
     p.memory[a("wPartyCount")] = 0
     p.memory[a("wMonDataLocation")] = 0x10  # player party, skip naming prompt
-    p.memory[a("wcf91")] = 0x55  # Raichu
+    p.memory[a("wcf91")] = species
     p.memory[a("wCurEnemyLVL")] = 30
     call("_AddPartyMon")
     p.memory[a("wPartyMonNicks") : a("wPartyMonNicks") + 11] = [
@@ -476,13 +478,16 @@ def enter_tutor_map(x, moves):
     p.memory[a("wGameplayModeCache")] = 1
     p.memory[3, 0xD000] = 1
     p.memory[a("wNumHoFTeams")] = 1
-    p.memory[a("wCurMap")] = 0x63
+    p.memory[a("wCurMap")] = map_id
     p.memory[a("wCurMapTileset")] = 0
-    p.memory[a("wYCoord")] = 6
+    if map_id == 0x28:
+        p.memory[a("wOaksLabCurScript")] = 18
+        p.memory[a("wEventFlags") + 4] = 0xFF
+    p.memory[a("wYCoord")] = y
     p.memory[a("wXCoord")] = x
-    p.memory[a("wYBlockCoord")] = 0
-    p.memory[a("wXBlockCoord")] = 0
-    ptr = a("wOverworldMap") + 4 * 16 + x // 2 + 1
+    p.memory[a("wYBlockCoord")] = y & 1
+    p.memory[a("wXBlockCoord")] = x & 1
+    ptr = a("wOverworldMap") + (y // 2 + 1) * (width + 6) + x // 2 + 1
     p.memory[a("wCurrentTileBlockMapViewPointer")] = ptr & 255
     p.memory[a("wCurrentTileBlockMapViewPointer") + 1] = ptr >> 8
     p.memory[0xFF40] = 0xE3
@@ -495,7 +500,7 @@ def enter_tutor_map(x, moves):
     p.memory[a("wSpritePlayerStateData1FacingDirection")] = 4  # up
 
 
-enter_tutor_map(10, [84, 0, 0, 0])
+enter_npc_map(10, [84, 0, 0, 0])
 for _ in range(120):
     p.button("a", 2)
     p.tick(20, False)
@@ -503,7 +508,7 @@ for _ in range(120):
         break
 assert p.memory[a("wPartyMon1Moves") + 1] == 45, "NPC reminder failed to teach Growl"
 assert p.memory[a("wPartyMon1PP") + 1] == 40
-enter_tutor_map(8, [57, 84, 0, 0])
+enter_npc_map(8, [57, 84, 0, 0])
 for _ in range(120):
     p.button("a", 2)
     p.tick(20, False)
@@ -512,6 +517,63 @@ for _ in range(120):
 assert list(p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4]) == [84, 0, 0, 0]
 assert p.memory[a("wPartyMon1PP")] == 30
 print("PASS: real bow NPCs open party/attack menus, teach a move and delete an HM")
+
+# Native trade evolutions keep ownership, experience, attacks and nickname.
+for source, target in [
+    (0x26, 0x95),
+    (0x29, 0x7E),
+    (0x27, 0x31),
+    (0x93, 0x0E),
+    (0x54, 0x54),
+]:
+    restore()
+    p.memory[a("wPartyCount")] = 0
+    for species in [source, 0x26]:
+        p.memory[a("wcf91")] = species
+        p.memory[a("wMonDataLocation")] = 0x10
+        p.memory[a("wCurEnemyLVL")] = 30
+        call("_AddPartyMon")
+    nick = [0x93, 0x84, 0x92, 0x93, 0x50] + [0x50] * 6
+    p.memory[a("wPartyMonNicks") : a("wPartyMonNicks") + 11] = nick
+    mon_before = list(p.memory[a("wPartyMon1") : a("wPartyMon2")])
+    other_before = list(p.memory[a("wPartyMon2") : a("wPartyMon3")])
+    p.memory[a("wWhichPokemon")] = 0
+    p.memory[a("wGameplayModeCache")] = 1
+    call("RunLocalTradeEvolution", 1800, "a")
+    assert p.memory[a("wPartyMon1")] == target
+    assert p.memory[a("wPartySpecies")] == target
+    assert p.memory[a("wPartyCount")] == 2
+    assert list(p.memory[a("wPartyMon2") : a("wPartyMon3")]) == other_before
+    assert list(p.memory[a("wPartyMonNicks") : a("wPartyMonNicks") + 11]) == nick
+    # Moves, OT ID, EXP, stat EXP, DVs and PP occupy this unchanged range.
+    lo, hi = a("wPartyMon1Moves"), a("wPartyMon1Level")
+    assert (
+        list(p.memory[lo:hi]) == mon_before[lo - a("wPartyMon1") : hi - a("wPartyMon1")]
+    )
+    assert p.memory[a("wLinkState")] == 0 and p.memory[a("wForceEvolution")] == 0
+    assert p.memory[a("wCanEvolveFlags")] == 0
+    p.memory[a("wWhichPokemon")] = 1
+    p.memory[a("wGameplayModeCache")] = 0
+    call("RunLocalTradeEvolution")
+    assert p.memory[a("wPartyMon2")] == 0x26, "Classic allowed a local trade evolution"
+print(
+    "PASS: all four trade evolutions preserve Pokemon data; non-evolving/Classic cases unchanged"
+)
+
+# Real lab scientist dialogue, party choice, evolution and return to map.
+trade_done = []
+hook("TradeBackTrainerTalk.done", lambda _: trade_done.append(True))
+enter_npc_map(8, [93, 0, 0, 0], species=0x26, map_id=0x28, width=5, y=11)
+for _ in range(160):
+    p.button("a", 2)
+    p.tick(20, False)
+    if trade_done:
+        break
+assert trade_done, "trade-back NPC did not return from its dialogue"
+assert p.memory[a("wPartyMon1")] == 0x95
+assert p.memory[a("wLinkState")] == 0
+assert p.memory[a("wGameplayModeCache")] == 1
+print("PASS: actual lab NPC selects a Pokemon, evolves it and returns it locally")
 
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
