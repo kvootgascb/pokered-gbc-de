@@ -71,6 +71,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Wiederverwendbare TMs | Nein | Ja | TMs werden beim Einsatz nicht verbraucht. |
 | Rückkehr der M.S. Anne | Nein | Ja | Kehrt nach jedem Top-Vier-Sieg zurück. Nach dem Verlassen fährt sie wieder ab; für die nächste Rückkehr sind die Top Vier erneut zu besiegen. |
 | Attacken-Helfer | Nein | Ja | Zwei neue NPCs: einer verlernt VMs, einer erinnert Attacken. Umgesetzt: kostenlos auf dem Deck der M.S. Anne nach dem ersten Top-Vier-Sieg. |
+| Spezialhändler auf der M.S. Anne | Nein | Ja | Geplant: erscheint nach dem ersten Top-Vier-Sieg wie die Attacken-Helfer; verkauft sonst nicht kaufbare Items. Sortiment und Preise noch abzustimmen. |
 | Kontextabhängige VMs | Nein | Ja | Zerschneider, Stärke und Surfer per A am passenden Hindernis aktivieren, wenn ein Team-Pokémon die VM beherrscht. Ordenvoraussetzungen bleiben erhalten. |
 | Größere Münzkäufe | Nein | Ja | In der Spielhalle mehr Münzen auf einmal kaufen. Umgesetzt: zusätzlich 500 Münzen für 10000 Geld. |
 | Fangsymbol bei wilden Pokémon | Nein | Ja | Anzeigen, ob die Art bereits gefangen wurde. |
@@ -294,6 +295,36 @@ Noch zu entscheiden:
   Rückkampf braucht es eine ausdrücklich festgelegte Rückkehr oder einen
   anderen Austragungsort; sein normaler Story-Abgang soll nicht versehentlich
   rückgängig gemacht werden.
+
+Dieses Feature ist **nur geplant, noch nicht implementiert**.
+
+## Geplant: Spezialhändler auf der M.S. Anne
+
+Ein weiterer NPC erscheint im erweiterten Modus nach dem ersten Top-Vier-Sieg
+auf der M.S. Anne, unter denselben Freischaltbedingungen wie die beiden
+Attacken-Helfer. Er ist bei den wiederkehrenden Schiffsbesuchen erreichbar.
+In Classic erscheint sein zusätzliches Angebot nicht.
+
+Er verkauft nützliche Items, die im Original nicht regulär gekauft werden
+können. Gewünscht sind AP-Plus und der beste Äther, also Top-Äther.
+Ergänzende Sortimentsideen:
+
+| Item | Status / Nutzen |
+| --- | --- |
+| AP-Plus | Gewünscht; erhöht dauerhaft die maximalen AP einer Attacke. |
+| Top-Äther | Gewünscht; füllt die AP einer Attacke vollständig auf. |
+| Elixier | Vorschlag; stellt AP aller Attacken wieder her. |
+| Top-Elixier | Vorschlag; füllt die AP aller Attacken vollständig auf. |
+| Entwicklungssteine | Optional, noch nicht beschlossen; besonders Mondstein als sonst nicht regulär kaufbarer Stein. Die anderen Steine sind bereits im Kaufhaus erhältlich. |
+
+Hintergrundidee: Ein weit gereister Händler bringt seltene Vorräte von seinen
+Reisen mit. Dialogvorschlag: „Für einen CHAMPION habe ich etwas Besonderes an
+Bord. Solche Vorräte findest Du in keinem normalen Laden!“
+
+Noch offen sind genaue Preise, das endgültige Sortiment, der Platz an Bord
+und mögliche Kaufbegrenzungen. Unbegrenzter Vorrat ist bisher nicht festgelegt;
+insbesondere AP-Plus soll bewusst bepreist werden. Die Gen-1-Itemwirkungen
+bleiben unverändert.
 
 Dieses Feature ist **nur geplant, noch nicht implementiert**.
 
