@@ -141,7 +141,12 @@ DisplayListMenuIDLoop::
 .skipGettingQuantity
 	ld a, [wcf91]
 	ld [wd0b5], a
+	ld a, [wListMenuID]
+	cp MOVESLISTMENU
 	ld a, BANK(ItemNames)
+	jr nz, .chosenNameBank
+	ld a, BANK(MoveNames)
+.chosenNameBank
 	ld [wPredefBank], a
 	call GetName
 	jr .storeChosenEntry

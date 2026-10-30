@@ -416,6 +416,28 @@ for index, moves, pp in [(1, [1,3,4,0], [0xC5,0x21,10,0]), (3,[1,2,3,0],[0xC5,0x
     assert list(p.memory[a("wPartyMon1PP"):a("wPartyMon1PP") + 4]) == pp
 print("PASS: move deletion shifts moves and PP-Up data together, including last slot")
 
+restore()
+p.memory[a("wTutorPartyIndex")] = 0
+p.memory[a("wPartyMon1")] = 0x55
+p.memory[a("wPartyMon1Level")] = 30
+p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4] = [0,0,0,0]
+call("BuildTutorMoveList")
+count = p.memory[a("wTutorMoveCount")]
+moves = list(p.memory[a("wTutorMoves"):a("wTutorMoves") + count])
+assert 98 in moves, "Raichu cannot recall Pikachu's Quick Attack"
+assert 87 not in moves, "level-30 Pokemon offered future Thunder"
+assert len(moves) == len(set(moves)) and count <= 64
+assert p.memory[a("wTutorMoves") + count] == 255
+p.memory[a("wPartyMon1Moves")] = 98
+call("BuildTutorMoveList")
+count = p.memory[a("wTutorMoveCount")]
+assert 98 not in list(p.memory[a("wTutorMoves"):a("wTutorMoves") + count])
+p.memory[a("wPartyMon1Level")] = 50
+call("BuildTutorMoveList")
+count = p.memory[a("wTutorMoveCount")]
+assert 87 in list(p.memory[a("wTutorMoves"):a("wTutorMoves") + count])
+print("PASS: reminder includes pre-evolution moves, filters known/duplicate/future moves")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [
