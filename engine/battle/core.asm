@@ -6344,7 +6344,7 @@ SwapPlayerAndEnemyLevels:
 LoadPlayerBackPic:
 	ld a, [wBattleType]
 	dec a ; is it the old man tutorial?
-	ld de, RedPicBack
+	player_graphics RedPicBack, GreenPicBack
 	jr nz, .next
 	ld de, OldManPicBack
 .next
@@ -6353,6 +6353,20 @@ LoadPlayerBackPic:
 	call UncompressSpriteFromDE
 
 IF GEN_2_GRAPHICS
+	ld a, [wBattleType]
+	dec a
+	jr z, .gen2Back ; keep the old man's tutorial sprite
+	ld a, [wPlayerGenderTag]
+	cp $47
+	jr nz, .gen2Back
+	ld a, [wPlayerGender]
+	dec a
+	jr nz, .gen2Back
+	predef ScaleSpriteByTwo
+	ld de, vBackPic
+	call InterlaceMergeSpriteBuffers
+	jr .backReady
+.gen2Back
 	call LoadMonBackSpriteHook ; No pixelated backsprites
 	nop
 	nop
@@ -6361,6 +6375,7 @@ ELSE
 	predef ScaleSpriteByTwo
 ENDC
 
+.backReady
 	ld hl, wShadowOAM
 	xor a
 	ldh [hOAMTile], a ; initial tile number

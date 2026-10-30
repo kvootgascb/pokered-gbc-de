@@ -969,3 +969,5 @@ MarowakPicFront::     INCBIN "gfx/pokemon/front/marowak.pic"
 MarowakPicBack::      INCBIN "gfx/pokemon/back/marowakb.pic"
 ENDC
 
+
+INCLUDE "engine/menus/player_sprite_menu.asm"

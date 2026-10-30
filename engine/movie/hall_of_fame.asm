@@ -182,36 +182,6 @@ HoFMonInfoText:
 	next "TYP1/"
 	next "TYP2/@"
 
-HoFLoadPlayerPics:
-	ld de, RedPicFront
-	ld a, BANK(RedPicFront)
-	call UncompressSpriteFromDE
-	ld hl, sSpriteBuffer1
-	ld de, sSpriteBuffer0
-	ld bc, $310
-	call CopyData
-	ld de, vFrontPic
-	call InterlaceMergeSpriteBuffers
-	ld de, RedPicBack
-	ld a, BANK(RedPicBack)
-	call UncompressSpriteFromDE
-
-IF GEN_2_GRAPHICS ; Use uncompressed red sprite
-	ld a, $66
-	ld c, a
-	ld de, vBackPic
-	call LoadUncompressedSpriteData
-	nop
-	nop
-	nop
-	nop
-ELSE
-	predef ScaleSpriteByTwo
-	ld de, vBackPic
-	call InterlaceMergeSpriteBuffers
-	ld c, $1
-ENDC
-
 HoFLoadMonPlayerPicTileIDs:
 ; c = base tile ID
 	ld b, TILEMAP_MON_PIC
@@ -298,3 +268,50 @@ HoFFadeOutScreenAndMusic:
 	ld a, $ff
 	ld [wAudioFadeOutControl], a
 	jp GBFadeOutToWhite
+
+PUSHS
+SECTION "Player Hall of Fame Graphics", ROMX, BANK[$1c]
+HoFLoadPlayerPics:
+	player_graphics RedPicFront, GreenPicFront
+	ld a, BANK(RedPicFront)
+	call UncompressSpriteFromDE
+	ld hl, sSpriteBuffer1
+	ld de, sSpriteBuffer0
+	ld bc, $310
+	call CopyData
+	ld de, vFrontPic
+	call InterlaceMergeSpriteBuffers
+	player_graphics RedPicBack, GreenPicBack
+	ld a, BANK(RedPicBack)
+	call UncompressSpriteFromDE
+
+IF GEN_2_GRAPHICS ; Green uses the original 32x32 backpic scaling.
+	ld a, [wPlayerGenderTag]
+	cp $47
+	jr nz, .gen2Back
+	ld a, [wPlayerGender]
+	dec a
+	jr nz, .gen2Back
+	predef ScaleSpriteByTwo
+	ld de, vBackPic
+	call InterlaceMergeSpriteBuffers
+	ld c, $1
+	jp HoFLoadMonPlayerPicTileIDs
+.gen2Back
+	ld a, $66
+	ld c, a
+	ld de, vBackPic
+	call LoadUncompressedSpriteData
+	nop
+	nop
+	nop
+	nop
+ELSE
+	predef ScaleSpriteByTwo
+	ld de, vBackPic
+	call InterlaceMergeSpriteBuffers
+	ld c, $1
+ENDC
+
+	jp HoFLoadMonPlayerPicTileIDs
+POPS

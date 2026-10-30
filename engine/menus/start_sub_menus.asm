@@ -476,7 +476,7 @@ StartMenu_TrainerInfo::
 
 ; loads tile patterns and draws everything except for gym leader faces / badges
 DrawTrainerInfo:
-	ld de, RedPicFront
+	player_graphics RedPicFront, GreenPicFront
 	lb bc, BANK(RedPicFront), $01
 	predef DisplayPicCenteredOrUpperRight
 	call DisableLCD
@@ -651,7 +651,7 @@ StartMenu_Option::
 	ldh [hAutoBGTransferEnabled], a
 	call ClearScreen
 	call UpdateSprites
-	callfar DisplayOptionMenu
+	callfar DisplayInGameOptionMenu
 	call LoadScreenTilesFromBuffer2 ; restore saved screen
 	call LoadTextBoxTilePatterns
 	call UpdateSprites

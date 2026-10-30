@@ -111,7 +111,22 @@ ColorOverworldSprite::
 	and 3
 
 .norandomColor
-
+	push af
+	ldh a, [hSpriteOffset2]
+	and a
+	jr nz, .keepPlayerPalette
+	ld a, [wPlayerGenderTag]
+	cp $47
+	jr nz, .keepPlayerPalette
+	ld a, [wPlayerGender]
+	dec a
+	jr nz, .keepPlayerPalette
+	pop af
+	ld a, SPR_PAL_BROWN
+	jr .playerPaletteReady
+.keepPlayerPalette
+	pop af
+.playerPaletteReady
 	pop de
 	or b
 	ld [de], a

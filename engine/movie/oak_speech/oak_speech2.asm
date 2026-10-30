@@ -1,11 +1,22 @@
 ChoosePlayerName:
 	call OakSpeechSlidePicRight
 	ld de, DefaultNamesPlayer
+	ld a, [wPlayerGender]
+	dec a
+	jr nz, .namesReady
+	ld de, DefaultNamesGirl
+.namesReady
 	call DisplayIntroNameTextBox
 	ld a, [wCurrentMenuItem]
 	and a
 	jr z, .customName
 	ld hl, DefaultNamesPlayerList
+	ld a, [wPlayerGender]
+	dec a
+	jr nz, .nameListReady
+	ld hl, DefaultNamesGirlList
+.nameListReady
+	ld a, [wCurrentMenuItem]
 	call GetDefaultName
 	ld de, wPlayerName
 	call OakSpeechSlidePicLeft
@@ -20,7 +31,7 @@ ChoosePlayerName:
 	jr z, .customName
 	call ClearScreen
 	call Delay3
-	ld de, RedPicFront
+	player_graphics RedPicFront, GreenPicFront
 	ld b, BANK(RedPicFront)
 	call IntroDisplayPicCenteredOrUpperRight
 .done
@@ -217,3 +228,16 @@ INCLUDE "data/player_names_list.asm"
 
 LinkMenuEmptyText:
 	text_end
+
+DefaultNamesGirl:
+	db "NAME"
+	next "GREEN"
+	next "GRÜN"
+	next "ANNA"
+	db "@"
+
+DefaultNamesGirlList:
+	db "NAME@"
+	db "GREEN@"
+	db "GRÜN@"
+	db "ANNA@"

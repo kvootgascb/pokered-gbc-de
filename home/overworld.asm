@@ -1977,7 +1977,7 @@ RunMapScript::
 	ret
 
 LoadWalkingPlayerSpriteGraphics::
-	ld de, RedSprite
+	player_graphics RedSprite, GreenSprite
 	ld hl, vNPCSprites
 	jr LoadPlayerSpriteGraphicsCommon
 
@@ -1987,7 +1987,7 @@ LoadSurfingPlayerSpriteGraphics::
 	jr LoadPlayerSpriteGraphicsCommon
 
 LoadBikePlayerSpriteGraphics::
-	ld de, RedBikeSprite
+	player_graphics RedBikeSprite, GreenBikeSprite
 	ld hl, vNPCSprites
 
 LoadPlayerSpriteGraphicsCommon::
@@ -2441,3 +2441,22 @@ LoadDestinationWarpPosition::
 	ldh [hLoadedROMBank], a
 	ld [MBC1RomBank], a
 	ret
+
+PUSHS
+SECTION "Player Graphics Selection", ROM0
+
+; DE = boy, HL = girl. Legacy/untagged saves retain the boy's graphics.
+SelectPlayerGraphics::
+	push af
+	ld a, [wPlayerGenderTag]
+	cp $47
+	jr nz, .done
+	ld a, [wPlayerGender]
+	dec a
+	jr nz, .done
+	ld d, h
+	ld e, l
+.done
+	pop af
+	ret
+POPS

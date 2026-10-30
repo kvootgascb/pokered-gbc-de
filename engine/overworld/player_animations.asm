@@ -380,12 +380,20 @@ FishingAnim:
 	call DelayFrames
 	ld hl, wd736
 	set 6, [hl] ; reserve the last 4 OAM entries
-	ld de, RedSprite
+	player_graphics RedSprite, GreenSprite
 	ld hl, vNPCSprites tile $00
 	lb bc, BANK(RedSprite), 12
 	call CopyVideoData
-	ld a, $4
 	ld hl, RedFishingTiles
+	ld a, [wPlayerGenderTag]
+	cp $47
+	jr nz, .fishingTilesReady
+	ld a, [wPlayerGender]
+	dec a
+	jr nz, .fishingTilesReady
+	ld hl, GreenFishingTiles
+.fishingTilesReady
+	ld a, $4
 	call LoadAnimSpriteGfx
 	ld a, [wSpritePlayerStateData1ImageIndex]
 	ld c, a
@@ -523,3 +531,9 @@ _HandleMidJump::
 PlayerJumpingYScreenCoords:
 ; Sequence of y screen coordinates for player's sprite when jumping over a ledge.
 	db $38, $36, $34, $32, $31, $30, $30, $30, $31, $32, $33, $34, $36, $38, $3C, $3C
+
+GreenFishingTiles:
+	fishing_gfx GreenFishingTilesFront, 2, $02
+	fishing_gfx GreenFishingTilesBack, 2, $06
+	fishing_gfx GreenFishingTilesSide, 2, $0a
+	fishing_gfx RedFishingRodTiles, 3, $fd

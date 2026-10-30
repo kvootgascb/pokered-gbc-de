@@ -9,3 +9,7 @@ ENDC
 
 ShrinkPic1::  INCBIN "gfx/player/shrink1.pic"
 ShrinkPic2::  INCBIN "gfx/player/shrink2.pic"
+
+GreenPicFront:: INCBIN "gfx/player/green.pic"
+GreenShrinkPic1:: INCBIN "gfx/player/green_shrink1.pic"
+GreenShrinkPic2:: INCBIN "gfx/player/green_shrink2.pic"

@@ -438,6 +438,18 @@ SaveScreenInfoText:
 	next "ZEIT@"
 
 DisplayOptionMenu:
+	xor a ; title-screen options must not change an in-game character
+	jr InitOptionMenu
+
+DisplayInGameOptionMenu:
+	ld a, 1
+
+InitOptionMenu:
+	ld [wOptionsSpriteMenuEnabled], a
+.redraw
+	xor a
+	ld [wOptionsSelectHoldFrames], a
+	call ClearScreen
 	hlcoord 0, 0
 	ld b, 3
 	ld c, 18
@@ -480,7 +492,13 @@ DisplayOptionMenu:
 	call PlaceMenuCursor
 	call SetOptionsFromCursorPositions
 .getJoypadStateLoop
+	call DelayFrame
 	call JoypadLowSensitivity
+	farcall CheckOptionsSpriteShortcut
+	jr nc, .normalInput
+	farcall ShowPlayerSpriteMenu
+	jp .redraw
+.normalInput
 	ldh a, [hJoy5]
 	ld b, a
 	and A_BUTTON | B_BUTTON | START | D_RIGHT | D_LEFT | D_UP | D_DOWN ; any key besides select pressed?

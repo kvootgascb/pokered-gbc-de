@@ -16,6 +16,18 @@ IF GEN_2_GRAPHICS
 ELSE
 	ld a, PAL_REDMON
 ENDC
+	push af
+	ld a, [wPlayerGenderTag]
+	cp $47
+	jr nz, .keepPalette
+	ld a, [wPlayerGender]
+	dec a
+	jr nz, .keepPalette
+	pop af
+	ld a, PAL_BROWNMON
+	jr GotPalID
+.keepPalette
+	pop af
 	jr GotPalID
 
 GetRivalPalID:

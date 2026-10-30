@@ -50,6 +50,7 @@ OakSpeech:
 	call LoadTextBoxTilePatterns
 	call PrepareOakSpeech
 	predef InitPlayerData2
+	call ChoosePlayerGender
 	ld hl, wNumBoxItems
 	ld a, POTION
 	ld [wcf91], a
@@ -93,7 +94,7 @@ ENDC
 	call PrintText
 	call GBFadeOutToWhite
 	call GetRedPalID ; HAX
-	ld de, RedPicFront
+	player_graphics RedPicFront, GreenPicFront
 	lb bc, BANK(RedPicFront), $00
 	call IntroDisplayPicCenteredOrUpperRight
 	call MovePicLeft
@@ -112,7 +113,7 @@ ENDC
 .skipSpeech
 	call GBFadeOutToWhite
 	call GetRedPalID ; HAX
-	ld de, RedPicFront
+	player_graphics RedPicFront, GreenPicFront
 	lb bc, BANK(RedPicFront), $00
 	call IntroDisplayPicCenteredOrUpperRight
 	call GBFadeInFromWhite
@@ -131,16 +132,16 @@ ENDC
 	ld [MBC1RomBank], a
 	ld c, 4
 	call DelayFrames
-	ld de, RedSprite
+	player_graphics RedSprite, GreenSprite
 	ld hl, vSprites
 	lb bc, BANK(RedSprite), $0C
 	call CopyVideoData
-	ld de, ShrinkPic1
+	player_graphics ShrinkPic1, GreenShrinkPic1
 	lb bc, BANK(ShrinkPic1), $00
 	call IntroDisplayPicCenteredOrUpperRight
 	ld c, 4
 	call DelayFrames
-	ld de, ShrinkPic2
+	player_graphics ShrinkPic2, GreenShrinkPic2
 	lb bc, BANK(ShrinkPic2), $00
 	call IntroDisplayPicCenteredOrUpperRight
 	call ResetPlayerSpriteData
@@ -250,3 +251,45 @@ IntroDisplayPicCenteredOrUpperRight:
 	xor a
 	ldh [hStartTileID], a
 	predef_jump CopyUncompressedPicToTilemap
+
+; Choose before the introduction; B cannot silently accept a choice.
+ChoosePlayerGender:
+	ldh a, [hUILayoutFlags]
+	push af
+	res 2, a ; PlaceString: two rows per choice
+	res 1, a ; menu cursor: two rows per choice
+	ldh [hUILayoutFlags], a
+	call ClearScreen
+	hlcoord 1, 2
+	ld de, .question
+	call PlaceString
+	hlcoord 3, 6
+	ld de, .choices
+	call PlaceString
+	xor a
+	ld [wCurrentMenuItem], a
+	ld [wLastMenuItem], a
+	ld [wMenuWatchMovingOutOfBounds], a
+	ld a, 6
+	ld [wTopMenuItemY], a
+	ld a, 2
+	ld [wTopMenuItemX], a
+	ld a, 1
+	ld [wMaxMenuItem], a
+	ld a, A_BUTTON
+	ld [wMenuWatchedKeys], a
+	call HandleMenuInput
+	ld a, [wCurrentMenuItem]
+	ld [wPlayerGender], a
+	ld a, $47
+	ld [wPlayerGenderTag], a
+	pop af
+	ldh [hUILayoutFlags], a
+	jp ClearScreen
+.question
+	db "Bist Du ein Junge?"
+	next "Oder ein Mädchen?"
+	db "@"
+.choices
+	db "JUNGE"
+	next "MÄDCHEN@"

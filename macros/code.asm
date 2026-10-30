@@ -18,3 +18,14 @@ MACRO dict
 	ENDC
 	jp z, \2
 ENDM
+
+
+; Select matching-bank player art, preserving all registers except DE.
+MACRO player_graphics
+	ASSERT BANK(\1) == BANK(\2)
+	ld de, \1
+	push hl
+	ld hl, \2
+	call SelectPlayerGraphics
+	pop hl
+ENDM

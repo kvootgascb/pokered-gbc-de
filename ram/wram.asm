@@ -770,6 +770,9 @@ wOptionsTextSpeedCursorX:: db
 wOptionsBattleAnimCursorX:: db
 wOptionsBattleStyleCursorX:: db
 wOptionsCancelCursorX:: db
+; Transient options-menu state, sharing existing scratch space.
+wOptionsSpriteMenuEnabled:: db
+wOptionsSelectHoldFrames:: db
 
 NEXTU
 ; tile ID of the badge number being drawn
@@ -2051,7 +2054,11 @@ wObtainedHiddenCoinsFlags:: flag_array 16
 ; $02 = surfing
 wWalkBikeSurfState:: db
 
-	ds 10
+; Stored in previously unused save data without shifting existing fields.
+; Only the tagged value identifies a girl; legacy saves default to a boy.
+wPlayerGender:: db
+wPlayerGenderTag:: db
+	ds 8
 
 wTownVisitedFlag:: flag_array NUM_CITY_MAPS
 
