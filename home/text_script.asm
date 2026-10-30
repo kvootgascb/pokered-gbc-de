@@ -219,6 +219,7 @@ PlayerBlackedOutText::
 DisplayRepelWoreOffText::
 	ld hl, RepelWoreOffText
 	call PrintText
+	farcall OfferRepeatRepel
 	jp AfterDisplayingTextID
 
 RepelWoreOffText::

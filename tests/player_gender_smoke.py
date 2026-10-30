@@ -784,6 +784,59 @@ print(
     "PASS: real bag registration, persistent selection, SELECT bike toggle and Classic gate"
 )
 
+# The last protection type survives saves; renew exactly that stack/step count.
+for item, steps in [(0x1E, 100), (0x38, 200), (0x39, 250)]:
+    restore()
+    p.memory[a("wGameplayModeCache")] = 1
+    p.memory[a("wNumBagItems") : a("wNumBagItems") + 8] = [3, 20, 5, item, 2, 4, 7, 255]
+    p.memory[a("wWhichPokemon")] = 1  # item in the second bag slot
+    p.memory[a("wcf91")] = item
+    call("UseItem_", 1200, "a")
+    assert p.memory[a("wRepelRemainingSteps")] == steps
+    assert p.memory[3, 0xD00F] == item
+    assert p.memory[a("wBagItems") + 3] == 1
+    call("SaveSAVtoSRAM0")
+    p.memory[3, 0xD00F] = 0
+    call("LoadSAV0")
+    assert p.memory[3, 0xD00F] == item
+    p.memory[a("wRepelRemainingSteps")] = 0
+    call("OfferRepeatRepel", 1200, "b")
+    assert p.memory[a("wRepelRemainingSteps")] == 0
+    assert p.memory[a("wBagItems") + 3] == 1
+    p.memory[a("wWhichPokemon")] = 3  # stale unrelated menu index must not be used
+    call("RepeatLastRepel", 1200, "a")
+    assert p.memory[a("wRepelRemainingSteps")] == steps
+    assert p.memory[a("wWhichPokemon")] == 3
+    assert list(p.memory[a("wNumBagItems") : a("wNumBagItems") + 6]) == [
+        2,
+        20,
+        5,
+        4,
+        7,
+        255,
+    ]
+    p.memory[a("wRepelRemainingSteps")] = 0
+    call("OfferRepeatRepel")  # no stock, no prompt and no substitution
+    assert p.memory[a("wRepelRemainingSteps")] == 0
+    p.memory[a("wNumBagItems") : a("wNumBagItems") + 4] = [1, item, 2, 255]
+    p.memory[a("wGameplayModeCache")] = 0
+    call("OfferRepeatRepel")
+    assert p.memory[a("wBagItems") + 1] == 2
+    assert p.memory[a("wRepelRemainingSteps")] == 0
+
+# Trigger the real last-step handler, its standard expiry text and Yes prompt.
+enter_npc_map(8, [84, 0, 0, 0], map_id=12, width=10, y=6)
+p.memory[a("wNumBagItems") : a("wNumBagItems") + 4] = [1, 0x1E, 2, 255]
+p.memory[3, 0xD00F] = 0x1E
+p.memory[a("wRepelRemainingSteps")] = 1
+call("TryDoWildEncounter", 1800, "a")
+assert p.memory[a("wRepelRemainingSteps")] == 100
+assert p.memory[a("wBagItems") + 1] == 1
+assert p.memory[a("wCurOpponent")] == 0
+print(
+    "PASS: real repel expiry/reuse, all three durations, save/load, No, empty bag and Classic"
+)
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [

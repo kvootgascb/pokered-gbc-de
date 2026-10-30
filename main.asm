@@ -997,3 +997,5 @@ INCLUDE "engine/events/trade_back.asm"
 INCLUDE "engine/events/merged_encounters.asm"
 
 INCLUDE "engine/events/registered_item.asm"
+
+INCLUDE "engine/events/repeat_repel.asm"

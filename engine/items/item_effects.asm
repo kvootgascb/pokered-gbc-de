@@ -1534,6 +1534,7 @@ ItemUseRepelCommon:
 	jp nz, ItemUseNotTime
 	ld a, b
 	ld [wRepelRemainingSteps], a
+	farcall RememberRepelType
 	jp PrintItemUseTextAndRemoveItem
 
 ; handles X Accuracy item

@@ -39,7 +39,7 @@ The existing gender field stays in the base save. See [postgame-features.md](pos
 | 12 | 1 | Starter reward tracking; zero |
 | 13 | 1 | Trade-back state; zero |
 | 14 | 1 | Pending Oak starter species; 0 means no gift |
-| 15 | 1 | Reserved |
+| 15 | 1 | Last used repel item ID; 0 means unknown (implemented) |
 | 16 | 64 | Future event flags, including per-feature initialization flags |
 | 80 | 32 | Future counters |
 | 112 | 400 | General reserve |

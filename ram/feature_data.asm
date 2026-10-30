@@ -15,6 +15,7 @@ DEF wFeatureOakWins EQU wFeatureData + 10 ; word
 DEF wFeatureStarterRewards EQU wFeatureData + 12
 DEF wFeatureTradeBackState EQU wFeatureData + 13
 DEF wFeatureOakPendingStarter EQU wFeatureData + 14
+DEF wFeatureLastRepel EQU wFeatureData + 15
 DEF wFeatureEventFlags EQU wFeatureData + 16 ; 64 bytes
 DEF wFeatureCounters EQU wFeatureData + 80 ; 32 bytes
 DEF wFeatureReserved EQU wFeatureData + 112
