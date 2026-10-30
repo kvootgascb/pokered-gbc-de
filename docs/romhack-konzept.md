@@ -35,7 +35,8 @@ ursprünglichen Konsequenzen verpasster Chancen nicht aufheben.
 - Bereits erhaltene Pokémon, Items und Fortschritte bleiben beim Wechsel erhalten.
   Beispielsweise verschwindet ein in Erweitert gefangenes Mew nicht in Classic.
 - Erweiterte Inhalte werden in Classic deaktiviert beziehungsweise pausiert.
-  Übergänge müssen sicher bleiben, etwa beim Umschalten an Bord der M.S. Anne.
+  Kartenbezogene Änderungen dürfen erst beim nächsten natürlichen Laden oder
+  Gebietswechsel greifen; ein sofortiger Umbau des laufenden Gebiets ist nicht nötig.
 - Unabhängig vom Modus gewählte Komfortoptionen bleiben beim Moduswechsel erhalten.
 - Persistente Änderungen werden über das normale Speichern im Spielstand gesichert. Die temporäre Auswahl des Starter-Editors ist davon ausdrücklich ausgenommen.
 
@@ -85,6 +86,61 @@ Die vorgeschlagene Auslösung des Box-Hinweises ist noch zu bestätigen:
 Nach dem Fang, der die aktuelle Box füllt, einmalig einen Gedanken anzeigen,
 z. B. „Ich sollte meine Pokémon-Box prüfen. Vielleicht ist sie schon voll …“.
 Die ursprüngliche Beschränkung bei gleichzeitig vollem Team und voller Box bleibt.
+
+## Präzisierte Regeln für Moduswechsel und wiederkehrende Ereignisse
+
+### Moduswechsel als Power-User-/Debug-Funktion
+
+Der Wechsel im Geheimmenü muss nicht alle laufenden Zustände sofort anpassen.
+Die Moduswahl wird gespeichert; einfache Regeln wie TM-Verbrauch können beim
+nächsten Einsatz gelten. Karten, NPCs und Begegnungstabellen dürfen den neuen
+Modus beim nächsten natürlichen Laden beziehungsweise Gebietswechsel übernehmen.
+Laufende Dialoge und Ereignisse dürfen unter ihren bisherigen Bedingungen enden.
+Ein Wechsel auf der M.S. Anne muss das Schiff daher nicht sofort entfernen oder
+den Spieler versetzen. Der reguläre Ausgang bleibt nutzbar; der Zugang wird beim
+nächsten regulären Betreten geprüft.
+
+Ein Moduswechsel **setzt keine Ereignisse oder Belohnungen zurück**. Classic
+pausiert beziehungsweise verbirgt die erweiterten Zugänge. Beim Zurückwechseln
+bleiben Verfügbarkeit, verbrauchte Begegnungen und ausstehende Belohnungen erhalten.
+
+### Eich: Verfügbarkeit und spätere Abholung
+
+- Nach einem Top-Vier-Sieg ist höchstens **ein Eich-Kampf** verfügbar.
+- Mehrere Top-Vier-Siege ohne zwischenzeitlichen Eich-Kampf sammeln keine
+  zusätzlichen Kämpfe an. Die Verfügbarkeit bleibt eine einzelne Gelegenheit.
+- Nach dem abgeschlossenen Eich-Kampf ist diese Gelegenheit verbraucht; ein
+  weiterer Top-Vier-Sieg kann wieder einen Kampf freischalten.
+- Der zufällige Starter als Belohnung wird **beim Sieg über Eich bestimmt**.
+- Ist das Team voll, weist Eich in einem passenden Kommentar darauf hin und
+  hält die Belohnung zur späteren Abholung bereit. Der Sieg geht nicht verloren.
+- Die ausstehende Pokémon-Art wird gespeichert. Erneutes Ansprechen, Laden oder
+  späteres Abholen würfelt den Preis nicht neu aus.
+- Ein weiterer Top-Vier-Sieg überschreibt keine ausstehende Belohnung.
+
+Für die spätere Umsetzung werden daher Kampf-Verfügbarkeit und ausstehende
+Belohnungs-Art getrennt gespeichert; dafür ist im Feature-Speicher Reserve
+vorhanden. Die genaue Art, wie ein erneut verfügbarer Kampf mit einer noch nicht
+abgeholten Belohnung zusammenspielt, ist noch festzulegen. Eine offene Belohnung
+darf dabei weder verloren gehen noch überschrieben werden.
+
+### M.S. Anne: ursprünglichen Abreiseablauf wiederverwenden
+
+- Nach einem Top-Vier-Sieg ist höchstens **ein erneuter Schiffsbesuch** verfügbar.
+- Mehrere Top-Vier-Siege ohne Besuch sammeln keine zusätzlichen Besuche an.
+- Es wird der ursprüngliche Abreiseablauf wiederverwendet:
+  **Spieler verlässt das Schiff → Schiff fährt aus dem Hafen → Spieler verlässt
+  den Hafen.**
+- Wechsel zwischen Kabinen, Decks und anderen Innenbereichen verbrauchen keinen
+  Besuch. Maßgeblich ist das Verlassen des Schiffs im ursprünglichen Ablauf.
+- Nach der Abreise ist der Besuch verbraucht. Ein weiterer Top-Vier-Sieg kann die
+  Rückkehr freischalten.
+- Bei der Umsetzung ist zu prüfen, welche vorhandenen Zugangs-/Abreiseflags
+  gezielt zurückgesetzt werden müssen, damit das alte Ereignis erneut funktioniert.
+
+Mew bleibt davon unabhängig einmalig: Weder ein erneuter Schiffsbesuch noch ein
+Top-Vier-Sieg oder Moduswechsel setzt eine verbrauchte Mew-Begegnung zurück.
+Sein Versteckspiel behält den gespeicherten Zustand über Gebietswechsel und Laden.
 
 ## Beschaffungswege für alle 151 Pokémon
 
@@ -222,12 +278,13 @@ legendärer Pokémon. Änderungen an der Gen-1-Kampfmechanik sind ausgeschlossen
 ## Offene Konzeptfragen vor der Umsetzung
 
 - Namen und Beschreibungen der Modi, Standardwerte und genaue Menüführung.
-- Sicherer Moduswechsel bei erweiterten Orten, Ereignissen und laufenden Zuständen,
-  insbesondere auf der M.S. Anne; kein Löschen erworbener Inhalte.
+- Geeignete natürliche Ladepunkte für Modusänderungen; kein sofortiger Umbau
+  laufender Karten nötig und kein Löschen erworbener Inhalte.
 - Abgleich weiterer vorhandener GBC-Erweiterungen mit dem Classic-Ziel.
 - Weitere Anforderungen an Beutel und PC über die umgesetzten 30/70 Plätze hinaus.
 - Laufschuhe: Bedienung, Freischaltung und Orte.
-- Eich: Team, Level, Voraussetzungen, Dialog und Starter-Belohnungsverteilung.
+- Eich: Team, Level, Voraussetzungen, Dialog und Starter-Belohnungsverteilung;
+  Zusammenspiel eines erneut verfügbaren Kampfes mit einer noch offenen Belohnung.
 - Neue Begegnungsraten, Surfer-Pikachu-Level und -Attacken, Preise in der Spielhalle.
 - Welche Entwicklungssteine zusätzlich nötig sind und wo sie erhältlich werden.
 - Attacken-Erinnerer: angebotene Attacken, Kosten und Standort; VM-Verlerner-Standort.
