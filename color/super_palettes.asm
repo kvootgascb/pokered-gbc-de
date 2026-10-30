@@ -26,6 +26,14 @@ LoadSGBPalette_Sprite:
 	ldh [rSVBK], a
 	push bc
 
+	; A scene may replace the temporary slot before the next sprite frame.
+	ld a, [W2_GreenPaletteSlot]
+	dec a
+	cp e
+	jr nz, .keepGreenBackup
+	xor a
+	ld [W2_GreenPaletteSlot], a
+.keepGreenBackup
 	ld a, e
 	ld l, d
 	ld h, 0
