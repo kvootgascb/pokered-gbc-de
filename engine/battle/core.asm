@@ -2471,7 +2471,7 @@ BattleMenu_RunWasSelected:
 	ret nz ; return if the player couldn't escape
 	jp DisplayBattleMenu
 
-MoveSelectionMenu:
+MoveSelectionMenu::
 	ld a, [wMoveMenuType]
 	dec a
 	jr z, .mimicmenu

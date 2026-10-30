@@ -1,4 +1,5 @@
 SSAnneBow_Script:
+	farcall RefreshMoveTutorObjects
 	call EnableAutoTextBoxDrawing
 	ld hl, SSAnne5TrainerHeaders
 	ld de, SSAnneBow_ScriptPointers
@@ -20,6 +21,8 @@ SSAnneBow_TextPointers:
 	dw_const SSAnneBowCooltrainerMText, TEXT_SSANNEBOW_COOLTRAINER_M
 	dw_const SSAnneBowSailor2Text,      TEXT_SSANNEBOW_SAILOR2
 	dw_const SSAnneBowSailor3Text,      TEXT_SSANNEBOW_SAILOR3
+
+	dw_const SSAnneBowMoveDeleterText, TEXT_SSANNEBOW_MOVE_DELETER
 
 SSAnne5TrainerHeaders:
 	def_trainers 4
@@ -76,3 +79,8 @@ SSAnneBowSailor3EndBattleText:
 SSAnneBowSailor3AfterBattleText:
 	text_far _SSAnneBowSailor3AfterBattleText
 	text_end
+
+SSAnneBowMoveDeleterText:
+	text_asm
+	farcall MoveDeleterTalk
+	jp TextScriptEnd

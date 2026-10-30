@@ -405,6 +405,17 @@ call("ValidateExtraPrizePurchase")
 assert p.memory[a("wPostgameAction")] == 5
 print("PASS: extra prize prices and full-party checks")
 
+restore()
+p.memory[a("wTutorPartyIndex")] = 0
+for index, moves, pp in [(1, [1,3,4,0], [0xC5,0x21,10,0]), (3,[1,2,3,0],[0xC5,0x81,0x21,0])]:
+    p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4] = [1,2,3,4]
+    p.memory[a("wPartyMon1PP"):a("wPartyMon1PP") + 4] = [0xC5,0x81,0x21,10]
+    p.memory[a("wTutorCandidate")] = index
+    call("DeleteTutorMove")
+    assert list(p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4]) == moves
+    assert list(p.memory[a("wPartyMon1PP"):a("wPartyMon1PP") + 4]) == pp
+print("PASS: move deletion shifts moves and PP-Up data together, including last slot")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [

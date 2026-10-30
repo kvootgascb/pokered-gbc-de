@@ -169,7 +169,20 @@ wSerialPartyMonsPatchList:: ds 200
 wSerialEnemyMonsPatchList:: ds 200
 ENDU
 
-	ds 80
+; Tutor scratch replaces unused padding, outside all menu/sprite buffers.
+wTutorMoveCount:: db
+wTutorMoves:: ds 65 ; up to 64 distinct moves and terminator
+wTutorPartyIndex:: db
+wTutorSpecies:: db
+wTutorLevel:: db
+wTutorCandidate:: db
+wTutorScanSpecies:: db
+wTutorPreEvolution:: db
+wTutorRecordPtr:: dw
+wTutorRecordLevel:: db
+wTutorMode:: db
+wTutorChainDepth:: db
+	ds 3
 
 
 SECTION "Overworld Map", WRAM0
