@@ -77,38 +77,42 @@ ShowPlayerSpriteMenu:
 	hlcoord 10, 8
 	ld de, .extended
 	call PlaceString
-	hlcoord 2, 13
-	ld de, .nextPage
-	jr .pageLinks
-.comfortPage
-	hlcoord 1, 1
-	ld de, .animationHeading
-	call PlaceString
-	hlcoord 5, 3
-	ld de, .on
-	call PlaceString
-	hlcoord 14, 3
-	ld de, .off
-	call PlaceString
-	hlcoord 0, 5
+	hlcoord 0, 10
 	lb bc, 3, 18
 	call TextBoxBorder
-	hlcoord 1, 6
-	ld de, .healingHeading
+	hlcoord 1, 11
+	ld de, .animationHeading
 	call PlaceString
-	hlcoord 2, 8
-	ld de, .off
-	call PlaceString
-	hlcoord 10, 8
+	hlcoord 5, 13
 	ld de, .on
 	call PlaceString
-	hlcoord 2, 13
-	ld de, .previousPage
-.pageLinks
+	hlcoord 14, 13
+	ld de, .off
 	call PlaceString
+	jr .footer
+.comfortPage
+	hlcoord 1, 1
+	ld de, .healingHeading
+	call PlaceString
+	hlcoord 5, 3
+	ld de, .off
+	call PlaceString
+	hlcoord 14, 3
+	ld de, .on
+	call PlaceString
+.footer
 	hlcoord 2, 16
 	ld de, .back
 	call PlaceString
+	hlcoord 13, 16
+	ld de, .pageOne
+	ld a, [wHiddenMenuPage]
+	and a
+	jr z, .pageNumber
+	ld de, .pageTwo
+.pageNumber
+	call PlaceString
+	call .drawCursor
 .waitForRelease
 	call DelayFrame
 	call Joypad
@@ -123,20 +127,19 @@ ShowPlayerSpriteMenu:
 	ld b, a
 	and B_BUTTON | START
 	jp nz, .done
+	; SELECT is edge-triggered; redraw waits for release to prevent repeats.
+	ldh a, [hJoyPressed]
+	bit BIT_SELECT, a
+	jp nz, .nextPage
 	bit BIT_D_DOWN, b
 	jp nz, .down
 	bit BIT_D_UP, b
 	jp nz, .up
-	ld a, [wHiddenMenuPage]
-	and a
+	call .lastRow
+	ld c, a
 	ld a, [wSpriteMenuCursorRow]
-	jr nz, .comfortInput
-	cp 2
-	jr nc, .checkConfirm
-	jr .checkLeftRight
-.comfortInput
-	cp 2
-	jr nc, .checkConfirm
+	cp c
+	jr z, .checkConfirm
 .checkLeftRight
 	bit BIT_D_LEFT, b
 	jr nz, .left
@@ -145,27 +148,17 @@ ShowPlayerSpriteMenu:
 .checkConfirm
 	bit BIT_A_BUTTON, b
 	jp z, .input
-	ld a, [wHiddenMenuPage]
-	and a
+	call .lastRow
+	ld c, a
 	ld a, [wSpriteMenuCursorRow]
-	jr nz, .comfortConfirm
-	cp 3
+	cp c
 	jr z, .done
-	cp 2
-	jp nz, .input
-	ld a, 1
+	jp .input
+.nextPage
+	ld a, [wHiddenMenuPage]
+	xor 1
 	ld [wHiddenMenuPage], a
 	xor a
-	ld [wSpriteMenuCursorRow], a
-	jp .redraw
-.comfortConfirm
-	cp 3
-	jr z, .done
-	cp 2
-	jp nz, .input
-	xor a
-	ld [wHiddenMenuPage], a
-	ld a, 2
 	ld [wSpriteMenuCursorRow], a
 	jp .redraw
 .done
@@ -187,7 +180,11 @@ ShowPlayerSpriteMenu:
 	ld [wSpriteMenuCursorRow], a
 	jp .input
 .lastRow
+	ld a, [wHiddenMenuPage]
+	and a
 	ld a, 3
+	ret z
+	ld a, 1
 	ret
 .left
 	xor a
@@ -198,8 +195,10 @@ ShowPlayerSpriteMenu:
 	ld c, a
 	ld a, [wHiddenMenuPage]
 	and a
-	jr nz, .selectComfort
+	jr nz, .selectHealing
 	ld a, [wSpriteMenuCursorRow]
+	cp 2
+	jr z, .selectAnimation
 	and a
 	ld a, c
 	jr nz, .selectMode
@@ -229,10 +228,7 @@ ShowPlayerSpriteMenu:
 	jp z, .input
 	farcall CommitGameplayMode
 	jp .input
-.selectComfort
-	ld a, [wSpriteMenuCursorRow]
-	and a
-	jr z, .selectAnimation
+.selectHealing
 	ld a, [wHiddenMenuPreferences]
 	res 0, a
 	bit 0, c
@@ -261,7 +257,9 @@ ShowPlayerSpriteMenu:
 	ld [hl], a
 	hlcoord 9, 8
 	ld [hl], a
-	hlcoord 1, 13
+	hlcoord 4, 13
+	ld [hl], a
+	hlcoord 13, 13
 	ld [hl], a
 	hlcoord 1, 16
 	ld [hl], a
@@ -285,11 +283,18 @@ ShowPlayerSpriteMenu:
 	hlcoord 9, 8
 .savedMode
 	ld [hl], "▷"
+	hlcoord 4, 13
+	ld a, [wHiddenMenuPreferences]
+	bit 1, a
+	jr z, .savedAnimation
+	hlcoord 13, 13
+.savedAnimation
+	ld [hl], "▷"
 	ld a, [wSpriteMenuCursorRow]
 	cp 3
 	jr z, .backCursor
 	cp 2
-	jr z, .pageCursor
+	jr z, .drawArrow
 	and a
 	jr z, .genderCursor
 	ld a, [wModeMenuChoice]
@@ -308,34 +313,14 @@ ShowPlayerSpriteMenu:
 .comfortCursors
 	hlcoord 4, 3
 	ld a, [wHiddenMenuPreferences]
-	bit 1, a
-	jr z, .animationCursor
-	hlcoord 13, 3
-.animationCursor
-	ld [hl], "▷"
-	hlcoord 1, 8
-	ld a, [wHiddenMenuPreferences]
 	bit 0, a
 	jr z, .healingCursor
-	hlcoord 9, 8
+	hlcoord 13, 3
 .healingCursor
 	ld [hl], "▷"
 	ld a, [wSpriteMenuCursorRow]
-	cp 3
-	jr z, .backCursor
-	cp 2
-	jr z, .pageCursor
 	and a
-	jr nz, .drawArrow
-	hlcoord 4, 3
-	ld a, [wHiddenMenuPreferences]
-	bit 1, a
 	jr z, .drawArrow
-	hlcoord 13, 3
-	jr .drawArrow
-.pageCursor
-	hlcoord 1, 13
-	jr .drawArrow
 .backCursor
 	hlcoord 1, 16
 .drawArrow
@@ -361,10 +346,10 @@ ShowPlayerSpriteMenu:
 	db "AN@"
 .off
 	db "AUS@"
-.nextPage
-	db "WEITER@"
-.previousPage
-	db "SEITE 1@"
+.pageOne
+	db "S. 1/2@"
+.pageTwo
+	db "S. 2/2@"
 .back
 	db "ZURÜCK@"
 

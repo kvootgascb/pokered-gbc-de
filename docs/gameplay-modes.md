@@ -49,7 +49,8 @@ und nur bei bereits gefangenen wilden Arten. Trainer-Pokémon und unbekannte
 Geister im Pokémon-Turm erhalten keine Markierung. Die HUD-Tests prüfen auch,
 dass ein altes Symbol beim nächsten Gegner oder Moduswechsel wieder verschwindet.
 
-Independent comfort options are available on hidden-menu page 2 via WEITER:
-VM animations on/off and fast healing off/on. Both apply in either mode,
+Independent comfort options: VM animations on/off on hidden-menu page 1 and
+fast healing off/on on page 2. SELECT switches pages; the footer shows S. 1/2
+or S. 2/2. ZURÜCK exits the whole menu while retaining changes from both pages. Both apply in either mode,
 persist through normal saving and default to the original behavior.
 Details: [comfort-options.md](comfort-options.md).

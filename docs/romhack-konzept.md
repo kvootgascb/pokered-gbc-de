@@ -52,7 +52,10 @@ Geplante Menüpunkte:
 | Starter-Editor (z. B. Seite 2) | Ersatz-Pokémon wählen / deaktivieren | Nur bei der ersten Starterwahl in Eichs Labor; Auswahl temporär, Modusverfügbarkeit noch offen |
 | Zurück | Menü schließen | — |
 
-Die umgesetzten Komfortschalter stehen auf Seite 2 (WEITER). Voreinstellung:
+Select blättert im Geheimmenü zwischen zwei Seiten; unten rechts steht
+S. 1/2 beziehungsweise S. 2/2. Seite 1 enthält Figur, Modus und VM-Animationen;
+Seite 2 die schnelle Heilung. ZURÜCK verlässt das gesamte Menü und behält
+Änderungen beider Seiten. Voreinstellung:
 VM-Animationen AN, schnelle Heilung AUS. Links/Rechts übernimmt sofort.
 Weitere geplante Menüpunkte, insbesondere der Starter-Editor, sind noch offen.
 
@@ -81,7 +84,7 @@ Weitere geplante Menüpunkte, insbesondere der Starter-Editor, sind noch offen.
 | Registrierbares Basis-Item | Nein | Ja | Umgesetzt: im Beutel registrieren, außerhalb der Menüs per Select benutzen. Details: [registered-item.md](registered-item.md). |
 | Schutz erneut verwenden | Nein | Ja | Umgesetzt: nach Ablauf bei vorhandenem Vorrat dieselbe Schutzart erneut anbieten; Ja/Nein. Details: [repeat-repel.md](repeat-repel.md). |
 | Schnelle Heilung / kürzere Wiederholungstexte | Optional | Optional | Umgesetzt: Seite 2, schnelle Heilung mit kurzen Pokémon-Center-Texten; unabhängig vom Modus. |
-| VM-Animationen überspringen | Optional | Optional | Umgesetzt: auf Seite 2 des Geheimmenüs „VM-Animationen“ auf Aus stellen; unabhängig vom Modus. |
+| VM-Animationen überspringen | Optional | Optional | Umgesetzt: auf Seite 1 des Geheimmenüs „VM-Animationen“ auf Aus stellen; unabhängig vom Modus. |
 | Kleine Gerüchte über Geheimnisse | Nein | Ja | Wenige passende NPC-Hinweise, ohne die Lösung ausdrücklich zu verraten. Ausgestaltung später. |
 
 Die vorgeschlagene Auslösung des Box-Hinweises ist noch zu bestätigen:

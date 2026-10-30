@@ -1,8 +1,16 @@
 # Unabhängige Komfortoptionen
 
-Im Geheimmenü führt **WEITER** auf Seite 2; **SEITE 1** führt zurück.
-**ZURÜCK** beendet das Geheimmenü auf beiden Seiten. Links/Rechts übernimmt
-Einstellungen sofort. A bestätigt nur die Seitenwahl oder ZURÜCK.
+Im Geheimmenü wechselt **Select** zwischen den beiden Seiten. Ein Druck
+wechselt genau eine Seite; Halten wiederholt den Wechsel nicht. Der lange
+Öffnungsgriff blättert nicht zusätzlich. Unten rechts steht **S. 1/2** oder
+**S. 2/2**. Die frühere Auswahl WEITER/SEITE 1 entfällt.
+
+Seite 1 enthält Geschlecht, Spielmodus und VM-Animationen. Seite 2 enthält
+schnelle Heilung und freien Platz für künftige Optionen. Auf beiden Seiten
+steht **ZURÜCK** unten links. A auf ZURÜCK beendet das gesamte Geheimmenü;
+B/Start beenden es ebenfalls. Links/Rechts übernimmt Einstellungen sofort.
+Alle Änderungen beider Seiten bleiben beim Blättern und Verlassen erhalten.
+Dauerhaft gesichert werden sie wie bisher durch normales Speichern im Spiel.
 Leere Pfeile markieren die aktiven Werte außerhalb der Cursorzeile.
 
 ## VM-Animationen
@@ -53,3 +61,7 @@ in Classic und Erweitert, ursprünglicher Ablauf bei ausgeschalteter Option und
 Ablehnung. Sie prüfen den vollständigen Team-Datensatz, HP, Status, AP samt
 AP-Plus, den Rückkehrort, das Ausbleiben beziehungsweise Vorhandensein der
 Maschinenanimation und den kürzeren Ablauf.
+
+Die Menütests prüfen auch Select von der ZURÜCK-Zeile, Halten ohne Wiederholung,
+den Öffnungsgriff, beide sichtbaren Seitenzähler, beide ZURÜCK-Cursor und den
+gemeinsamen Erhalt von Figur, Modus und Komfortoptionen beim Speichern/Laden.

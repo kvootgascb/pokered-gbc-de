@@ -1258,6 +1258,7 @@ p.tick(20, False)
 assert len(opened) == 1, "three-second hold did not open menu"
 p.tick(200, False)
 assert len(opened) == 1, "continued SELECT reopened menu"
+assert p.memory[a("wHiddenMenuPage")] == 0, "opening hold also changed page"
 release_select()
 assert p.memory[a("wCurrentMenuItem")] == 1, "current Green selection not highlighted"
 closed = []
@@ -1327,51 +1328,86 @@ for direction, mode in [("left", 0), ("right", 1)]:
 tap("left")
 assert not closed and p.memory[a("wPlayerGender")] == 1
 assert p.memory[a("wGameplayModeCache")] == 1
-# The page link has its own visible cursor and opens the comfort page.
+
+
+# Page 1 has all three boxes; SELECT switches without committing/exiting.
+def assert_page_number(page):
+    assert list(
+        p.memory[a("wTileMap") + 16 * 20 + 13 : a("wTileMap") + 16 * 20 + 19]
+    ) == [
+        0x92,
+        0xE8,
+        0x7F,
+        0xF7 + page,
+        0xF3,
+        0xF8,
+    ], "page number is missing or overlaps Back"
+
+
+assert_page_number(0)
 tap("up")
-assert p.memory[a("wTileMap") + 13 * 20 + 1] == 0xED
-tap("a")
-assert p.memory[a("wHiddenMenuPage")] == 1
-assert not closed
+assert p.memory[a("wSpriteMenuCursorRow")] == 2
+assert p.memory[a("wTileMap") + 13 * 20 + 4] == 0xED
 tap("right")
 assert p.memory[3, 0xD001] == 0x82
-assert p.memory[a("wTileMap") + 3 * 20 + 13] == 0xED
+assert p.memory[a("wTileMap") + 13 * 20 + 13] == 0xED
 tap("a")
 assert not closed, "A on VM option closed the menu"
-tap("down")
+tap("select")
+assert p.memory[a("wHiddenMenuPage")] == 1
+assert p.memory[a("wSpriteMenuCursorRow")] == 0
+assert_page_number(1)
+assert not closed
+# A fresh long hold changes exactly one page, with no auto-repeat.
+hold_select(90)
+assert p.memory[a("wHiddenMenuPage")] == 0
+p.tick(120, False)
+assert p.memory[a("wHiddenMenuPage")] == 0
+assert len(opened) == 1 and not closed
+release_select()
+assert_page_number(0)
+tap("select")
+assert p.memory[a("wHiddenMenuPage")] == 1
+assert_page_number(1)
+# Healing is the first box on page 2; old option boxes leave no remnants.
+assert p.memory[a("wTileMap") + 8 * 20 + 9] == 0x7F
 tap("right")
 assert p.memory[3, 0xD001] == 0x83
-assert p.memory[a("wTileMap") + 8 * 20 + 9] == 0xED
+assert p.memory[a("wTileMap") + 3 * 20 + 13] == 0xED
 tap("a")
 assert not closed, "A on fast healing closed the menu"
 tap("down")
-assert p.memory[a("wTileMap") + 13 * 20 + 1] == 0xED
-tap("a")
+assert p.memory[a("wSpriteMenuCursorRow")] == 1
+assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED
+tap("select")  # can turn pages from Back, too
 assert p.memory[a("wHiddenMenuPage")] == 0
-assert p.memory[a("wSpriteMenuCursorRow")] == 2
-tap("up")
-tap("left")  # Classic still allows the independent preference.
+assert p.memory[a("wSpriteMenuCursorRow")] == 0
+assert_page_number(0)
+assert p.memory[a("wPlayerGender")] == 1
+tap("down")
+tap("left")  # Classic still allows both independent preferences.
 assert p.memory[a("wGameplayModeCache")] == 0
 tap("down")
-tap("a")
 tap("left")
-assert p.memory[3, 0xD001] == 0x81  # preserve fast healing and the reserved bit
+assert p.memory[3, 0xD001] == 0x81
 tap("right")
 assert p.memory[3, 0xD001] == 0x83
-assert p.memory[a("wGameplayModeCache")] == 0
-tap("down")
+tap("select")
 tap("left")
 assert p.memory[3, 0xD001] == 0x82
 tap("right")
 assert p.memory[3, 0xD001] == 0x83
-assert p.memory[a("wTileMap") + 3 * 20 + 13] == 0xEC
-tap("down")
+assert p.memory[a("wGameplayModeCache")] == 0
 tap("down")
 assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED
 tap("a")
-assert len(closed) == 1, "A on Back failed to exit"
+assert len(closed) == 1, "A on page-2 Back failed to exit"
+assert p.memory[3, 0xD000] == 0 and p.memory[3, 0xD001] == 0x83
+assert p.memory[a("wPlayerGender")] == 1
 assert_menu_font()
-print("PASS: immediate mode changes, navigation between rows, and A on Back")
+print(
+    "PASS: SELECT pages/hold debouncing, counters, cross-page settings and page-2 Back"
+)
 
 # B exits like normal options; changes already applied remain active.
 hold_select(190)
@@ -1388,8 +1424,26 @@ tap("right")
 tap("start")
 assert len(closed) == 3 and p.memory[a("wPlayerGender")] == 1
 assert_menu_font()
+hold_select(190)
+release_select()
+assert p.memory[a("wHiddenMenuPage")] == 0
+assert p.memory[3, 0xD001] == 0x83
+for _ in range(3):
+    tap("down")
+assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED
+tap("a")
+assert len(closed) == 4, "A on page-1 Back failed to exit"
+assert_menu_font()
 tap("b")
 tap("b")
+# Normal saving keeps all settings from both pages, including unknown bits.
+call("SaveSAVtoSRAM0")
+p.memory[3, 0xD000:0xD002] = [1, 0]
+p.memory[a("wPlayerGender")] = 0
+call("LoadSAV0")
+assert p.memory[a("wPlayerGender")] == 1
+assert p.memory[a("wGameplayModeCache")] == 0
+assert list(p.memory[3, 0xD000:0xD002]) == [0, 0x83]
 print("PASS: B/Start keep applied settings and return through intact normal menus")
 # The same options screen in the title menu cannot unlock this shortcut.
 restore()
