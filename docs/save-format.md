@@ -6,7 +6,7 @@ preserves existing progress and initializes feature data to safe zero defaults.
 The ordinary save command writes the new `I2` format and feature extension.
 
 Mode selection, the EXP-bar switch, running and the champion events are implemented.
-The independent preferences and registered-item shortcut remain reserved.
+The registered-item shortcut uses offset 2; the independent preferences remain reserved.
 The existing gender field stays in the base save. See [postgame-features.md](postgame-features.md) for the active events.
 
 ## Fixed storage
@@ -28,7 +28,7 @@ The existing gender field stays in the base save. See [postgame-features.md](pos
 | --- | --- | --- |
 | 0 | 1 | Mode: 0 Classic, 1 Extended; default Classic |
 | 1 | 1 | Independent preferences: fast healing bit 0, skip VM animation bit 1; both off |
-| 2 | 1 | Registered basis item; 0 means none |
+| 2 | 1 | Registered basis item (implemented); 0 means none |
 | 3 | 1 | Feature-initialization flags; bit 0: champion events initialized |
 | 4 | 1 | Oak battle availability; zero |
 | 5 | 1 | M.S. Anne availability: 0 unavailable, 1 available |

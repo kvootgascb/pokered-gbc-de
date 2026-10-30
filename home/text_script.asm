@@ -26,6 +26,7 @@ DisplayTextID::
 	dict TEXT_MON_FAINTED,      DisplayPokemonFaintedText
 	dict TEXT_BLACKED_OUT,      DisplayPlayerBlackedOutText
 	dict TEXT_REPEL_WORE_OFF,   DisplayRepelWoreOffText
+	dict TEXT_REGISTERED_ITEM,  DisplayRegisteredItem
 
 	ld a, [wNumSprites]
 	ld e, a

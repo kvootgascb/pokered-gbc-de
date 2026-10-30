@@ -995,3 +995,5 @@ INCLUDE "engine/events/move_tutors.asm"
 INCLUDE "engine/events/trade_back.asm"
 
 INCLUDE "engine/events/merged_encounters.asm"
+
+INCLUDE "engine/events/registered_item.asm"

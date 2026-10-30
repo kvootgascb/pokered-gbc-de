@@ -76,7 +76,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Attacken-Lernlisten aus Pokémon Gelb | Ja | Ja | Umgesetzt: Gelb als gemeinsame Moveset-Grundlage. Gen-1-Kampfmechanik unverändert. |
 | EP-Leiste | Nein | Ja | Umgesetzt: EP-Leiste in Erweitert anzeigen; in Classic nur die blaue Füllung ausblenden, HUD und leere Leiste erhalten. EP-Gewinn bleibt unverändert. |
 | Hinweis auf volle Box | Nein | Ja | Nur ein Hinweis; kein automatischer Boxwechsel. |
-| Registrierbares Basis-Item | Nein | Ja | Ein Basis-Item auf Select legen, z. B. Fahrrad oder Angel. Außerhalb des Optionsmenüs direkt verwendbar. |
+| Registrierbares Basis-Item | Nein | Ja | Umgesetzt: im Beutel registrieren, außerhalb der Menüs per Select benutzen. Details: [registered-item.md](registered-item.md). |
 | Schutz erneut verwenden | Nein | Ja | Nach Ablauf anbieten, ein weiteres vorhandenes Exemplar einzusetzen. |
 | Schnelle Heilung / kürzere Wiederholungstexte | Optional | Optional | Separater Schalter im Geheimmenü, unabhängig vom Modus. |
 | VM-Animationen überspringen | Optional | Optional | Separater Schalter im Geheimmenü, unabhängig vom Modus. |

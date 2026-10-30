@@ -688,6 +688,102 @@ print(
     "PASS: actual enemy HUD caught marker is Extended-only, owned-only, wild-only and ghost-safe"
 )
 
+# Registration persists in the existing payload, supports replacement/removal,
+# and rejects consumables/Classic without mutating the saved selection.
+restore()
+p.memory[a("wGameplayModeCache")] = 1
+for item in [6, 0x4C, 0x4D, 0x4E, 0x47, 0x49, 5]:
+    p.memory[a("wcf91")] = item
+    call("ToggleRegisteredItem")
+    assert p.memory[3, 0xD002] == item
+p.memory[a("wcf91")] = 5
+call("ToggleRegisteredItem")
+assert p.memory[3, 0xD002] == 0
+p.memory[a("wcf91")] = 6
+call("ToggleRegisteredItem")
+p.memory[a("wcf91")] = 20  # Potion cannot be registered
+call("ToggleRegisteredItem")
+assert p.memory[3, 0xD002] == 6
+p.memory[a("wGameplayModeCache")] = 0
+p.memory[a("wcf91")] = 0x4E
+call("ToggleRegisteredItem")
+assert p.memory[3, 0xD002] == 6
+call("SaveSAVtoSRAM0")
+p.memory[3, 0xD002] = 0
+call("LoadSAV0")
+assert p.memory[3, 0xD002] == 6
+
+# Register from the real bag, then use SELECT in the overworld twice.
+enter_npc_map(8, [84, 0, 0, 0], map_id=12, width=10, y=6)
+p.memory[a("wNumBagItems") : a("wNumBagItems") + 4] = [1, 6, 1, 255]
+p.memory[a("wCurrentMenuItem")] = 0
+p.memory[a("wBagSavedMenuItem")] = 0
+p.memory[a("wListScrollOffset")] = 0
+p.memory[3, 0xD002] = 0
+registered_menus = []
+registered_uses = []
+hook("RegisteredItemMenu.input", lambda _: registered_menus.append(True))
+hook("UseRegisteredItem", lambda _: registered_uses.append(True))
+
+
+def shortcut_tap(button, frames=20):
+    p.button(button, 2)
+    p.tick(frames, False)
+
+
+shortcut_tap("start", 40)
+shortcut_tap("down")
+shortcut_tap("a")
+shortcut_tap("a")
+assert registered_menus, "eligible bag item did not offer registration"
+shortcut_tap("down")
+shortcut_tap("a")
+assert p.memory[3, 0xD002] == 6, "bag registration failed"
+shortcut_tap("b")
+shortcut_tap("b", 60)
+for expected_state in [1, 0]:
+    before = len(registered_uses)
+    shortcut_tap("select")
+    for _ in range(20):
+        shortcut_tap("a")
+        if not p.memory[a("wFontLoaded")] & 1:
+            break
+    assert len(registered_uses) == before + 1, "SELECT did not activate registered item"
+    assert p.memory[a("wWalkBikeSurfState")] == expected_state
+    assert p.memory[a("wBagItems") + 1] == 1
+p.memory[a("wGameplayModeCache")] = 0
+p.memory[3, 0xD000] = 0
+before = len(registered_uses)
+shortcut_tap("select", 60)
+assert len(registered_uses) == before
+assert p.memory[a("wWalkBikeSurfState")] == 0
+# A missing registered item reports the problem, retaining the registration.
+p.memory[a("wGameplayModeCache")] = 1
+p.memory[3, 0xD000] = 1
+p.memory[a("wNumBagItems") : a("wNumBagItems") + 2] = [0, 255]
+shortcut_tap("select")
+for _ in range(25):
+    shortcut_tap("a")
+    if not p.memory[a("wFontLoaded")] & 1:
+        break
+assert len(registered_uses) == before + 1
+assert p.memory[a("wWalkBikeSurfState")] == 0
+assert p.memory[3, 0xD002] == 6 and p.memory[a("wNumBagItems")] == 0
+# Cycling Road's mandatory-bike flag also applies to the shortcut.
+p.memory[a("wNumBagItems") : a("wNumBagItems") + 4] = [1, 6, 1, 255]
+p.memory[a("wWalkBikeSurfState")] = 1
+p.memory[a("wd732")] |= 1 << 5
+shortcut_tap("select")
+for _ in range(25):
+    shortcut_tap("a")
+    if not p.memory[a("wFontLoaded")] & 1:
+        break
+assert p.memory[a("wWalkBikeSurfState")] == 1
+p.memory[a("wd732")] &= ~(1 << 5)
+print(
+    "PASS: real bag registration, persistent selection, SELECT bike toggle and Classic gate"
+)
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [

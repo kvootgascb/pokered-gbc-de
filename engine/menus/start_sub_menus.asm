@@ -328,6 +328,14 @@ StartMenu_Item::
 	call UpdateSprites
 	jp RedisplayStartMenu
 .choseItem
+	farcall RegisteredItemMenu
+	jr nc, .ordinaryItemMenu
+	ld a, [wPostgameAction]
+	and a
+	jp nz, ItemMenuLoop
+	ld [wCurrentMenuItem], a
+	jp .useOrTossItem
+.ordinaryItemMenu
 ; erase menu cursor (blank each tile in front of an item name)
 	ld a, " "
 	ldcoord_a 5, 4

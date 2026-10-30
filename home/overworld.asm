@@ -71,6 +71,8 @@ OverworldLoopLessDelay::
 	jr .checkIfStartIsPressed
 .notSimulating
 	ldh a, [hJoyPressed]
+	cp SELECT
+	jp z, HandleRegisteredItemShortcut
 .checkIfStartIsPressed
 	bit BIT_START, a
 	jr z, .startButtonNotPressed
@@ -2438,6 +2440,13 @@ LoadDestinationWarpPosition::
 
 PUSHS
 SECTION "Player Graphics Selection", ROM0
+
+HandleRegisteredItemShortcut:
+	farcall CheckRegisteredItemShortcut
+	jp nc, OverworldLoop
+	ld a, TEXT_REGISTERED_ITEM
+	ldh [hSpriteIndexOrTextID], a
+	jp OverworldLoopLessDelay.displayDialogue
 
 ; DE = boy, HL = girl. Legacy/untagged saves retain the boy's graphics.
 SelectPlayerGraphics::
