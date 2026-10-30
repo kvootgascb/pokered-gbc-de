@@ -155,7 +155,7 @@ print("PASS: boy selection retains original walking graphics")
 restore()
 for inventory, capacity, guard in [
     ("wNumBagItems", 30, "wPlayerMoney"),
-    ("wNumBoxItems", 60, "wCurrentBoxNum"),
+    ("wNumBoxItems", 70, "wCurrentBoxNum"),
 ]:
     p.memory[a(inventory)] = 0
     p.memory[a(inventory) + 1] = 0xFF
@@ -175,8 +175,8 @@ call("SaveSAVtoSRAM0")
 p.memory[a("wNumBagItems")] = 0
 p.memory[a("wNumBoxItems")] = 0
 call("LoadSAV0")
-assert p.memory[a("wNumBagItems")] == 30 and p.memory[a("wNumBoxItems")] == 60
-print("PASS: 30 bag / 60 PC slots, overflow protection, and full inventory save/load")
+assert p.memory[a("wNumBagItems")] == 30 and p.memory[a("wNumBoxItems")] == 70
+print("PASS: 30 bag / 70 PC slots, overflow protection, and full inventory save/load")
 
 # Synthetic legacy-format save with old absolute offsets and a valid checksum.
 restore()
@@ -195,12 +195,12 @@ expected = (
     legacy[:bag_end]
     + bytes(20)
     + legacy[bag_end:pc_end]
-    + bytes(20)
-    + legacy[pc_end:old_gap]
-    + legacy[old_gap + 40 :]
+    + bytes(40)
+    + legacy[pc_end : old_gap - 4]
+    + legacy[old_gap + 56 :]
 )
 expected = bytearray(expected)
-expected[a("wInventoryFormat") - start : a("wInventoryFormat") - start + 2] = b"I1"
+expected[a("wInventoryFormat") - start : a("wInventoryFormat") - start + 2] = b"I2"
 expected[a("wCurMapTileset") - start] |= 0x80
 p.memory[1, a("sMainData") : a("sMainData") + len(legacy)] = list(legacy)
 data = list(p.memory[1, a("sGameData") : a("sGameDataEnd")])
@@ -216,6 +216,81 @@ assert list(p.memory[start:end]) == list(expected), "migrated save was migrated 
 print(
     "PASS: checksum-validated old 20/50 save migrates without losing any other main data"
 )
+
+# Import the previous 30/60 layout (I1), including a completely full PC.
+restore()
+legacy = bytearray((i * 13 + 7) & 255 for i in range(end - start))
+old_bag, old_pc = 0xD31D - start, 0xD54E - start
+old_gap = 0xD6E0 - start
+for offset, count in [(old_bag, 30), (old_pc, 60)]:
+    legacy[offset] = count
+    for i in range(count):
+        legacy[offset + 1 + i * 2 : offset + 3 + i * 2] = bytes([i + 1, 4])
+    legacy[offset + 1 + count * 2] = 0xFF
+legacy[a("wInventoryFormat") - start : a("wInventoryFormat") - start + 2] = b"I1"
+pc_end = old_pc + 122
+expected = bytearray(
+    legacy[:pc_end] + bytes(20) + legacy[pc_end : old_gap - 4] + legacy[old_gap + 16 :]
+)
+expected[a("wInventoryFormat") - start : a("wInventoryFormat") - start + 2] = b"I2"
+expected[a("wCurMapTileset") - start] |= 0x80
+p.memory[1, a("sMainData") : a("sMainData") + len(legacy)] = list(legacy)
+data = list(p.memory[1, a("sGameData") : a("sGameDataEnd")])
+p.memory[1, a("sMainDataCheckSum")] = (~sum(data)) & 255
+p.memory[3, 0xD000:0xD200] = [0x55] * 512
+call("LoadSAV0")
+assert list(p.memory[start:end]) == list(expected), "I1 migration changed saved state"
+assert list(p.memory[3, 0xD000:0xD200]) == [0] * 512
+print("PASS: full 30/60 save migrates with progress intact and safe feature defaults")
+
+# Every reserved byte survives a normal game save and reload.
+restore()
+payload = [(i * 29 + 5) & 255 for i in range(512)]
+payload[0:3] = [1, 3, 6]  # Extended, both preferences, registered bicycle
+payload[6] = 2  # Mew hiding at the rear (storage only; feature not active yet)
+p.memory[3, 0xD000:0xD200] = payload
+call("SaveSAVtoSRAM0")
+p.memory[3, 0xD000:0xD200] = [0] * 512
+call("LoadSAV0")
+assert list(p.memory[3, 0xD000:0xD200]) == payload
+assert not p.register_file.F & 0x10
+print("PASS: all 512 feature/reserved bytes persist with independent checksum")
+
+# A corrupt or newer extension must not be silently replaced by defaults.
+ext_start, ext_end = a("sFeatureSaveStart"), a("sFeatureSaveChecksum") + 1
+extension = list(p.memory[1, ext_start:ext_end])
+p.memory[1, a("sFeatureSavePayload") + 17] ^= 1
+call("LoadSAV0")
+assert p.register_file.F & 0x10, "corrupt extension accepted"
+p.memory[1, ext_start:ext_end] = extension
+p.memory[1, a("sFeatureSaveVersion")] = 2
+data = list(p.memory[1, a("sFeatureSaveStart") : a("sFeatureSaveEnd")])
+p.memory[1, a("sFeatureSaveChecksum")] = (~sum(data)) & 255
+call("LoadSAV0")
+assert p.register_file.F & 0x10, "newer feature schema accepted"
+p.memory[1, ext_start:ext_end] = extension
+p.memory[1, a("sFeatureSaveMagic")] = 0
+call("LoadSAV0")
+assert p.register_file.F & 0x10, "missing I2 extension accepted"
+p.memory[1, ext_start:ext_end] = extension
+call("LoadSAV0")
+assert not p.register_file.F & 0x10
+assert list(p.memory[3, 0xD000:0xD200]) == payload
+print(
+    "PASS: corrupted, missing and newer feature blocks rejected without erasing stored data"
+)
+
+# New Game initialization clears another playthrough's options and event flags.
+call("InitFeatureData")
+assert list(p.memory[3, 0xD000:0xD200]) == [0] * 512
+p.register_file.HL = 0xD006
+p.register_file.C = 2
+call("SetFeatureByte")
+p.register_file.HL = 0xD006
+call("GetFeatureByte")
+assert p.register_file.C == 2
+assert p.memory[0xFF70] & 7 in (0, 1)
+print("PASS: New Game resets feature data; bank-safe byte accessors work")
 
 # Exercise the shortcut through the actual Start -> Options flow.
 restore()

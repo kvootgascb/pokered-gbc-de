@@ -7,8 +7,22 @@ MigrateLegacyInventory:
 	cp $49
 	jr nz, .legacy
 	ld a, [wInventoryFormat + 1]
-	cp $31
+	cp $32
 	ret z
+	cp $31
+	jr z, .version1
+	jr .legacy
+.version1
+	; The 30/60 layout already has the final bag and PC start addresses.
+	ld hl, wBoxItems + 60 * 2 + 1
+	ld bc, (PC_ITEM_CAPACITY - 60) * 2
+	xor a
+	call FillMemory
+	ld hl, sMainData + wCurrentBoxNum - wMainDataStart - (PC_ITEM_CAPACITY - 60) * 2
+	ld de, wCurrentBoxNum
+	ld bc, wGameProgressFlagsEnd - wCurrentBoxNum
+	call CopyData
+	jr .tag
 .legacy
 	; Bag count and old slots have not moved. Clear its new trailing slots.
 	ld hl, wBagItems + LEGACY_BAG_ITEM_CAPACITY * 2 + 1
@@ -31,9 +45,11 @@ MigrateLegacyInventory:
 	ld de, wCurrentBoxNum
 	ld bc, wGameProgressFlagsEnd - wCurrentBoxNum
 	call CopyData
+
+.tag
 	ld a, $49
 	ld [wInventoryFormat], a
-	ld a, $31
+	ld a, $32
 	ld [wInventoryFormat + 1], a
 	ret
 

@@ -50,6 +50,7 @@ OakSpeech:
 	call LoadTextBoxTilePatterns
 	call PrepareOakSpeech
 	predef InitPlayerData2
+	farcall InitFeatureData
 	call ChoosePlayerGender
 	ld hl, wNumBoxItems
 	ld a, POTION

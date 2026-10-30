@@ -66,6 +66,8 @@ LoadSAV0:
 	ld de, wMainDataStart
 	ld bc, wMainDataEnd - wMainDataStart
 	call CopyData
+	farcall LoadFeatureSaveData
+	jp c, SAVBadCheckSum
 	farcall MigrateLegacyInventory
 	ld hl, wCurMapTileset
 	set 7, [hl]
@@ -202,7 +204,7 @@ OlderFileWillBeErasedText:
 SaveSAVtoSRAM0:
 	ld a, $49
 	ld [wInventoryFormat], a
-	ld a, $31
+	ld a, $32
 	ld [wInventoryFormat + 1], a
 	ld a, SRAM_ENABLE
 	ld [MBC1SRamEnable], a
@@ -231,6 +233,7 @@ SaveSAVtoSRAM0:
 	ld bc, sGameDataEnd - sGameData
 	call SAVCheckSum
 	ld [sMainDataCheckSum], a
+	farcall SaveFeatureSaveData
 	xor a
 	ld [MBC1SRamBankingMode], a
 	ld [MBC1SRamEnable], a

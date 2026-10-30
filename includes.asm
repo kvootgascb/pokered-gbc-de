@@ -1,5 +1,8 @@
 GEN_2_GRAPHICS EQU 1
 
+INCLUDE "constants/feature_save_constants.asm"
+INCLUDE "ram/feature_data.asm"
+
 INCLUDE "macros/asserts.asm"
 INCLUDE "macros/const.asm"
 INCLUDE "macros/predef.asm"

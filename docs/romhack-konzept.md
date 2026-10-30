@@ -60,7 +60,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | --- | --- | --- | --- |
 | Junge-/Green-Auswahl | Ja | Ja | Vorhandene Auswahl und laufender Sprite-Wechsel bleiben erhalten. |
 | Größerer Beutel | Ja | Ja | 30 Plätze (umgesetzt). |
-| Größeres PC-Item-Lager | Ja | Ja | 60 Plätze (umgesetzt). |
+| Größeres PC-Item-Lager | Ja | Ja | 70 Plätze (umgesetzt). |
 | Laufschuhe | Nein | Ja | Laufen ermöglichen; Taste, Freischaltung und erlaubte Orte noch festlegen. |
 | Kampf gegen Professor Eich | Nein | Ja | Nach jedem Top-Vier-Sieg einmal verfügbar, danach bis zum nächsten Top-Vier-Sieg gesperrt. Ein Sieg über Eich gibt einen zufälligen Starter als Preis. |
 | Tausch-zurück-Trainer | Nein | Ja | In Eichs Labor: testet ein zuvor wackeliges Linkkabel. Tauscht ein Pokémon und gibt es sofort zurück; ermöglicht Tauschentwicklungen ohne externen Tauschpartner. |
@@ -183,7 +183,7 @@ legendärer Pokémon. Änderungen an der Gen-1-Kampfmechanik sind ausgeschlossen
 - Sicherer Moduswechsel bei erweiterten Orten, Ereignissen und laufenden Zuständen,
   insbesondere auf der M.S. Anne; kein Löschen erworbener Inhalte.
 - Abgleich weiterer vorhandener GBC-Erweiterungen mit dem Classic-Ziel.
-- Weitere Anforderungen an Beutel und PC über die umgesetzten 30/60 Plätze hinaus.
+- Weitere Anforderungen an Beutel und PC über die umgesetzten 30/70 Plätze hinaus.
 - Laufschuhe: Bedienung, Freischaltung und Orte.
 - Eich: Team, Level, Voraussetzungen, Dialog und Starter-Belohnungsverteilung.
 - Neue Begegnungsraten, Surfer-Pikachu-Level und -Attacken, Preise in der Spielhalle.
@@ -196,10 +196,18 @@ legendärer Pokémon. Änderungen an der Gen-1-Kampfmechanik sind ausgeschlossen
 ## Bestehende technische Grundlage
 
 Junge-/Green-Auswahl, gespeicherte Figur und das versteckte Sprite-Menü sind
-bereits umgesetzt. Beutel und PC-Item-Lager sind auf 30 beziehungsweise 60 Plätze
-erweitert; alte 20/50-Spielstände werden beim Laden übernommen. Greens bisheriger Look mit brauner Palette bleibt erhalten;
+bereits umgesetzt. Beutel und PC-Item-Lager sind auf 30 beziehungsweise 70 Plätze
+erweitert; alte 20/50- und 30/60-Spielstände werden beim Laden übernommen. Greens bisheriger Look mit brauner Palette bleibt erhalten;
 der experimentelle grüne-Kleid-Commit wurde auf Wunsch zurückgenommen.
 Details und Herkunft der Grafiken stehen in [green-sprites.md](green-sprites.md).
 
 Die übrigen Punkte dieses Dokuments sind Planung und dürfen nicht als bereits
 implementierte Funktionen verstanden werden. Die Implementierung der Inventarkapazitäten ist in [inventory-storage.md](inventory-storage.md) beschrieben.
+
+
+Für künftige Features ist bereits ein versionierter Speicherbereich mit 512 Bytes
+und eigener Prüfsumme vorbereitet. Er reserviert Modus, Komfortoptionen,
+registriertes Item sowie Zustände/Zähler für Eich, M.S. Anne, Mew, Box-Hinweis
+und weitere Ereignisse. Das aktiviert die geplanten Features noch nicht.
+Neue Features sollen vorhandene Spielstände migrieren beziehungsweise ihre
+Startzustände aus dem bisherigen Fortschritt ableiten. Details: [save-format.md](save-format.md).

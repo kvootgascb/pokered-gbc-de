@@ -2041,10 +2041,10 @@ wSeafoamIslandsB3FCurScript:: db
 wRoute23CurScript:: db
 wSeafoamIslandsB4FCurScript:: db
 wRoute18Gate1FCurScript:: db
-	ds 78
+	ds 78 - INVENTORY_RECLAIMED_FLAG_TAIL
 wGameProgressFlagsEnd::
 
-	ds 56 - BAG_STORAGE_GROWTH - PC_STORAGE_GROWTH
+	ds 56 + INVENTORY_RECLAIMED_FLAG_TAIL - BAG_STORAGE_GROWTH - PC_STORAGE_GROWTH
 
 wObtainedHiddenItemsFlags:: flag_array 112
 

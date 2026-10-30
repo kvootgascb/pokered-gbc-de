@@ -23,6 +23,18 @@ sTileAnimations:: db
 sGameDataEnd::
 sMainDataCheckSum:: db
 
+; Fixed extension outside the original checksummed save block.
+SECTION "Feature Save Data", SRAM[$b600], BANK[1]
+	ASSERT sMainDataCheckSum < $b600
+sFeatureSaveStart::
+sFeatureSaveMagic:: ds 4
+sFeatureSaveVersion:: db
+sFeatureSaveSize:: dw
+	ds 9 ; header reserved for future versions
+sFeatureSavePayload:: ds FEATURE_DATA_SIZE
+sFeatureSaveEnd::
+sFeatureSaveChecksum:: db
+
 
 ; The PC boxes will not fit into one SRAM bank,
 ; so they use multiple SECTIONs
