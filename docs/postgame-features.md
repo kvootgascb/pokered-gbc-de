@@ -65,8 +65,8 @@ ihrer Vorentwicklungen bis zum aktuellen Level an. Bereits bekannte Attacken
 und doppelte Einträge werden ausgefiltert. Das Erlernen nutzt den normalen
 Attackenwechsel; zum Ersetzen einer VM ist vorher der Verlerner da.
 
-Die gemeinsame Umstellung auf Gelb-Lerndaten bleibt ein eigener geplanter
-Schritt. Die Helfer verwenden jeweils die aktuell im ROM enthaltenen Daten.
+Die Helfer verwenden inzwischen die gemeinsame Gelb-Lerndatengrundlage.
+Details stehen in [yellow-learnsets.md](yellow-learnsets.md).
 
 ## Tausch-zurück-Trainer
 

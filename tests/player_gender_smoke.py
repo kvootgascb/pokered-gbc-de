@@ -607,6 +607,26 @@ for mode in [0, 1]:
             assert p.memory[a("wBagItems") + 1] == expected
 print("PASS: real TM teaching consumes only in Classic; HMs/cancellation never consume")
 
+# Yellow data is shared by both modes, including generated and level-up moves.
+for mode in [0, 1]:
+    restore()
+    p.memory[a("wPartyCount")] = 0
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[a("wMonDataLocation")] = 0x10
+    p.memory[a("wcf91")] = 0x54  # Pikachu
+    p.memory[a("wCurEnemyLVL")] = 26
+    call("_AddPartyMon")
+    assert 85 in list(
+        p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4]
+    ), "Yellow Pikachu lacks level-26 Thunderbolt"
+    p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4] = [84, 0, 0, 0]
+    p.memory[a("wWhichPokemon")] = 0
+    p.memory[a("wMonDataLocation")] = 0
+    p.memory[a("wd11e")] = 0x54
+    call("LearnMoveFromLevelUp", 1200, "a")
+    assert p.memory[a("wPartyMon1Moves") + 1] == 85
+print("PASS: both modes generate and teach Yellow's level-26 Pikachu Thunderbolt")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [

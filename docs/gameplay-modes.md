@@ -13,8 +13,9 @@ Implemented mode differences:
 - Classic: normal walking speed; the HUD and empty EXP track remain in battle/status; only blue EXP fill is hidden.
 - Extended: existing EXP bar and its gain animation; hold B while walking to
   move at twice normal walking speed, including inside buildings.
-- EXP itself, levels, battle rules, sprites, item capacities and all other
-  currently implemented features are otherwise unchanged.
+- EXP itself, battle rules, sprites and item capacities are shared.
+- Expanded champion events, encounters, shops and the trade-back trainer are
+  gated to Extended; see [postgame-features.md](postgame-features.md).
 - B adds no speed while surfing, cycling, jumping, spinning or scripted walking.
   Cycling keeps its original behavior. Releasing or pressing B partway through
   a step cannot underflow the movement counter. No dedicated running art or
@@ -39,4 +40,6 @@ In Erweitert bleiben TMs nach erfolgreichem Erlernen im Beutel und können
 erneut verwendet werden. Classic verbraucht wie bisher ein Exemplar.
 VMs bleiben in beiden Modi wiederverwendbar; Abbruch, Ablehnung und fehlende
 Kompatibilität verbrauchen nichts. Ein Moduswechsel gilt beim nächsten Einsatz.
-Die normalen Regeln für Attackenauswahl und TM-/VM-Kompatibilität bleiben erhalten.
+Die normalen Regeln für Attackenauswahl bleiben erhalten. Die TM-/VM-Kompatibilität
+stammt wie Start- und Level-Attacken in beiden Modi aus Gelb:
+[yellow-learnsets.md](yellow-learnsets.md).

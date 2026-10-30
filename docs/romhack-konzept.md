@@ -14,14 +14,12 @@ und keine neue Hauptgeschichte als Bestandteil dieses Konzepts.
 bekannten Kampfeigenheiten und Fehler. Moderne Typen, Fähigkeiten und eine
 neue physisch/spezielle Schadensaufteilung sind nicht vorgesehen.
 
-**Die Pokémon-Movesets beziehungsweise Attacken-Lernlisten sollen aus Pokémon
-Gelb übernommen werden – in Classic und Erweitert gleichermaßen.** Das ist eine
+**Die Pokémon-Movesets beziehungsweise Attacken-Lernlisten stammen jetzt aus
+Pokémon Gelb – in Classic und Erweitert gleichermaßen.** Das ist eine
 bewusste Ausnahme von der Rot-/Blau-Originaltreue in Classic und verändert die
-Lerndaten, nicht die Gen-1-Kampfregeln oder deren Eigenheiten. Diese Änderung
-ist vorerst nur geplant, nicht implementiert. Bei der Umsetzung sind
-Startattacken, Level-up-Lernlisten und TM-/VM-Kompatibilität mit Gelb
-abzugleichen; besondere Begegnungsattacken wie Surfer bei dem seltenen
-Kraftwerk-Pikachu bleiben als eigener Konzeptpunkt erhalten.
+Lerndaten, nicht die Gen-1-Kampfregeln oder deren Eigenheiten. Startattacken, Level-up-Lernlisten und TM-/VM-Kompatibilität sind umgesetzt
+und mit Gelb abgeglichen; besondere Begegnungsattacken wie Surfer bei dem
+seltenen Kraftwerk-Pikachu bleiben erhalten. Details: [yellow-learnsets.md](yellow-learnsets.md).
 
 Weniger umständliche Bedienung und zusätzliche Beschaffungswege sollen die
 ursprünglichen Konsequenzen verpasster Chancen nicht aufheben.
@@ -75,7 +73,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Kontextabhängige VMs | Nein | Ja | Zerschneider, Stärke und Surfer per A am passenden Hindernis aktivieren, wenn ein Team-Pokémon die VM beherrscht. Ordenvoraussetzungen bleiben erhalten. |
 | Größere Münzkäufe | Nein | Ja | In der Spielhalle mehr Münzen auf einmal kaufen. Umgesetzt: zusätzlich 500 Münzen für 10000 Geld. |
 | Fangsymbol bei wilden Pokémon | Nein | Ja | Anzeigen, ob die Art bereits gefangen wurde. |
-| Attacken-Lernlisten aus Pokémon Gelb | Ja | Ja | Gelb als gemeinsame Moveset-Grundlage; bisher nur geplant. Gen-1-Kampfmechanik unverändert. |
+| Attacken-Lernlisten aus Pokémon Gelb | Ja | Ja | Umgesetzt: Gelb als gemeinsame Moveset-Grundlage. Gen-1-Kampfmechanik unverändert. |
 | EP-Leiste | Nein | Ja | Umgesetzt: EP-Leiste in Erweitert anzeigen; in Classic nur die blaue Füllung ausblenden, HUD und leere Leiste erhalten. EP-Gewinn bleibt unverändert. |
 | Hinweis auf volle Box | Nein | Ja | Nur ein Hinweis; kein automatischer Boxwechsel. |
 | Registrierbares Basis-Item | Nein | Ja | Ein Basis-Item auf Select legen, z. B. Fahrrad oder Angel. Außerhalb des Optionsmenüs direkt verwendbar. |
@@ -380,9 +378,8 @@ Startzustände aus dem bisherigen Fortschritt ableiten. Details: [save-format.md
 Moduswahl beim neuen Spiel und im Geheimmenü, modusabhängige EP-Leiste und
 Laufschuhe sind inzwischen umgesetzt. Bestehende Spielstände übernehmen den
 gespeicherten Modus; frühere Spielstände ohne Auswahl starten in Classic.
-Ein Neustart ist für den Wechsel zu Erweitert nicht erforderlich. Weitere
-geplante QoL-Funktionen, einschließlich wiederverwendbarer TMs, sind damit noch
-nicht aktiviert. Details: [gameplay-modes.md](gameplay-modes.md).
+Ein Neustart ist für den Wechsel zu Erweitert nicht erforderlich. Tausch-zurück-Trainer und wiederverwendbare TMs sind ebenfalls umgesetzt.
+Weitere Konzeptpunkte bleiben geplant. Details: [gameplay-modes.md](gameplay-modes.md).
 
 
 ## Ergänzte Festlegungen: Eich, Begegnungen und Attacken-Helfer
