@@ -1,0 +1,29 @@
+# VMs per Ansprechen
+
+Nur in Erweitert: A vor einem zerschneidbaren Busch oder am Wasser bietet
+eine Ja/Nein-Frage an. Der normale Fels-Dialog bietet entsprechend Stärke an.
+Das erste passende Team-Pokémon wird gewählt; die VM muss tatsächlich zu seinen
+vier Attacken gehören. Wie im ursprünglichen VM-Menü werden keine AP verbraucht.
+
+| Aktion | Voraussetzung |
+| --- | --- |
+| Zerschneider | Quellorden, Team-Pokémon mit Zerschneider, echter Busch im Freien oder in Erikas Arena |
+| Surfer | Seelenorden, Team-Pokémon mit Surfer, passende Wasser-/Uferkachel |
+| Stärke | Farborden, Team-Pokémon mit Stärke, ansprechbarer Schiebefels |
+
+NPCs, Schilder und versteckte Ereignisse behalten Vorrang vor der zusätzlichen
+Kachelprüfung. Normales Gras löst keinen Zerschneider-Dialog aus. Beim Surfen
+bleibt der normale Ausstieg per Bewegung erhalten; A aktiviert dort nicht erneut
+Surfer. Alle drei ursprünglichen Menüeinträge bleiben nutzbar.
+
+Die Ausführung verwendet die ursprünglichen Routinen: Zerschneider ersetzt den
+Kartenblock, Surfer prüft weiterhin Radweg, Strömung und Kachel-Kollisionen und
+setzt den normalen Einstiegsschritt, Stärke aktiviert den normalen Schiebeablauf.
+Stärke gilt weiterhin nur bis zum natürlichen Zurücksetzen beim Kartenwechsel.
+Classic erhält keine zusätzlichen Angebote. Es sind keine neuen Save-Felder nötig.
+
+`tests/player_gender_smoke.py` prüft Modus, Orden, Kachel und Attackenbesitz,
+einschließlich eines passenden Pokémon an zweiter Teamposition. Auf echten
+Karten wird ein Busch auf Route 2 entfernt, in Alabastia Surfer benutzt und auf
+den Seeschauminseln Stärke aktiviert und ein Fels geschoben. Weitere Checks
+prüfen den Vorrang von Schild/NPC sowie Ablehnung und gesperrte Stärke-Nutzung.

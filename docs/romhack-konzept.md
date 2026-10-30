@@ -70,7 +70,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Rückkehr der M.S. Anne | Nein | Ja | Kehrt nach jedem Top-Vier-Sieg zurück. Nach dem Verlassen fährt sie wieder ab; für die nächste Rückkehr sind die Top Vier erneut zu besiegen. |
 | Attacken-Helfer | Nein | Ja | Zwei neue NPCs: einer verlernt VMs, einer erinnert Attacken. Umgesetzt: kostenlos auf dem Deck der M.S. Anne nach dem ersten Top-Vier-Sieg. |
 | Spezialhändler auf der M.S. Anne | Nein | Ja | Geplant: erscheint nach dem ersten Top-Vier-Sieg wie die Attacken-Helfer; verkauft sonst nicht kaufbare Items. Sortiment und Preise noch abzustimmen. |
-| Kontextabhängige VMs | Nein | Ja | Zerschneider, Stärke und Surfer per A am passenden Hindernis aktivieren, wenn ein Team-Pokémon die VM beherrscht. Ordenvoraussetzungen bleiben erhalten. |
+| Kontextabhängige VMs | Nein | Ja | Umgesetzt: Zerschneider, Stärke und Surfer per A und Ja/Nein am Hindernis aktivieren. Team-Attacke und ursprünglicher Orden nötig. Details: [context-field-moves.md](context-field-moves.md). |
 | Größere Münzkäufe | Nein | Ja | In der Spielhalle mehr Münzen auf einmal kaufen. Umgesetzt: zusätzlich 500 Münzen für 10000 Geld. |
 | Fangsymbol bei wilden Pokémon | Nein | Ja | Umgesetzt: vorhandenes Pokéball-Zeichen im Gegner-HUD nur in Erweitert, bei bereits gefangenen wilden Arten. Keine Anzeige bei Trainer-Pokémon oder unbekannten Geistern. |
 | Attacken-Lernlisten aus Pokémon Gelb | Ja | Ja | Umgesetzt: Gelb als gemeinsame Moveset-Grundlage. Gen-1-Kampfmechanik unverändert. |

@@ -27,6 +27,7 @@ DisplayTextID::
 	dict TEXT_BLACKED_OUT,      DisplayPlayerBlackedOutText
 	dict TEXT_REPEL_WORE_OFF,   DisplayRepelWoreOffText
 	dict TEXT_REGISTERED_ITEM,  DisplayRegisteredItem
+	dict TEXT_CONTEXT_FIELD_MOVE, DisplayContextFieldMove
 
 	ld a, [wNumSprites]
 	ld e, a

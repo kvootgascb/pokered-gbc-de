@@ -96,7 +96,7 @@ OverworldLoopLessDelay::
 	call IsSpriteOrSignInFrontOfPlayer
 	ldh a, [hSpriteIndexOrTextID]
 	and a
-	jp z, OverworldLoop
+	jp z, HandleContextFieldMove
 .displayDialogue
 	predef GetTileAndCoordsInFrontOfPlayer
 	call UpdateSprites
@@ -2445,6 +2445,13 @@ HandleRegisteredItemShortcut:
 	farcall CheckRegisteredItemShortcut
 	jp nc, OverworldLoop
 	ld a, TEXT_REGISTERED_ITEM
+	ldh [hSpriteIndexOrTextID], a
+	jp OverworldLoopLessDelay.displayDialogue
+
+HandleContextFieldMove:
+	farcall CheckContextFieldMove
+	jp nc, OverworldLoop
+	ld a, TEXT_CONTEXT_FIELD_MOVE
 	ldh [hSpriteIndexOrTextID], a
 	jp OverworldLoopLessDelay.displayDialogue
 

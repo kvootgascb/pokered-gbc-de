@@ -837,6 +837,123 @@ print(
     "PASS: real repel expiry/reuse, all three durations, save/load, No, empty bag and Classic"
 )
 
+# Context VM requirements and party scan, including a move on the second mon.
+restore()
+p.memory[a("wPartyCount")] = 2
+p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4] = [84, 0, 0, 0]
+p.memory[a("wPartyMon2Moves") : a("wPartyMon2Moves") + 4] = [15, 57, 70, 0]
+p.memory[a("wSpritePlayerStateData1FacingDirection")] = 4
+p.memory[a("wWalkBikeSurfState")] = 0
+for mode, tileset, tile, badges, allowed, action in [
+    (1, 0, 0x3D, 2, True, 1),
+    (0, 0, 0x3D, 2, False, 1),
+    (1, 0, 0x3D, 0, False, 1),
+    (1, 7, 0x50, 2, True, 1),
+    (1, 0, 0x52, 2, False, 1),
+    (1, 0, 0x14, 16, True, 2),
+    (1, 0, 0x14, 0, False, 2),
+    (1, 0, 0x23, 16, False, 2),
+]:
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[a("wCurMapTileset")] = tileset
+    p.memory[a("wTileMap") + 7 * 20 + 8] = tile
+    p.memory[a("wObtainedBadges")] = badges
+    call("CheckContextFieldMove")
+    assert bool(p.register_file.F & 0x10) == allowed, (mode, tileset, tile, badges)
+    if allowed:
+        assert p.memory[a("wPostgameAction")] == action
+        assert p.memory[a("wTutorPartyIndex")] == 1
+p.memory[a("wPartyMon2Moves") : a("wPartyMon2Moves") + 4] = [84, 0, 0, 0]
+p.memory[a("wObtainedBadges")] = 16
+p.memory[a("wTileMap") + 7 * 20 + 8] = 0x14
+call("CheckContextFieldMove")
+assert not p.register_file.F & 0x10, "Surf was offered without a team move"
+print("PASS: context VM mode/badge/tile/team requirements and second-party selection")
+
+# Actual A -> confirmation -> native Cut removes a real Route 2 tree block.
+context_talks = []
+hook("ContextFieldMoveDialogue", lambda _: context_talks.append(True))
+enter_npc_map(5, [15, 57, 70, 0], species=0x15, map_id=13, width=10, y=11)
+p.memory[a("wObtainedBadges")] = 2
+ptr = (
+    p.memory[a("wCurrentTileBlockMapViewPointer")]
+    + 256 * p.memory[a("wCurrentTileBlockMapViewPointer") + 1]
+)
+cut_block = ptr + 2 * 16 + 2
+before_block = p.memory[cut_block]
+shortcut_tap("a")
+for _ in range(100):
+    shortcut_tap("a")
+    if p.memory[cut_block] != before_block:
+        break
+assert context_talks, "A did not offer Cut"
+assert p.memory[cut_block] != before_block, "native Cut did not replace the tree block"
+p.tick(80, False)
+assert not p.memory[a("wFontLoaded")] & 1
+
+# Actual shore interaction boards Surf in the direction being faced.
+enter_npc_map(6, [15, 57, 70, 0], species=0x15, map_id=0, width=10, y=13)
+p.memory[a("wSpritePlayerStateData1FacingDirection")] = 0
+p.memory[a("wObtainedBadges")] = 16
+before_talks = len(context_talks)
+shortcut_tap("a")
+for _ in range(100):
+    shortcut_tap("a")
+    if p.memory[a("wWalkBikeSurfState")] == 2 and not p.memory[a("wFontLoaded")] & 1:
+        break
+p.tick(80, False)
+assert len(context_talks) == before_talks + 1
+assert p.memory[a("wWalkBikeSurfState")] == 2
+assert (p.memory[a("wXCoord")], p.memory[a("wYCoord")]) == (6, 14)
+
+# Existing boulder dialogue now activates Strength, then the original pushing code.
+enter_npc_map(18, [15, 57, 70, 0], species=0x15, map_id=0xC0, width=15, y=11)
+p.memory[a("wObtainedBadges")] = 8
+shortcut_tap("a")
+for _ in range(100):
+    shortcut_tap("a")
+    if p.memory[a("wd728")] & 1 and not p.memory[a("wFontLoaded")] & 1:
+        break
+assert p.memory[a("wd728")] & 1, "boulder dialogue did not activate Strength"
+# Pushing remains the native movement event after activation.
+boulder_y = p.memory[a("wSprite01StateData2MapY")]
+p.button_press("up")
+p.tick(40, False)
+p.button_release("up")
+p.tick(20, False)
+assert (
+    p.memory[a("wSprite01StateData2MapY")] < boulder_y
+), "activated boulder cannot be pushed"
+print(
+    "PASS: real A interactions cut a tree, board Surf, activate Strength and push its boulder"
+)
+
+# A sign/NPC takes precedence even when its ground tile looks cuttable.
+for x, y, map_id, width in [(7, 10, 0, 10), (8, 11, 0x28, 5)]:
+    enter_npc_map(x, [15, 57, 70, 0], species=0x15, map_id=map_id, width=width, y=y)
+    p.memory[a("wObtainedBadges")] = 0xFF
+    p.memory[a("wTileMap") + 7 * 20 + 8] = 0x3D
+    before_talks = len(context_talks)
+    shortcut_tap("a")
+    for _ in range(25):
+        shortcut_tap("b")
+    assert len(context_talks) == before_talks, "context move stole a normal interaction"
+restore()
+p.memory[a("wPartyCount")] = 1
+p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4] = [70, 0, 0, 0]
+for mode, badges in [(0, 8), (1, 0)]:
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[a("wObtainedBadges")] = badges
+    p.memory[a("wd728")] = 0
+    call("TryContextStrength")
+    assert not p.memory[a("wd728")] & 1
+    assert not p.register_file.F & 0x10
+p.memory[a("wGameplayModeCache")] = 1
+p.memory[a("wObtainedBadges")] = 8
+call("TryContextStrength", 1200, "b")
+assert not p.memory[a("wd728")] & 1, "No activated Strength"
+print("PASS: signs/NPCs retain A priority; Strength badge/Classic/No checks hold")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [
