@@ -36,10 +36,22 @@ ShowPlayerSpriteMenu:
 	res 2, a ; PlaceString uses two rows
 	ldh [hUILayoutFlags], a
 	call ClearScreen
-	hlcoord 1, 2
+	hlcoord 0, 0
+	lb bc, 16, 18
+	call TextBoxBorder
+	hlcoord 2, 2
 	ld de, .heading
 	call PlaceString
-	hlcoord 3, 6
+	hlcoord 2, 4
+	lb bc, 7, 14
+	call TextBoxBorder
+	hlcoord 4, 4
+	ld de, .sectionTitle
+	call PlaceString
+	hlcoord 2, 14
+	ld de, .controls
+	call PlaceString
+	hlcoord 4, 6
 	ld de, .choices
 	call PlaceString
 	; Do not let the opening SELECT hold repeat or confirm anything.
@@ -66,8 +78,9 @@ ShowPlayerSpriteMenu:
 	ld [wLastMenuItem], a
 	ld a, 6
 	ld [wTopMenuItemY], a
-	ld a, 2
+	ld a, 3
 	ld [wTopMenuItemX], a
+	ld a, 2
 	ld [wMaxMenuItem], a
 	ld a, A_BUTTON | B_BUTTON | START
 	ld [wMenuWatchedKeys], a
@@ -81,13 +94,21 @@ ShowPlayerSpriteMenu:
 	ld a, $47
 	ld [wPlayerGenderTag], a
 	call ReloadSelectedPlayerSprite
+	; Walking frames share $8800 with the menu font. Restore the font before
+	; redrawing Options; closing the Start menu reloads the walking frames.
+	call LoadFontTilePatterns
+	call LoadTextBoxTilePatterns
 .done
 	pop af
 	ldh [hUILayoutFlags], a
 	ret
 
 .heading
-	db "FIGUR WÄHLEN@"
+	db "GEHEIMMENÜ@"
+.sectionTitle
+	db "FIGUR@"
+.controls
+	db "A:OK  B:ZURÜCK@"
 .choices
 	db "JUNGE"
 	next "GREEN"

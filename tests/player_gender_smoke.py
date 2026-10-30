@@ -182,6 +182,15 @@ for _ in range(4):
 tap("a")
 assert options, "Start -> Options was not entered"
 option_bits = p.memory[a("wOptions")]
+font_before = list(p.memory[0, 0x8800:0x9000])
+
+
+def assert_menu_font():
+    assert (
+        list(p.memory[0, 0x8800:0x9000]) == font_before
+    ), "sprite switch corrupted menu font"
+
+
 coords = tuple(
     p.memory[a(n)] for n in ("wCurMap", "wXCoord", "wYCoord", "wWalkBikeSurfState")
 )
@@ -201,7 +210,9 @@ release_select()
 assert p.memory[a("wCurrentMenuItem")] == 1, "current Green selection not highlighted"
 tap("up")
 tap("a")
+p.tick(30, False)
 assert p.memory[a("wPlayerGender")] == 0, "boy choice not applied"
+assert_menu_font()
 bank, addr = sym["RedSprite"]
 assert list(p.memory[0, 0x8000:0x80C0]) == list(p.memory[bank, addr : addr + 192])
 assert p.memory[a("wOptions")] == option_bits, "sprite menu changed game options"
@@ -225,10 +236,13 @@ hold_select(190)
 release_select()
 tap("down")
 tap("a")
+p.tick(30, False)
 assert p.memory[a("wPlayerGender")] == 1, "Green choice not applied"
+assert_menu_font()
 bank, addr = sym["GreenSprite"]
 assert list(p.memory[0, 0x8000:0x80C0]) == list(p.memory[bank, addr : addr + 192])
 tap("b")
+assert_menu_font()
 tap("b")
 print("PASS: cancellation and repeated switching to Green, with normal return to game")
 
