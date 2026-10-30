@@ -37,7 +37,7 @@ ursprünglichen Konsequenzen verpasster Chancen nicht aufheben.
 - Erweiterte Inhalte werden in Classic deaktiviert beziehungsweise pausiert.
   Übergänge müssen sicher bleiben, etwa beim Umschalten an Bord der M.S. Anne.
 - Unabhängig vom Modus gewählte Komfortoptionen bleiben beim Moduswechsel erhalten.
-- Änderungen werden über das normale Speichern im Spielstand gesichert.
+- Persistente Änderungen werden über das normale Speichern im Spielstand gesichert. Die temporäre Auswahl des Starter-Editors ist davon ausdrücklich ausgenommen.
 
 Der vorhandene Zugang zum Geheimmenü bleibt die Grundlage:
 **Start → OPTION → Select ungefähr drei Sekunden halten, dann loslassen.**
@@ -50,6 +50,7 @@ Geplante Menüpunkte:
 | Spielfigur | Junge / Green | Unabhängig vom Modus |
 | Schnelle Heilung und kürzere Wiederholungstexte | An / Aus | Unabhängig vom Modus |
 | VM-Animationen überspringen | An / Aus | Unabhängig vom Modus |
+| Starter-Editor (z. B. Seite 2) | Ersatz-Pokémon wählen / deaktivieren | Nur bei der ersten Starterwahl in Eichs Labor; Auswahl temporär, Modusverfügbarkeit noch offen |
 | Zurück | Menü schließen | — |
 
 Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
@@ -161,6 +162,47 @@ Unverbindliche Textideen:
   Als ich nachschauen wollte, war es plötzlich auf der anderen Seite …“
 - Der Assistent in Eichs Labor erzählt von seinem reparierten Linkkabel und
   möchte mit einem sofortigen Rücktausch dessen Funktion testen.
+
+## Geplanter Starter-Editor im Geheimmenü
+
+Ein zusätzlicher Editor, beispielsweise auf **Seite 2** des Geheimmenüs, soll
+vor der ersten Starterwahl in **Professor Eichs Labor** ein Ersatz-Pokémon
+festlegen können. Die Auswahl soll jederzeit in dieser Phase direkt im Spiel
+möglich sein, ohne vorab eine ROM zu konfigurieren. Nach abgeschlossener
+Starterwahl ist keine nachträgliche Team-Ersetzung durch diesen Editor vorgesehen.
+
+### Verhalten
+
+- Der Spieler wählt im Editor eine Pokémon-Art als temporären Ersatz, z. B. Simsala.
+- Danach wird ganz normal eine der ursprünglichen Starter-Kugeln gewählt.
+- **Die Kugelwahl bestimmt weiterhin den ursprünglichen Spielverlauf:**
+  Dialoge, Starter-Flags, Rivalenwahl und nachfolgende Skripte laufen so,
+  als hätte der Spieler dieses ursprüngliche Starter-Pokémon genommen.
+- Nur das tatsächlich erhaltene Team-Pokémon wird durch die Editor-Art ersetzt.
+  Es ist ein echtes Pokémon dieser Art mit dazu passenden Pokémon-Daten,
+  nicht lediglich ein anderer Name oder Sprite für den ursprünglichen Starter.
+- Beispiel: **Editor auf Simsala → Schiggy-Kugel wählen → Simsala im Team**;
+  die Story behandelt die Wahl weiterhin als Schiggy und der Rivale erhält
+  entsprechend der normalen Rot-/Blau-Auswahl Bisasam.
+- Ohne aktivierte Ersatz-Auswahl funktioniert die Starterwahl unverändert.
+
+### Lebensdauer der Auswahl
+
+Die **Editor-Voreinstellung wird nicht im Spielstand gespeichert** und braucht
+keinen Platz im persistenten Feature-Speicher. Sie muss nach einem Neustart
+oder erneuten Laden wieder gewählt werden. Nach der einmaligen Übergabe des
+Ersatz-Starters gilt die temporäre Auswahl als verbraucht.
+
+Das bereits erhaltene Simsala bleibt selbstverständlich ein normales Mitglied
+des Teams und wird regulär gespeichert. Nur die noch nicht angewendete
+Editor-Voreinstellung ist flüchtig; beim Laden wird kein vorhandenes Pokémon
+wieder gegen den ursprünglichen Starter ausgetauscht.
+
+Noch offen: endgültige Seitengestaltung und Artenauswahl, Verfügbarkeit in
+Classic/Erweitert sowie die genauen Erzeugungswerte (Level, Startattacken nach
+der geplanten Gelb-Grundlage usw.). Der bisher gewünschte Umfang ist die Wahl
+der Pokémon-Art, kein allgemeiner Editor für Level, Werte, Items oder Teams.
+Dieses Feature ist **nur geplant, noch nicht implementiert**.
 
 ## Noch nicht beschlossene Vorschläge
 
