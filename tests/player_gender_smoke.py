@@ -368,6 +368,28 @@ call("LoadSAV0")
 assert p.memory[3, 0xD006] == 3
 print("PASS: first Mew attempt fails, same-side attempts do not roll, and consumed encounter persists")
 
+restore()
+p.memory[a("wNumBagItems")] = 1
+p.memory[a("wBagItems"):a("wBagItems") + 3] = [0x45, 1, 255]
+p.memory[a("wPlayerMoney"):a("wPlayerMoney") + 3] = [0x10, 0, 0]
+p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = [0, 0]
+p.memory[a("wPostgameAction")] = 1
+call("BuyExpandedCoins")
+assert p.memory[a("wPostgameAction")] == 2
+assert list(p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2]) == [5, 0]
+assert list(p.memory[a("wPlayerMoney"):a("wPlayerMoney") + 3]) == [9, 0, 0]
+p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = [0x95, 0]
+p.memory[a("wPostgameAction")] = 1
+call("BuyExpandedCoins")
+assert p.memory[a("wPostgameAction")] == 4
+assert list(p.memory[a("wPlayerMoney"):a("wPlayerMoney") + 3]) == [9, 0, 0]
+p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = [0x99, 0x49]
+p.memory[a("wPostgameAction")] = 0
+call("BuyExpandedCoins")
+assert p.memory[a("wPostgameAction")] == 2
+assert list(p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2]) == [0x99, 0x99]
+print("PASS: 500-coin purchase costs 10000, with no overflow or payment on a full case")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [

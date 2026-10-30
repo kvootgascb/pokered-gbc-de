@@ -139,6 +139,8 @@ GameCornerBeauty1Text:
 
 GameCornerClerk1Text:
 	text_asm
+	farcall ExpandedCoinShop
+	jp c, TextScriptEnd
 	; Show player's coins
 	call GameCornerDrawCoinBox
 	ld hl, .DoYouNeedSomeGameCoins
