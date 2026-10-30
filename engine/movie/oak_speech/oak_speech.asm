@@ -51,6 +51,7 @@ OakSpeech:
 	call PrepareOakSpeech
 	predef InitPlayerData2
 	farcall InitFeatureData
+	farcall ChooseGameplayMode
 	call ChoosePlayerGender
 	ld hl, wNumBoxItems
 	ld a, POTION

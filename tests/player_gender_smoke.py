@@ -37,6 +37,7 @@ def record_copy(_):
     copies.append((p.register_file.B, p.register_file.D * 256 + p.register_file.E))
 
 
+hook("ChooseGameplayMode", lambda _: seen.append("mode"))
 hook("ChoosePlayerGender", lambda _: seen.append("gender"))
 hook("HandleMenuInput", lambda _: seen.append("menu"))
 hook("IntroDisplayPicCenteredOrUpperRight", record_pic)
@@ -45,7 +46,22 @@ hook("LoadWalkingPlayerSpriteGraphics", lambda _: seen.append("walking"))
 for i in range(250):
     p.button("start" if i < 20 else "a", 2)
     p.tick(20, False)
-    if "gender" in seen:
+    if "mode" in seen:
+        p.tick(20, False)
+        menu_state = io.BytesIO()
+        p.save_state(menu_state)
+        p.button("a", 2)
+        p.tick(20, False)
+        assert p.memory[a("wGameplayModeCache")] == 0
+        assert p.memory[3, 0xD000] == 0
+        menu_state.seek(0)
+        p.load_state(menu_state)
+        p.button("down", 2)
+        p.tick(12, False)
+        p.button("a", 2)
+        p.tick(20, False)
+        assert p.memory[a("wGameplayModeCache")] == 1
+        assert p.memory[3, 0xD000] == 1
         break
 assert "gender" in seen
 p.tick(30, False)
@@ -151,6 +167,78 @@ call("LoadWalkingPlayerSpriteGraphics")
 bank, addr = sym["RedSprite"]
 assert list(p.memory[0, 0x8000:0x80C0]) == list(p.memory[bank, addr : addr + 192])
 print("PASS: boy selection retains original walking graphics")
+# Mode-dependent HUD drawing and running use the real ROM routines.
+restore()
+for mode in (0, 1):
+    p.register_file.C = mode
+    call("SetGameplayMode")
+    assert p.memory[a("wGameplayModeCache")] == mode
+    assert p.memory[3, 0xD000] == mode
+    p.memory[a("wEXPBarKeepFullFlag")] = 1
+    dest = a("wTileMap") + 11 * 20 + 17
+    p.register_file.D, p.register_file.E = dest >> 8, dest & 255
+    call("PrintEXPBar")
+    assert list(p.memory[dest - 7 : dest + 1]) == [0x7F if mode == 0 else 0xC8] * 8
+    for held, transport, scripted, jumping in [
+        (0, 0, 0, 0),
+        (2, 0, 0, 0),
+        (2, 2, 0, 0),
+        (2, 0, 1, 0),
+        (2, 0, 0, 1),
+    ]:
+        p.memory[a("hJoyHeld")] = held
+        p.memory[a("wWalkBikeSurfState")] = transport
+        p.memory[a("wd730")] = 0x80 if scripted else 0
+        p.memory[a("wd736")] = 0x40 if jumping else 0
+        p.memory[a("wNPCMovementScriptPointerTableNum")] = 0
+        p.memory[a("wWalkCounter")] = 6
+        call("ApplyPlayerSpeedup")
+        expected_counter = (
+            5
+            if mode == 1
+            and held == 2
+            and transport == 0
+            and not scripted
+            and not jumping
+            else 6
+        )
+        assert p.memory[a("wWalkCounter")] == expected_counter
+    p.memory[a("wWalkBikeSurfState")] = 0
+    p.memory[a("wd730")] = 0
+    p.memory[a("wd736")] = 0
+    p.memory[a("hJoyHeld")] = 2
+    p.memory[a("wWalkCounter")] = 1
+    call("ApplyPlayerSpeedup")
+    assert p.memory[a("wWalkCounter")] == 1, "mid-step B caused counter underflow"
+    call("AdvancePlayerSprite")
+    assert p.memory[a("wWalkCounter")] == 0
+    call("SaveSAVtoSRAM0")
+    p.memory[a("wGameplayModeCache")] = 1 - mode
+    p.memory[3, 0xD000] = 1 - mode
+    call("LoadSAV0")
+    assert p.memory[a("wGameplayModeCache")] == mode
+print("PASS: new-game modes, HUD visibility, gated running, and mode save/load")
+
+# Compare actual overworld progress with identical input on the bedroom floor.
+distances = []
+for mode in (0, 1):
+    restore()
+    p.tick(120, False)
+    p.memory[3, 0xD000] = mode
+    p.memory[a("wGameplayModeCache")] = mode
+    start_x = p.memory[a("wXCoord")]
+    p.button_press("right")
+    p.button_press("b")
+    p.tick(24, False)
+    distances.append(p.memory[a("wXCoord")] - start_x)
+    p.button_release("right")
+    p.button_release("b")
+assert distances[1] > distances[0], (
+    "running did not increase actual movement",
+    distances,
+)
+print("PASS: held B moves farther in Extended than Classic in actual overworld play")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [
@@ -202,6 +290,7 @@ expected = (
 expected = bytearray(expected)
 expected[a("wInventoryFormat") - start : a("wInventoryFormat") - start + 2] = b"I2"
 expected[a("wCurMapTileset") - start] |= 0x80
+expected[a("wGameplayModeCache") - start] = 0
 p.memory[1, a("sMainData") : a("sMainData") + len(legacy)] = list(legacy)
 data = list(p.memory[1, a("sGameData") : a("sGameDataEnd")])
 p.memory[1, a("sMainDataCheckSum")] = (~sum(data)) & 255
@@ -234,6 +323,7 @@ expected = bytearray(
 )
 expected[a("wInventoryFormat") - start : a("wInventoryFormat") - start + 2] = b"I2"
 expected[a("wCurMapTileset") - start] |= 0x80
+expected[a("wGameplayModeCache") - start] = 0
 p.memory[1, a("sMainData") : a("sMainData") + len(legacy)] = list(legacy)
 data = list(p.memory[1, a("sGameData") : a("sGameDataEnd")])
 p.memory[1, a("sMainDataCheckSum")] = (~sum(data)) & 255
@@ -376,6 +466,7 @@ assert p.memory[a("wPlayerGender")] == 0, "B committed a selection"
 hold_select(190)
 release_select()
 tap("down")
+tap("down")
 tap("a")
 assert p.memory[a("wPlayerGender")] == 0, "ZURÜCK changed the selected figure"
 hold_select(190)
@@ -387,11 +478,28 @@ assert p.memory[a("wPlayerGender")] == 1, "Green choice not applied"
 assert_menu_font()
 bank, addr = sym["GreenSprite"]
 assert list(p.memory[0, 0x8000:0x80C0]) == list(p.memory[bank, addr : addr + 192])
+hold_select(190)
+release_select()
+tap("down")
+tap("left")
+tap("a")
+p.tick(15, False)
+assert p.memory[a("wGameplayModeCache")] == 0
+assert p.memory[3, 0xD000] == 0
+assert_menu_font()
+hold_select(190)
+release_select()
+tap("down")
+tap("right")
+tap("a")
+p.tick(15, False)
+assert p.memory[a("wGameplayModeCache")] == 1
+assert p.memory[3, 0xD000] == 1
+print("PASS: hidden mode row switches between Classic and Extended")
 tap("b")
 assert_menu_font()
 tap("b")
 print("PASS: cancellation and repeated switching to Green, with normal return to game")
-
 # The same options screen in the title menu cannot unlock this shortcut.
 restore()
 p.memory[a("wOptionsSelectHoldFrames")] = 0

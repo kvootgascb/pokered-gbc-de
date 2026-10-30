@@ -774,6 +774,7 @@ wOptionsCancelCursorX:: db
 wOptionsSpriteMenuEnabled:: db
 wOptionsSelectHoldFrames:: db
 wSpriteMenuCursorRow:: db
+wModeMenuChoice:: db
 
 NEXTU
 ; tile ID of the badge number being drawn
@@ -2059,7 +2060,8 @@ wWalkBikeSurfState:: db
 ; Only the tagged value identifies a girl; legacy saves default to a boy.
 wPlayerGender:: db
 wPlayerGenderTag:: db
-	ds 8
+wGameplayModeCache:: db
+	ds 7
 
 wTownVisitedFlag:: flag_array NUM_CITY_MAPS
 

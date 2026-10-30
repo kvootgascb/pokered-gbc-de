@@ -63,7 +63,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Junge-/Green-Auswahl | Ja | Ja | Vorhandene Auswahl und laufender Sprite-Wechsel bleiben erhalten. |
 | Größerer Beutel | Ja | Ja | 30 Plätze (umgesetzt). |
 | Größeres PC-Item-Lager | Ja | Ja | 70 Plätze (umgesetzt). |
-| Laufschuhe | Nein | Ja | Laufen ermöglichen; Taste, Freischaltung und erlaubte Orte noch festlegen. |
+| Laufschuhe | Nein | Ja | Umgesetzt: B halten für doppeltes normales Gehtempo, auch in Innenräumen. Kein Extra-Tempo beim Surfen, Fahrrad, Springen oder geskripteten Bewegungen. |
 | Kampf gegen Professor Eich | Nein | Ja | Nach jedem Top-Vier-Sieg einmal verfügbar, danach bis zum nächsten Top-Vier-Sieg gesperrt. Ein Sieg über Eich gibt einen zufälligen Starter als Preis. |
 | Tausch-zurück-Trainer | Nein | Ja | In Eichs Labor: testet ein zuvor wackeliges Linkkabel. Tauscht ein Pokémon und gibt es sofort zurück; ermöglicht Tauschentwicklungen ohne externen Tauschpartner. |
 | Alle 151 Pokémon erhältlich | Nein | Ja | Jede Art soll ohne externen Tausch in einem Spielstand erhältlich sein. Einmal pro Art genügt; keine Fanggarantie. |
@@ -74,7 +74,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Größere Münzkäufe | Nein | Ja | In der Spielhalle mehr Münzen auf einmal kaufen. Mengen und Preise offen. |
 | Fangsymbol bei wilden Pokémon | Nein | Ja | Anzeigen, ob die Art bereits gefangen wurde. |
 | Attacken-Lernlisten aus Pokémon Gelb | Ja | Ja | Gelb als gemeinsame Moveset-Grundlage; bisher nur geplant. Gen-1-Kampfmechanik unverändert. |
-| EP-Leiste | Nein | Ja | Vorhandene EP-Leiste in Erweitert beibehalten, in Classic ausblenden. |
+| EP-Leiste | Nein | Ja | Umgesetzt: EP-Leiste in Erweitert anzeigen, in Classic in Kampf und Status ausblenden; EP-Gewinn bleibt unverändert. |
 | Hinweis auf volle Box | Nein | Ja | Nur ein Hinweis; kein automatischer Boxwechsel. |
 | Registrierbares Basis-Item | Nein | Ja | Ein Basis-Item auf Select legen, z. B. Fahrrad oder Angel. Außerhalb des Optionsmenüs direkt verwendbar. |
 | Schutz erneut verwenden | Nein | Ja | Nach Ablauf anbieten, ein weiteres vorhandenes Exemplar einzusetzen. |
@@ -282,7 +282,7 @@ legendärer Pokémon. Änderungen an der Gen-1-Kampfmechanik sind ausgeschlossen
   laufender Karten nötig und kein Löschen erworbener Inhalte.
 - Abgleich weiterer vorhandener GBC-Erweiterungen mit dem Classic-Ziel.
 - Weitere Anforderungen an Beutel und PC über die umgesetzten 30/70 Plätze hinaus.
-- Laufschuhe: Bedienung, Freischaltung und Orte.
+- Gegebenenfalls später gewünschte Einschränkungen oder Freischaltung der bereits umgesetzten Laufschuhe.
 - Eich: Team, Level, Voraussetzungen, Dialog und Starter-Belohnungsverteilung;
   Zusammenspiel eines erneut verfügbaren Kampfes mit einer noch offenen Belohnung.
 - Neue Begegnungsraten, Surfer-Pikachu-Level und -Attacken, Preise in der Spielhalle.
@@ -310,3 +310,11 @@ registriertes Item sowie Zustände/Zähler für Eich, M.S. Anne, Mew, Box-Hinwei
 und weitere Ereignisse. Das aktiviert die geplanten Features noch nicht.
 Neue Features sollen vorhandene Spielstände migrieren beziehungsweise ihre
 Startzustände aus dem bisherigen Fortschritt ableiten. Details: [save-format.md](save-format.md).
+
+
+Moduswahl beim neuen Spiel und im Geheimmenü, modusabhängige EP-Leiste und
+Laufschuhe sind inzwischen umgesetzt. Bestehende Spielstände übernehmen den
+gespeicherten Modus; frühere Spielstände ohne Auswahl starten in Classic.
+Ein Neustart ist für den Wechsel zu Erweitert nicht erforderlich. Weitere
+geplante QoL-Funktionen, einschließlich wiederverwendbarer TMs, sind damit noch
+nicht aktiviert. Details: [gameplay-modes.md](gameplay-modes.md).

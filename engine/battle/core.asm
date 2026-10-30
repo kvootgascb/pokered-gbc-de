@@ -7124,6 +7124,19 @@ LoadMonBackSpriteHook:
 PrintEXPBarAt1711:
 	coord de, 17, 11
 PrintEXPBar:
+	ld a, [wGameplayModeCache]
+	and a
+	jr nz, .extended
+	ld h, d
+	ld l, e
+	ld b, 8
+	ld a, " "
+.clearClassic
+	ld [hld], a
+	dec b
+	jr nz, .clearClassic
+	ret
+.extended
 	push de
 	call CalcEXPBarPixelLength
 	ldh a, [hQuotient + 3] ; pixel length

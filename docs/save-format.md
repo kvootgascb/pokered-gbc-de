@@ -5,9 +5,9 @@ without starting a new game. On loading, it migrates inventories to 30/70,
 preserves existing progress and initializes feature data to safe zero defaults.
 The ordinary save command writes the new `I2` format and feature extension.
 
-This is infrastructure, not an implementation of the planned QoL features.
-No mode, registered-item shortcut, new encounter, or story event is activated
-by reserving its state. The existing gender field stays in the base save.
+Mode selection, the EXP-bar switch and running are now implemented. Other
+reserved preferences, the registered-item shortcut, new encounters and story
+events remain planned; reserving their state does not activate them. The existing gender field stays in the base save.
 
 ## Fixed storage
 
@@ -88,3 +88,11 @@ whole-main-data migration from 20/50 and I1 30/60, repeated save/load, preservat
 of all 512 feature bytes, default initialization, bank-safe accessors, and
 rejection of corrupted, missing or newer feature blocks. It also exercises the
 intro, sprite selection, font integrity and return to the original menus.
+
+
+The current mode is mirrored into `wGameplayModeCache` in previously unused
+base-save padding for hot rendering/movement paths. Initialize/load rebuild the
+mirror from the feature payload; it is not an independent setting. Mode UI uses
+`SetGameplayMode` locally or the register-argument-free farcall entry
+`CommitGameplayMode`, which reads `wModeMenuChoice`. Normal farcall trampolines
+clobber HL and BC, so do not pass their pointers/values through them unchanged.

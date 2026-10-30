@@ -3,6 +3,8 @@ SECTION "Versioned Feature Save", ROMX
 ; Public entry points expect WRAM bank 0 (the normal game bank). The stack
 ; resides in banked WRAM, so every return must restore bank 0 first.
 InitFeatureData:
+	xor a
+	ld [wGameplayModeCache], a
 	ld a, 3
 	ldh [rSVBK], a
 	ld hl, wFeatureData
@@ -57,8 +59,17 @@ LoadFeatureSaveData:
 	ld de, wFeatureData
 	ld bc, FEATURE_DATA_SIZE
 	call CopyData
+	ld a, [wFeatureMode]
+	ld c, a
 	xor a
 	ldh [rSVBK], a
+	ld a, c
+	cp 1
+	jr z, .cache
+	xor a
+.cache
+	ld [wGameplayModeCache], a
+	and a
 	ret
 .bad
 	scf

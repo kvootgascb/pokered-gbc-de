@@ -43,6 +43,20 @@ ShowPlayerSpriteMenu:
 	hlcoord 10, 3
 	ld de, .female
 	call PlaceString
+	hlcoord 0, 5
+	lb bc, 3, 18
+	call TextBoxBorder
+	hlcoord 1, 6
+	ld de, .modeHeading
+	call PlaceString
+	hlcoord 2, 8
+	ld de, .classic
+	call PlaceString
+	hlcoord 10, 8
+	ld de, .extended
+	call PlaceString
+	ld a, [wGameplayModeCache]
+	ld [wModeMenuChoice], a
 	hlcoord 2, 16
 	ld de, .back
 	call PlaceString
@@ -76,17 +90,25 @@ ShowPlayerSpriteMenu:
 	jr nz, .genderRow
 	ld a, [wSpriteMenuCursorRow]
 	and a
-	jr nz, .checkConfirm
+	cp 2
+	jr z, .checkConfirm
 	bit BIT_D_LEFT, b
 	jr nz, .maleSelected
 	bit BIT_D_RIGHT, b
 	jr nz, .femaleSelected
 .checkConfirm
 	bit BIT_A_BUTTON, b
-	jr z, .input
+	jp z, .input
 	ld a, [wSpriteMenuCursorRow]
+	cp 2
+	jr z, .done
 	and a
-	jr nz, .done
+	jr z, .confirmGender
+	ld a, [wModeMenuChoice]
+	ld c, a
+	farcall CommitGameplayMode
+	ret
+.confirmGender
 	ld a, [wCurrentMenuItem]
 	ld [wPlayerGender], a
 	ld a, $47
@@ -98,32 +120,60 @@ ShowPlayerSpriteMenu:
 .done
 	ret
 .backRow
-	ld a, 1
+	ld a, [wSpriteMenuCursorRow]
+	cp 2
+	jp z, .input
+	inc a
 	ld [wSpriteMenuCursorRow], a
-	jr .input
+	jp .input
 .genderRow
-	xor a
+	ld a, [wSpriteMenuCursorRow]
+	and a
+	jp z, .input
+	dec a
 	ld [wSpriteMenuCursorRow], a
-	jr .input
+	jp .input
 .maleSelected
 	xor a
-	ld [wCurrentMenuItem], a
-	jr .input
+	jr .select
 .femaleSelected
 	ld a, 1
+.select
+	ld c, a
+	ld a, [wSpriteMenuCursorRow]
+	and a
+	ld a, c
+	jr nz, .selectMode
 	ld [wCurrentMenuItem], a
-	jr .input
+	jp .input
+.selectMode
+	ld [wModeMenuChoice], a
+	jp .input
+
 .drawCursor
 	ld a, " "
 	hlcoord 2, 3
 	ld [hl], a
 	hlcoord 9, 3
 	ld [hl], a
+	hlcoord 1, 8
+	ld [hl], a
+	hlcoord 9, 8
+	ld [hl], a
 	hlcoord 1, 16
 	ld [hl], a
 	ld a, [wSpriteMenuCursorRow]
+	cp 2
+	jr z, .drawArrow
 	and a
-	jr nz, .drawArrow
+	jr z, .genderCursor
+	ld a, [wModeMenuChoice]
+	and a
+	hlcoord 1, 8
+	jr z, .drawArrow
+	hlcoord 9, 8
+	jr .drawArrow
+.genderCursor
 	ld a, [wCurrentMenuItem]
 	and a
 	hlcoord 2, 3
@@ -138,6 +188,12 @@ ShowPlayerSpriteMenu:
 	db "♂@"
 .female
 	db "♀@"
+.modeHeading
+	db "SPIELMODUS@"
+.classic
+	db "CLASSIC@"
+.extended
+	db "ERWEITERT@"
 .back
 	db "ZURÜCK@"
 

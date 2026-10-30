@@ -1,5 +1,8 @@
 AnimateEXPBarAgain:
 	call LoadMonData
+	ld a, [wGameplayModeCache]
+	and a
+	ret z
 	call IsCurrentMonBattleMon
 	ret nz
 	xor a
@@ -13,6 +16,9 @@ AnimateEXPBarAgain:
 	jr nz, .loop
 AnimateEXPBar:
 	call LoadMonData
+	ld a, [wGameplayModeCache]
+	and a
+	ret z
 	call IsCurrentMonBattleMon
 	ret nz
 	ld a, [wBattleMonLevel]
