@@ -33,9 +33,3 @@ python tests/player_gender_smoke.py pokeblue
 ```
 
 These checks execute the actual intro and Start → Options shortcut, verify hold/reset/cancel behavior, compare player VRAM with the selected sprite data, exercise checksum-checked save/load, and check the title-screen restriction. Battle-back and Hall-of-Fame graphics routines are exercised directly; this is not a full playthrough of those sequences.
-
-## Brown hair and green dress
-
-The overworld renderer retains the original brown palette for the two head tiles and applies dark forest green to the two lower clothing tiles. Hair colors therefore remain unchanged. Original PNG pixels remain unchanged. Intro, trainer-card, battle and Hall-of-Fame portraits retain their existing colors.
-
-The renderer temporarily uses an OBJ palette slot not occupied by another visible sprite (reserving brown for the head) and restores its original colors before the next frame. This keeps NPC palettes and scene transitions intact. If all eight slots are occupied, it retains the prior brown palette for that frame. Surfing continues to use Seel's ordinary colors.

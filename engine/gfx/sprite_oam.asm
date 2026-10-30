@@ -159,15 +159,10 @@ PrepareOAMData::
 
 .clear
 	cp l
-	jr z, .palettesReady
+	ret z
 	ld [hl], b
 	add hl, de
 	jr .clear
-
-.palettesReady
-	farcall RefreshGreenOverworldPalette
-	xor a ; regular overworld OAM needs no non-overworld recoloring
-	ret
 
 GetSpriteScreenXY:
 	inc e

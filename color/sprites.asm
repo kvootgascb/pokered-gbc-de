@@ -56,8 +56,6 @@ LoadSpritePaletteData:
 	ldh [rSVBK], a
 	push bc
 
-	xor a
-	ld [W2_GreenPaletteSlot], a
 	ld de, W2_SprPaletteData
 	ld b, $40
 .sprCopyLoop
@@ -149,7 +147,6 @@ ColorOverworldSprite::
 ColorNonOverworldSprites::
 	ld a, 2
 	ldh [rSVBK], a
-	call RestoreGreenSpritePalette
 
 	ld hl, wShadowOAM
 	ld b, 40
@@ -238,7 +235,6 @@ ColorNonOverworldSprites::
 	jr nz, .spriteLoop
 
 .end
-	call ApplyGreenSpritePalette
 	xor a
 	ldh [rSVBK], a
 	ret
@@ -579,177 +575,3 @@ TypeColorTable: ; Used for a select few sprites to be colorized based on attack 
 	db 1 ; DRAGON EQU $1A
 
 INCLUDE "color/data/spritepalettes.asm"
-
-; Temporarily borrow an OBJ palette not used by any visible non-player sprite.
-; Restore it before recoloring the next frame, including when leaving the map.
-RestoreGreenSpritePalette:
-	ld a, 2
-	ldh [rSVBK], a
-	ld a, [W2_GreenPaletteSlot]
-	and a
-	ret z
-	dec a
-	add a
-	add a
-	add a
-	add LOW(W2_SprPaletteData)
-	ld e, a
-	ld d, HIGH(W2_SprPaletteData)
-	ld hl, W2_GreenPaletteBackup
-	ld b, 8
-.loop
-	ld a, [hli]
-	ld [de], a
-	inc de
-	dec b
-	jr nz, .loop
-	xor a
-	ld [W2_GreenPaletteSlot], a
-	inc a
-	ld [W2_ForceOBPUpdate], a
-	ret
-
-ApplyGreenSpritePalette:
-	xor a
-	ldh [rSVBK], a
-	; Shared state is in fixed WRAM, independent of the selected WRAM bank.
-	ld a, [wUpdateSpritesEnabled]
-	dec a
-	jp nz, .notApplicable
-	ld a, [wIsInBattle]
-	and a
-	jp nz, .notApplicable
-	ld a, [wWalkBikeSurfState]
-	cp 2 ; surfing still uses Seel's ordinary palette
-	jp z, .notApplicable
-	ld a, [wPlayerGenderTag]
-	cp $47
-	jp nz, .notApplicable
-	ld a, [wPlayerGender]
-	dec a
-	jp nz, .notApplicable
-	ld a, 2
-	ldh [rSVBK], a
-	; Player is the first four hardware sprites; inspect every other visible one.
-	ld hl, wShadowOAM + 4 * 4
-	ld b, 36
-	ld c, 1 << SPR_PAL_BROWN ; head keeps its original brown palette
-.scan
-	ld a, [hli] ; Y
-	and a
-	jr z, .hidden
-	cp 160
-	jr nc, .hidden
-	ld a, [hl] ; X
-	and a
-	jr z, .hidden
-	cp 168
-	jr nc, .hidden
-	inc hl
-	inc hl
-	ld a, [hl]
-	and 7
-	ld e, 1
-	and a
-	jr z, .mark
-.bit
-	sla e
-	dec a
-	jr nz, .bit
-.mark
-	ld a, c
-	or e
-	ld c, a
-	jr .next
-.hidden
-	inc hl
-	inc hl
-.next
-	inc hl
-	dec b
-	jr nz, .scan
-	ld d, 0 ; candidate palette
-	ld e, 1
-.find
-	ld a, c
-	and e
-	jr z, .found
-	sla e
-	inc d
-	ld a, d
-	cp 8
-	jr nz, .find
-	ret ; all eight occupied: retain the regular brown player palette
-.found
-	ld a, d
-	inc a
-	ld [W2_GreenPaletteSlot], a
-	ld a, d
-	add a
-	add a
-	add a
-	add LOW(W2_SprPaletteData)
-	ld l, a
-	ld h, HIGH(W2_SprPaletteData)
-	push hl
-	push de
-	ld de, W2_GreenPaletteBackup
-	ld b, 8
-.backup
-	ld a, [hli]
-	ld [de], a
-	inc de
-	dec b
-	jr nz, .backup
-	pop de
-	pop hl
-	push de
-	ld de, GreenOverworldPalette
-	ld b, 8
-.copy
-	ld a, [de]
-	inc de
-	ld [hli], a
-	dec b
-	jr nz, .copy
-	pop de
-	ld hl, wShadowOAM + 3
-	ld b, 4
-.player
-	ld c, d
-	ld a, b
-	cp 3 ; first two tiles are the head; last two are the dress
-	jr c, .dress
-	ld c, SPR_PAL_BROWN
-.dress
-	ld a, [hl]
-	and $f8
-	or c
-	ld [hli], a
-	inc hl
-	inc hl
-	inc hl
-	dec b
-	jr nz, .player
-	ld a, 1
-	ld [W2_ForceOBPUpdate], a
-	ret
-
-.notApplicable
-	ld a, 2
-	ldh [rSVBK], a
-	ret
-
-GreenOverworldPalette:
-	RGB 27,31,27, 31,19,10, 15,10,3, 2,11,4
-
-; Entry from the ordinary overworld renderer, with the stack in WRAM bank 1.
-RefreshGreenOverworldPalette:
-	ld a, 2
-	ldh [rSVBK], a
-	call RestoreGreenSpritePalette
-	call ApplyGreenSpritePalette
-	xor a
-	ldh [rSVBK], a
-.done
-	ret

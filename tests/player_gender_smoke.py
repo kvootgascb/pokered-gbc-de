@@ -151,54 +151,6 @@ call("LoadWalkingPlayerSpriteGraphics")
 bank, addr = sym["RedSprite"]
 assert list(p.memory[0, 0x8000:0x80C0]) == list(p.memory[bank, addr : addr + 192])
 print("PASS: boy selection retains original walking graphics")
-# Check the live four-color Green palette and its temporary OBJ-slot ownership.
-palette_frames = []
-
-
-def capture_green_frame(_):
-    palette_frames.append(
-        (
-            p.memory[2, 0xD78E] - 1,
-            [p.memory[a("wShadowOAM") + 3 + i * 4] & 7 for i in range(4)],
-        )
-    )
-
-
-hook("RefreshGreenOverworldPalette.done", capture_green_frame)
-restore()
-p.tick(120, True)
-slot = p.memory[2, 0xD78E] - 1
-assert 0 <= slot < 8, "Green palette was not installed"
-bank, addr = sym["GreenOverworldPalette"]
-green_palette = list(p.memory[bank, addr : addr + 8])
-assert list(p.memory[2, 0xD040 + slot * 8 : 0xD048 + slot * 8]) == green_palette
-assert palette_frames and palette_frames[-1] == (slot, [3, 3, slot, slot])
-print("PASS: live Green sprite uses brown hair and dark-green dress palette")
-
-# Simulate a visible NPC claiming the previously borrowed palette. Its colors
-# must be restored and the player assigned a different unoccupied slot.
-p.memory[2, 0xD400:0xD500] = [9] * 256
-for i in range(4, 40):
-    p.memory[a("wShadowOAM") + i * 4] = 0
-p.memory[a("wShadowOAM") + 16 : a("wShadowOAM") + 20] = [40, 40, 0, slot]
-original = list(p.memory[2, 0xD790:0xD798])
-call("ColorNonOverworldSprites")
-assert p.memory[2, 0xD78E] - 1 != slot
-assert list(p.memory[2, 0xD040 + slot * 8 : 0xD048 + slot * 8]) == original
-print("PASS: NPC palette is restored when a previously free slot becomes occupied")
-
-# No recoloring is allowed to displace another actor if all eight slots are used.
-for i in range(8):
-    p.memory[a("wShadowOAM") + 16 + i * 4 : a("wShadowOAM") + 20 + i * 4] = [
-        40,
-        40,
-        0,
-        i,
-    ]
-call("ColorNonOverworldSprites")
-assert p.memory[2, 0xD78E] == 0
-print("PASS: full palette allocation safely keeps the brown fallback")
-
 # Exercise the shortcut through the actual Start -> Options flow.
 restore()
 p.tick(120, False)

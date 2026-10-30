@@ -54,7 +54,3 @@ W2_VBCOPYBGNUMROWS             EQU $d78d
 
 ; In bank 1, the stack starts at $dfff. So, that's also the stack here when bank 2 is
 ; loaded. Don't use anything too close to there.
-
-; Temporary player palette: slot+1 is zero when no override is installed.
-W2_GreenPaletteSlot EQU $d78e
-W2_GreenPaletteBackup EQU $d790 ; eight original palette bytes
