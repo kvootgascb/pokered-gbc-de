@@ -162,6 +162,24 @@ ShowPlayerSpriteMenu:
 	ld [hl], a
 	hlcoord 1, 16
 	ld [hl], a
+	; Hollow arrows retain the saved values while the solid cursor moves.
+	hlcoord 4, 3
+	ld a, [wPlayerGenderTag]
+	cp $47
+	jr nz, .savedGender
+	ld a, [wPlayerGender]
+	cp 1
+	jr nz, .savedGender
+	hlcoord 13, 3
+.savedGender
+	ld [hl], "▷"
+	hlcoord 1, 8
+	ld a, [wGameplayModeCache]
+	and a
+	jr z, .savedMode
+	hlcoord 9, 8
+.savedMode
+	ld [hl], "▷"
 	ld a, [wSpriteMenuCursorRow]
 	cp 2
 	jr z, .drawArrow

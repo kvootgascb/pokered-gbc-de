@@ -318,3 +318,23 @@ gespeicherten Modus; frühere Spielstände ohne Auswahl starten in Classic.
 Ein Neustart ist für den Wechsel zu Erweitert nicht erforderlich. Weitere
 geplante QoL-Funktionen, einschließlich wiederverwendbarer TMs, sind damit noch
 nicht aktiviert. Details: [gameplay-modes.md](gameplay-modes.md).
+
+
+## Ergänzte Festlegungen: Eich, Begegnungen und Attacken-Helfer
+
+- Eich kämpft im Labor aus Erinnerung an seine Zeit als junger Trainer. Team
+  und Level stammen aus seinen bereits vorhandenen Trainerdaten. Die drei
+  Starter-Belohnungen sind gleich wahrscheinlich. Solange ein Geschenk offen
+  ist, kämpft er nicht erneut und ein Top-Vier-Sieg schaltet ihn nicht wieder
+  frei. Das Geschenk kann später mit einem passenden Kommentar abgeholt werden.
+- Seltene Amonitas, Kabuto und Surfer-Pikachu: vorläufig je 1 % pro Art,
+  Level passend zum Gebiet. Fossil-Pokémon nur mit der besten Angel (Superangel).
+- Mew: Level 30, reguläre bis dahin erlernte Attacken.
+- Spielhallenpreise orientieren sich an Blau; die größte Münzkaufmenge wird
+  verzehnfacht, bei gleichem Preis pro Münze.
+- Beide Attacken-Helfer stehen auf dem Deck der M.S. Anne und arbeiten kostenlos.
+  Sie kamen, um den neuen Champion kennenzulernen. Nun helfen sie ihm mit ihren
+  besonderen Begabungen. Der Erinnerer berücksichtigt auch frühere Level-Attacken
+  der Vorentwicklungen.
+- Im Geheimmenü markieren leere Pfeile die gespeicherten Werte, der volle Pfeil
+  zeigt den aktuellen Auswahlcursor.
