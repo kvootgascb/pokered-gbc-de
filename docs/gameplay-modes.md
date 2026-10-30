@@ -34,3 +34,9 @@ is not a full campaign or exhaustive battle-animation playthrough.
 New-game gender selection uses the same standard box and vertical choice layout
 as the mode selection. Girl name suggestions are Grün, Elly and Tina. The
 hidden-menu gender symbols occupy evenly spaced columns 5 and 14.
+
+In Erweitert bleiben TMs nach erfolgreichem Erlernen im Beutel und können
+erneut verwendet werden. Classic verbraucht wie bisher ein Exemplar.
+VMs bleiben in beiden Modi wiederverwendbar; Abbruch, Ablehnung und fehlende
+Kompatibilität verbrauchen nichts. Ein Moduswechsel gilt beim nächsten Einsatz.
+Die normalen Regeln für Attackenauswahl und TM-/VM-Kompatibilität bleiben erhalten.

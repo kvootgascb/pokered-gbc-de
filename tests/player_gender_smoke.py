@@ -575,6 +575,38 @@ assert p.memory[a("wLinkState")] == 0
 assert p.memory[a("wGameplayModeCache")] == 1
 print("PASS: actual lab NPC selects a Pokemon, evolves it and returns it locally")
 
+# Teach through the original TM/HM item dialogue and party menu.
+for mode in [0, 1]:
+    for item, move, quantity in [(0xC9, 5, 2), (0xC8, 148, 1)]:
+        restore()
+        p.memory[a("wPartyCount")] = 0
+        p.memory[a("wMonDataLocation")] = 0x10
+        p.memory[a("wcf91")] = 0x55
+        p.memory[a("wCurEnemyLVL")] = 30
+        call("_AddPartyMon")
+        p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4] = [84, 0, 0, 0]
+        p.memory[a("wGameplayModeCache")] = mode
+        p.memory[a("wNumBagItems") : a("wNumBagItems") + 4] = [1, item, quantity, 255]
+        p.memory[a("wWhichPokemon")] = 0
+        p.memory[a("wcf91")] = item
+        call("UseItem_", 1200, "a")
+        assert p.memory[a("wPartyMon1Moves") + 1] == move
+        expected = quantity - (item == 0xC9 and mode == 0)
+        assert p.memory[a("wBagItems") + 1] == expected
+        # Refusing the same machine never consumes another item.
+        p.memory[a("wcf91")] = item
+        call("UseItem_", 600, "b")
+        assert p.memory[a("wBagItems") + 1] == expected
+        if mode == 1 and item == 0xC9:
+            # Forget the taught move, then successfully reuse the same TM.
+            p.memory[a("wPartyMon1Moves") + 1] = 0
+            p.memory[a("wWhichPokemon")] = 0
+            p.memory[a("wcf91")] = item
+            call("UseItem_", 1200, "a")
+            assert p.memory[a("wPartyMon1Moves") + 1] == move
+            assert p.memory[a("wBagItems") + 1] == expected
+print("PASS: real TM teaching consumes only in Classic; HMs/cancellation never consume")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [

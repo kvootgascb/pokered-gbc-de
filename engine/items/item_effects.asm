@@ -2249,6 +2249,9 @@ ItemUseTMHM:
 	ld a, [wcf91]
 	call IsItemHM
 	ret c
+	ld a, [wGameplayModeCache]
+	and a
+	ret nz ; Extended TMs are reusable; Classic still consumes one copy
 	jp RemoveUsedItem
 
 BootedUpTMText:
