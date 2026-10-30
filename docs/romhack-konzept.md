@@ -65,6 +65,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Größeres PC-Item-Lager | Ja | Ja | 70 Plätze (umgesetzt). |
 | Laufschuhe | Nein | Ja | Umgesetzt: B halten für doppeltes normales Gehtempo, auch in Innenräumen. Kein Extra-Tempo beim Surfen, Fahrrad, Springen oder geskripteten Bewegungen. |
 | Kampf gegen Professor Eich | Nein | Ja | Nach jedem Top-Vier-Sieg einmal verfügbar, danach bis zum nächsten Top-Vier-Sieg gesperrt. Ein Sieg über Eich gibt einen zufälligen Starter als Preis. |
+| Arena-Rückkämpfe | Nein | Ja | Geplant: nach jedem Top-Vier-Sieg jeder Leiter einmal erneut herausforderbar; Gelegenheiten sammeln sich nicht an. Teams und Level noch offen. |
 | Tausch-zurück-Trainer | Nein | Ja | In Eichs Labor: testet ein zuvor wackeliges Linkkabel. Tauscht ein Pokémon und gibt es sofort zurück; ermöglicht Tauschentwicklungen ohne externen Tauschpartner. |
 | Alle 151 Pokémon erhältlich | Nein | Ja | Jede Art soll ohne externen Tausch in einem Spielstand erhältlich sein. Einmal pro Art genügt; keine Fanggarantie. |
 | Wiederverwendbare TMs | Nein | Ja | TMs werden beim Einsatz nicht verbraucht. |
@@ -258,6 +259,42 @@ Noch offen: endgültige Seitengestaltung und Artenauswahl, Verfügbarkeit in
 Classic/Erweitert sowie die genauen Erzeugungswerte (Level, Startattacken nach
 der geplanten Gelb-Grundlage usw.). Der bisher gewünschte Umfang ist die Wahl
 der Pokémon-Art, kein allgemeiner Editor für Level, Werte, Items oder Teams.
+Dieses Feature ist **nur geplant, noch nicht implementiert**.
+
+## Geplant: Rückkämpfe gegen die Arenaleiter
+
+Nur im erweiterten Modus. Nach jedem Top-Vier-Sieg kann jeder der acht
+Arenaleiter erneut herausgefordert werden. Jeder Leiter hat seine eigene
+Verfügbarkeit; ein Rückkampf bei Rocko verbraucht beispielsweise nicht Mistys
+Gelegenheit. Mehrere Top-Vier-Siege sammeln keine zusätzlichen Kämpfe an.
+Classic pausiert die zusätzlichen Angebote, ohne die Zustände zurückzusetzen.
+Die Verfügbarkeit soll gespeichert werden und vorhandene Spielstände weiter
+unterstützen. Die ursprünglichen ersten Arenakämpfe bleiben erhalten.
+
+Dialogideen vor der Herausforderung, noch keine endgültigen Bildschirmtexte:
+
+| Leiter | Motivation / Dialogidee |
+| --- | --- |
+| Rocko | „Seit unserem ersten Kampf ist viel passiert. Zeig mir, wie stark Du geworden bist!“ |
+| Misty | „Du bist jetzt CHAMPION? Dann will ich sehen, ob Du auch gegen meine Strömung bestehst!“ |
+| Major Bob | „Diese Niederlage lässt mir keine Ruhe, Soldat! Zeit für eine Revanche!“ |
+| Erika | „Dein Können ist seit unserem letzten Treffen aufgeblüht. Darf ich es noch einmal erleben?“ |
+| Koga | „Ein wahrer Ninja hört nie auf zu trainieren. Prüfen wir, was wir beide gelernt haben!“ |
+| Sabrina | „Ich habe vorausgesehen, dass Du zurückkommst. Den Ausgang unseres Kampfes sehe ich diesmal nicht klar.“ |
+| Pyro | „Neue Frage: Wie schlägt sich ein CHAMPION gegen mein Feuer? Finden wir es heraus!“ |
+| Giovanni | Vorschlag bei einer möglichen Rückkehr: „Ich habe mich zurückgezogen, um meine Schwäche zu verstehen. Zeig mir, ob ich daraus gelernt habe.“ |
+
+Noch zu entscheiden:
+
+- Teams und Level der Rückkämpfe; verstärkte Teams sind ein Vorschlag.
+- Wird die Gelegenheit beim Kampfbeginn oder erst bei einem Sieg verbraucht?
+- Preisgeld und weitere Belohnungen. Vorschlag: keine erneuten Orden oder
+  ursprünglichen Arena-TMs.
+- Giovanni verschwindet im Original nach seiner Niederlage. Für den achten
+  Rückkampf braucht es eine ausdrücklich festgelegte Rückkehr oder einen
+  anderen Austragungsort; sein normaler Story-Abgang soll nicht versehentlich
+  rückgängig gemacht werden.
+
 Dieses Feature ist **nur geplant, noch nicht implementiert**.
 
 ## Noch nicht beschlossene Vorschläge
