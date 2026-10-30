@@ -30,31 +30,22 @@ CheckOptionsSpriteShortcut:
 	ret
 
 ShowPlayerSpriteMenu:
-	ldh a, [hUILayoutFlags]
-	push af
-	res 1, a ; menu cursor uses two rows
-	res 2, a ; PlaceString uses two rows
-	ldh [hUILayoutFlags], a
 	call ClearScreen
 	hlcoord 0, 0
-	lb bc, 16, 18
+	lb bc, 3, 18
 	call TextBoxBorder
-	hlcoord 2, 2
+	hlcoord 1, 1
 	ld de, .heading
 	call PlaceString
-	hlcoord 2, 4
-	lb bc, 7, 14
-	call TextBoxBorder
-	hlcoord 4, 4
-	ld de, .sectionTitle
+	hlcoord 3, 3
+	ld de, .male
 	call PlaceString
-	hlcoord 2, 14
-	ld de, .controls
+	hlcoord 10, 3
+	ld de, .female
 	call PlaceString
-	hlcoord 4, 6
-	ld de, .choices
+	hlcoord 2, 16
+	ld de, .back
 	call PlaceString
-	; Do not let the opening SELECT hold repeat or confirm anything.
 .waitForRelease
 	call DelayFrame
 	call Joypad
@@ -62,59 +53,94 @@ ShowPlayerSpriteMenu:
 	and SELECT
 	jr nz, .waitForRelease
 	xor a
-	ld [wMenuWatchMovingOutOfBounds], a
-	ld [wMenuWrappingEnabled], a
-	ld [wMenuJoypadPollCount], a
+	ld [wSpriteMenuCursorRow], a
 	ld [wCurrentMenuItem], a
 	ld a, [wPlayerGenderTag]
 	cp $47
-	jr nz, .selectionReady
+	jr nz, .input
 	ld a, [wPlayerGender]
 	cp 1
-	jr nz, .selectionReady
+	jr nz, .input
 	ld [wCurrentMenuItem], a
-.selectionReady
-	ld a, [wCurrentMenuItem]
-	ld [wLastMenuItem], a
-	ld a, 6
-	ld [wTopMenuItemY], a
-	ld a, 3
-	ld [wTopMenuItemX], a
-	ld a, 2
-	ld [wMaxMenuItem], a
-	ld a, A_BUTTON | B_BUTTON | START
-	ld [wMenuWatchedKeys], a
-	call HandleMenuInput
+.input
+	call .drawCursor
+	call DelayFrame
+	call JoypadLowSensitivity
+	ldh a, [hJoy5]
+	ld b, a
 	and B_BUTTON | START
 	jr nz, .done
+	bit BIT_D_DOWN, b
+	jr nz, .backRow
+	bit BIT_D_UP, b
+	jr nz, .genderRow
+	ld a, [wSpriteMenuCursorRow]
+	and a
+	jr nz, .checkConfirm
+	bit BIT_D_LEFT, b
+	jr nz, .maleSelected
+	bit BIT_D_RIGHT, b
+	jr nz, .femaleSelected
+.checkConfirm
+	bit BIT_A_BUTTON, b
+	jr z, .input
+	ld a, [wSpriteMenuCursorRow]
+	and a
+	jr nz, .done
 	ld a, [wCurrentMenuItem]
-	cp 2 ; ZURÜCK
-	jr z, .done
 	ld [wPlayerGender], a
 	ld a, $47
 	ld [wPlayerGenderTag], a
 	call ReloadSelectedPlayerSprite
-	; Walking frames share $8800 with the menu font. Restore the font before
-	; redrawing Options; closing the Start menu reloads the walking frames.
+	; Animation frames share VRAM with the font; restore menu graphics.
 	call LoadFontTilePatterns
 	call LoadTextBoxTilePatterns
 .done
-	pop af
-	ldh [hUILayoutFlags], a
 	ret
-
+.backRow
+	ld a, 1
+	ld [wSpriteMenuCursorRow], a
+	jr .input
+.genderRow
+	xor a
+	ld [wSpriteMenuCursorRow], a
+	jr .input
+.maleSelected
+	xor a
+	ld [wCurrentMenuItem], a
+	jr .input
+.femaleSelected
+	ld a, 1
+	ld [wCurrentMenuItem], a
+	jr .input
+.drawCursor
+	ld a, " "
+	hlcoord 2, 3
+	ld [hl], a
+	hlcoord 9, 3
+	ld [hl], a
+	hlcoord 1, 16
+	ld [hl], a
+	ld a, [wSpriteMenuCursorRow]
+	and a
+	jr nz, .drawArrow
+	ld a, [wCurrentMenuItem]
+	and a
+	hlcoord 2, 3
+	jr z, .drawArrow
+	hlcoord 9, 3
+.drawArrow
+	ld [hl], "▶"
+	ret
 .heading
-	db "GEHEIMMENÜ@"
-.sectionTitle
-	db "FIGUR@"
-.controls
-	db "A:OK  B:ZURÜCK@"
-.choices
-	db "JUNGE"
-	next "GREEN"
-	next "ZURÜCK@"
+	db "GESCHLECHT@"
+.male
+	db "♂@"
+.female
+	db "♀@"
+.back
+	db "ZURÜCK@"
 
-; Reload immediately, preserving location, facing and walking/bike/surf state.
 ReloadSelectedPlayerSprite:
 	ld a, [wWalkBikeSurfState]
 	and a

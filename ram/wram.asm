@@ -773,6 +773,7 @@ wOptionsCancelCursorX:: db
 ; Transient options-menu state, sharing existing scratch space.
 wOptionsSpriteMenuEnabled:: db
 wOptionsSelectHoldFrames:: db
+wSpriteMenuCursorRow:: db
 
 NEXTU
 ; tile ID of the badge number being drawn
@@ -2043,7 +2044,7 @@ wRoute18Gate1FCurScript:: db
 	ds 78
 wGameProgressFlagsEnd::
 
-	ds 56
+	ds 56 - BAG_STORAGE_GROWTH - PC_STORAGE_GROWTH
 
 wObtainedHiddenItemsFlags:: flag_array 112
 
@@ -2268,7 +2269,8 @@ wUnusedDA38:: db
 ; mostly copied from map-specific map script pointer and written back later
 wCurMapScript:: db
 
-	ds 7
+wInventoryFormat:: ds 2
+	ds 5
 
 wPlayTimeHours:: db
 wPlayTimeMaxed:: db

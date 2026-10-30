@@ -66,6 +66,7 @@ LoadSAV0:
 	ld de, wMainDataStart
 	ld bc, wMainDataEnd - wMainDataStart
 	call CopyData
+	farcall MigrateLegacyInventory
 	ld hl, wCurMapTileset
 	set 7, [hl]
 	ld hl, sSpriteData
@@ -199,6 +200,10 @@ OlderFileWillBeErasedText:
 	text_end
 
 SaveSAVtoSRAM0:
+	ld a, $49
+	ld [wInventoryFormat], a
+	ld a, $31
+	ld [wInventoryFormat + 1], a
 	ld a, SRAM_ENABLE
 	ld [MBC1SRamEnable], a
 	ld a, $1

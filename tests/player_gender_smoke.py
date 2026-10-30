@@ -151,6 +151,72 @@ call("LoadWalkingPlayerSpriteGraphics")
 bank, addr = sym["RedSprite"]
 assert list(p.memory[0, 0x8000:0x80C0]) == list(p.memory[bank, addr : addr + 192])
 print("PASS: boy selection retains original walking graphics")
+# Fill both inventories beyond their former limits and verify hard boundaries.
+restore()
+for inventory, capacity, guard in [
+    ("wNumBagItems", 30, "wPlayerMoney"),
+    ("wNumBoxItems", 60, "wCurrentBoxNum"),
+]:
+    p.memory[a(inventory)] = 0
+    p.memory[a(inventory) + 1] = 0xFF
+    unchanged = p.memory[a(guard)]
+    for item in range(1, capacity + 1):
+        p.memory[a("wcf91")] = item
+        p.memory[a("wItemQuantity")] = 1
+        p.register_file.HL = a(inventory)
+        call("AddItemToInventory_")
+        assert p.memory[a(inventory)] == item
+    p.memory[a("wcf91")] = 201
+    p.register_file.HL = a(inventory)
+    call("AddItemToInventory_")
+    assert p.memory[a(inventory)] == capacity
+    assert p.memory[a(guard)] == unchanged, "full inventory overwrote adjacent state"
+call("SaveSAVtoSRAM0")
+p.memory[a("wNumBagItems")] = 0
+p.memory[a("wNumBoxItems")] = 0
+call("LoadSAV0")
+assert p.memory[a("wNumBagItems")] == 30 and p.memory[a("wNumBoxItems")] == 60
+print("PASS: 30 bag / 60 PC slots, overflow protection, and full inventory save/load")
+
+# Synthetic legacy-format save with old absolute offsets and a valid checksum.
+restore()
+start, end = a("wMainDataStart"), a("wMainDataEnd")
+legacy = bytearray((i * 17 + 3) & 255 for i in range(end - start))
+old_bag, old_pc = 0xD31D - start, 0xD53A - start
+old_gap = 0xD6B8 - start
+for offset, count in [(old_bag, 20), (old_pc, 50)]:
+    legacy[offset] = count
+    for i in range(count):
+        legacy[offset + 1 + i * 2 : offset + 3 + i * 2] = bytes([i + 1, 3])
+    legacy[offset + 1 + count * 2] = 0xFF
+legacy[a("wInventoryFormat") - start : a("wInventoryFormat") - start + 2] = bytes(2)
+bag_end, pc_end = old_bag + 42, old_pc + 102
+expected = (
+    legacy[:bag_end]
+    + bytes(20)
+    + legacy[bag_end:pc_end]
+    + bytes(20)
+    + legacy[pc_end:old_gap]
+    + legacy[old_gap + 40 :]
+)
+expected = bytearray(expected)
+expected[a("wInventoryFormat") - start : a("wInventoryFormat") - start + 2] = b"I1"
+expected[a("wCurMapTileset") - start] |= 0x80
+p.memory[1, a("sMainData") : a("sMainData") + len(legacy)] = list(legacy)
+data = list(p.memory[1, a("sGameData") : a("sGameDataEnd")])
+p.memory[1, a("sMainDataCheckSum")] = (~sum(data)) & 255
+call("LoadSAV0")
+assert list(p.memory[start:end]) == list(
+    expected
+), "legacy migration changed saved state"
+call("SaveSAVtoSRAM0")
+p.memory[start:end] = [0] * (end - start)
+call("LoadSAV0")
+assert list(p.memory[start:end]) == list(expected), "migrated save was migrated twice"
+print(
+    "PASS: checksum-validated old 20/50 save migrates without losing any other main data"
+)
+
 # Exercise the shortcut through the actual Start -> Options flow.
 restore()
 p.tick(120, False)
@@ -208,7 +274,7 @@ p.tick(200, False)
 assert len(opened) == 1, "continued SELECT reopened menu"
 release_select()
 assert p.memory[a("wCurrentMenuItem")] == 1, "current Green selection not highlighted"
-tap("up")
+tap("left")
 tap("a")
 p.tick(30, False)
 assert p.memory[a("wPlayerGender")] == 0, "boy choice not applied"
@@ -235,6 +301,11 @@ assert p.memory[a("wPlayerGender")] == 0, "B committed a selection"
 hold_select(190)
 release_select()
 tap("down")
+tap("a")
+assert p.memory[a("wPlayerGender")] == 0, "ZURÜCK changed the selected figure"
+hold_select(190)
+release_select()
+tap("right")
 tap("a")
 p.tick(30, False)
 assert p.memory[a("wPlayerGender")] == 1, "Green choice not applied"
