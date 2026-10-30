@@ -1001,3 +1001,5 @@ INCLUDE "engine/events/registered_item.asm"
 INCLUDE "engine/events/repeat_repel.asm"
 
 INCLUDE "engine/events/context_field_moves.asm"
+
+INCLUDE "engine/events/comfort_options.asm"

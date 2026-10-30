@@ -182,7 +182,9 @@ wTutorRecordPtr:: dw
 wTutorRecordLevel:: db
 wTutorMode:: db
 wTutorChainDepth:: db
-	ds 3
+wHiddenMenuPage:: db
+wHiddenMenuPreferences:: db
+	ds 1
 
 
 SECTION "Overworld Map", WRAM0

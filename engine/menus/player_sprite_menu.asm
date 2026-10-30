@@ -30,10 +30,32 @@ CheckOptionsSpriteShortcut:
 	ret
 
 ShowPlayerSpriteMenu:
+	xor a
+	ld [wHiddenMenuPage], a
+	ld [wSpriteMenuCursorRow], a
+	ld a, [wGameplayModeCache]
+	ld [wModeMenuChoice], a
+	ld hl, wFeaturePreferences
+	read_feature_byte
+	ld a, c
+	ld [wHiddenMenuPreferences], a
+	xor a
+	ld [wCurrentMenuItem], a
+	ld a, [wPlayerGenderTag]
+	cp $47
+	jr nz, .redraw
+	ld a, [wPlayerGender]
+	cp 1
+	jr nz, .redraw
+	ld [wCurrentMenuItem], a
+.redraw
 	call ClearScreen
 	hlcoord 0, 0
 	lb bc, 3, 18
 	call TextBoxBorder
+	ld a, [wHiddenMenuPage]
+	and a
+	jp nz, .comfortPage
 	hlcoord 1, 1
 	ld de, .heading
 	call PlaceString
@@ -55,8 +77,23 @@ ShowPlayerSpriteMenu:
 	hlcoord 10, 8
 	ld de, .extended
 	call PlaceString
-	ld a, [wGameplayModeCache]
-	ld [wModeMenuChoice], a
+	hlcoord 2, 13
+	ld de, .nextPage
+	jr .pageLinks
+.comfortPage
+	hlcoord 1, 1
+	ld de, .animationHeading
+	call PlaceString
+	hlcoord 5, 3
+	ld de, .on
+	call PlaceString
+	hlcoord 14, 3
+	ld de, .off
+	call PlaceString
+	hlcoord 2, 13
+	ld de, .previousPage
+.pageLinks
+	call PlaceString
 	hlcoord 2, 16
 	ld de, .back
 	call PlaceString
@@ -66,16 +103,6 @@ ShowPlayerSpriteMenu:
 	ldh a, [hJoyHeld]
 	and SELECT
 	jr nz, .waitForRelease
-	xor a
-	ld [wSpriteMenuCursorRow], a
-	ld [wCurrentMenuItem], a
-	ld a, [wPlayerGenderTag]
-	cp $47
-	jr nz, .input
-	ld a, [wPlayerGender]
-	cp 1
-	jr nz, .input
-	ld [wCurrentMenuItem], a
 .input
 	call .drawCursor
 	call DelayFrame
@@ -83,49 +110,87 @@ ShowPlayerSpriteMenu:
 	ldh a, [hJoy5]
 	ld b, a
 	and B_BUTTON | START
-	jr nz, .done
+	jp nz, .done
 	bit BIT_D_DOWN, b
-	jr nz, .backRow
+	jp nz, .down
 	bit BIT_D_UP, b
-	jr nz, .genderRow
-	ld a, [wSpriteMenuCursorRow]
+	jp nz, .up
+	ld a, [wHiddenMenuPage]
 	and a
+	ld a, [wSpriteMenuCursorRow]
+	jr nz, .comfortInput
 	cp 2
-	jr z, .checkConfirm
+	jr nc, .checkConfirm
+	jr .checkLeftRight
+.comfortInput
+	and a
+	jr nz, .checkConfirm
+.checkLeftRight
 	bit BIT_D_LEFT, b
-	jr nz, .maleSelected
+	jr nz, .left
 	bit BIT_D_RIGHT, b
-	jr nz, .femaleSelected
+	jr nz, .right
 .checkConfirm
 	bit BIT_A_BUTTON, b
 	jp z, .input
+	ld a, [wHiddenMenuPage]
+	and a
 	ld a, [wSpriteMenuCursorRow]
+	jr nz, .comfortConfirm
+	cp 3
+	jr z, .done
+	cp 2
+	jp nz, .input
+	ld a, 1
+	ld [wHiddenMenuPage], a
+	xor a
+	ld [wSpriteMenuCursorRow], a
+	jp .redraw
+.comfortConfirm
 	cp 2
 	jr z, .done
-	jp .input ; options take effect with Left/Right, like the normal menu
+	cp 1
+	jp nz, .input
+	xor a
+	ld [wHiddenMenuPage], a
+	ld a, 2
+	ld [wSpriteMenuCursorRow], a
+	jp .redraw
 .done
 	ret
-.backRow
+.down
+	call .lastRow
+	ld c, a
 	ld a, [wSpriteMenuCursorRow]
-	cp 2
+	cp c
 	jp z, .input
 	inc a
 	ld [wSpriteMenuCursorRow], a
 	jp .input
-.genderRow
+.up
 	ld a, [wSpriteMenuCursorRow]
 	and a
 	jp z, .input
 	dec a
 	ld [wSpriteMenuCursorRow], a
 	jp .input
-.maleSelected
+.lastRow
+	ld a, [wHiddenMenuPage]
+	and a
+	ld a, 3
+	ret z
+	dec a
+	ret
+.left
 	xor a
 	jr .select
-.femaleSelected
+.right
 	ld a, 1
 .select
 	ld c, a
+	ld a, [wHiddenMenuPage]
+	and a
+	jr nz, .selectAnimation
 	ld a, [wSpriteMenuCursorRow]
 	and a
 	ld a, c
@@ -143,8 +208,7 @@ ShowPlayerSpriteMenu:
 	ld a, $47
 	ld [wPlayerGenderTag], a
 	call ReloadSelectedPlayerSprite
-	; The second 12-tile sprite block overlaps the first 12 font tiles.
-	; Restore only that range so further menu input is not delayed by a full font load.
+	; Restore only the 12 font tiles overwritten by the animation frames.
 	ld de, FontGraphics
 	ld hl, vFont
 	lb bc, BANK(FontGraphics), 12
@@ -157,7 +221,18 @@ ShowPlayerSpriteMenu:
 	jp z, .input
 	farcall CommitGameplayMode
 	jp .input
-
+.selectAnimation
+	ld a, [wHiddenMenuPreferences]
+	res 1, a
+	bit 0, c
+	jr z, .storePreference
+	set 1, a
+.storePreference
+	ld [wHiddenMenuPreferences], a
+	ld c, a
+	ld hl, wFeaturePreferences
+	write_feature_byte
+	jp .input
 .drawCursor
 	ld a, " "
 	hlcoord 4, 3
@@ -168,9 +243,13 @@ ShowPlayerSpriteMenu:
 	ld [hl], a
 	hlcoord 9, 8
 	ld [hl], a
+	hlcoord 1, 13
+	ld [hl], a
 	hlcoord 1, 16
 	ld [hl], a
-	; Hollow arrows show the active values on rows without the solid cursor.
+	ld a, [wHiddenMenuPage]
+	and a
+	jr nz, .comfortCursors
 	hlcoord 4, 3
 	ld a, [wPlayerGenderTag]
 	cp $47
@@ -189,11 +268,10 @@ ShowPlayerSpriteMenu:
 .savedMode
 	ld [hl], "▷"
 	ld a, [wSpriteMenuCursorRow]
+	cp 3
+	jr z, .backCursor
 	cp 2
-	jr nz, .optionCursor
-	hlcoord 1, 16
-	jr .drawArrow
-.optionCursor
+	jr z, .pageCursor
 	and a
 	jr z, .genderCursor
 	ld a, [wModeMenuChoice]
@@ -208,6 +286,26 @@ ShowPlayerSpriteMenu:
 	hlcoord 4, 3
 	jr z, .drawArrow
 	hlcoord 13, 3
+	jr .drawArrow
+.comfortCursors
+	hlcoord 4, 3
+	ld a, [wHiddenMenuPreferences]
+	bit 1, a
+	jr z, .animationCursor
+	hlcoord 13, 3
+.animationCursor
+	ld [hl], "▷"
+	ld a, [wSpriteMenuCursorRow]
+	cp 2
+	jr z, .backCursor
+	cp 1
+	jr z, .pageCursor
+	jr .drawArrow
+.pageCursor
+	hlcoord 1, 13
+	jr .drawArrow
+.backCursor
+	hlcoord 1, 16
 .drawArrow
 	ld [hl], "▶"
 	ret
@@ -223,6 +321,16 @@ ShowPlayerSpriteMenu:
 	db "CLASSIC@"
 .extended
 	db "ERWEITERT@"
+.animationHeading
+	db "VM-ANIMATIONEN@"
+.on
+	db "AN@"
+.off
+	db "AUS@"
+.nextPage
+	db "WEITER@"
+.previousPage
+	db "SEITE 1@"
 .back
 	db "ZURÜCK@"
 

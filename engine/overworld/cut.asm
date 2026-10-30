@@ -53,11 +53,18 @@ UsedCut:
 	res 6, [hl]
 	ld a, $ff
 	ld [wUpdateSpritesEnabled], a
+	farcall SkipVMAnimationsEnabled
+	push af
+	jr nz, .noCutSprites
 	call InitCutAnimOAM
+.noCutSprites
 	ld de, CutTreeBlockSwaps
 	call ReplaceTreeTileBlock
 	call RedrawMapView
+	pop af
+	jr nz, .noCutAnimation
 	farcall AnimCut
+.noCutAnimation
 	ld a, $1
 	ld [wUpdateSpritesEnabled], a
 	ld a, SFX_CUT

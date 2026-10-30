@@ -79,7 +79,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Registrierbares Basis-Item | Nein | Ja | Umgesetzt: im Beutel registrieren, außerhalb der Menüs per Select benutzen. Details: [registered-item.md](registered-item.md). |
 | Schutz erneut verwenden | Nein | Ja | Umgesetzt: nach Ablauf bei vorhandenem Vorrat dieselbe Schutzart erneut anbieten; Ja/Nein. Details: [repeat-repel.md](repeat-repel.md). |
 | Schnelle Heilung / kürzere Wiederholungstexte | Optional | Optional | Separater Schalter im Geheimmenü, unabhängig vom Modus. |
-| VM-Animationen überspringen | Optional | Optional | Separater Schalter im Geheimmenü, unabhängig vom Modus. |
+| VM-Animationen überspringen | Optional | Optional | Umgesetzt: auf Seite 2 des Geheimmenüs „VM-Animationen“ auf Aus stellen; unabhängig vom Modus. |
 | Kleine Gerüchte über Geheimnisse | Nein | Ja | Wenige passende NPC-Hinweise, ohne die Lösung ausdrücklich zu verraten. Ausgestaltung später. |
 
 Die vorgeschlagene Auslösung des Box-Hinweises ist noch zu bestätigen:

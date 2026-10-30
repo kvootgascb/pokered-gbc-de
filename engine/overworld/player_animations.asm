@@ -45,6 +45,8 @@ EnterMapAnim::
 	jr .done
 .flyAnimation
 	pop hl
+	farcall SkipVMAnimationsEnabled
+	jr nz, .skipFlyArrival
 	ld de, BirdSprite
 	ld hl, vNPCSprites
 	lb bc, BANK(BirdSprite), $0c
@@ -60,6 +62,7 @@ EnterMapAnim::
 	ld [hl], $8 ; wFlyAnimBirdSpriteImageIndex (facing right)
 	ld de, FlyAnimationEnterScreenCoords
 	call DoFlyAnimation
+.skipFlyArrival
 	call LoadPlayerSpriteGraphics
 	jr .restoreDefaultMusic
 
@@ -138,6 +141,8 @@ _LeaveMapAnim::
 	call PlayerSpinInPlace
 	jr .spinWhileMovingUp
 .flyAnimation
+	farcall SkipVMAnimationsEnabled
+	jr nz, .skipFlyDeparture
 	call LoadBirdSpriteGraphics
 	ld hl, wFlyAnimUsingCoordList
 	ld a, $ff ; is not using coord list (flap in place)
@@ -164,6 +169,7 @@ _LeaveMapAnim::
 	ld [hl], $8 ; wFlyAnimBirdSpriteImageIndex (facing left)
 	ld de, FlyAnimationScreenCoords2
 	call DoFlyAnimation
+.skipFlyDeparture
 	call GBFadeOutToWhite
 	jp RestoreFacingDirectionAndYScreenPos
 
@@ -332,12 +338,16 @@ PlayerSpinWhileMovingUpOrDown:
 	call DelayFrames
 	jr PlayerSpinWhileMovingUpOrDown
 
+; Keep the fixed battle-transition entry in bank $1c stable as checks grow.
+PUSHS
+SECTION "VM Animation State Restore", ROMX, BANK[$1c]
 RestoreFacingDirectionAndYScreenPos:
 	ld a, [wSavedPlayerScreenY]
 	ld [wSpritePlayerStateData1YPixels], a
 	ld a, [wSavedPlayerFacingDirection]
 	ld [wSpritePlayerStateData1ImageIndex], a ; (image index is locked to standing images)
 	ret
+POPS
 
 ; if SGB, 2 frames, else 3 frames
 GetPlayerTeleportAnimFrameDelay:

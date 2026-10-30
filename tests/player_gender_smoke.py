@@ -131,7 +131,19 @@ def call(n, limit=180, auto_button=None):
     bank, pc = sym[n]
     # A frame snapshot can be inside an interrupt. Enable interrupts before
     # invoking routines which wait for VBlank, then return to a ROM0 loop.
-    trampoline = [0xFB, 0xCD, pc & 255, pc >> 8, 0x3E, 0x91, 0xE0, 0x40, 0x18, 0xFE]
+    trampoline = [
+        0xFB,
+        0xCD,
+        pc & 255,
+        pc >> 8,
+        0xF3,
+        0x3E,
+        0x91,
+        0xE0,
+        0x40,
+        0x18,
+        0xFE,
+    ]
     for offset, byte in enumerate(trampoline):
         p.memory[0, 0x100 + offset] = byte
     p.memory[0xFF70] = 0
@@ -139,13 +151,18 @@ def call(n, limit=180, auto_button=None):
         p.memory[0x2000] = bank
         p.memory[a("hLoadedROMBank")] = bank
     p.register_file.PC = 0x100
+    # DI after RET keeps the sentinel outside VBlank so PC/flags/registers
+    # can be checked reliably, regardless of the routine's frame alignment.
     for frame in range(limit):
         if auto_button and frame % 20 == 0:
             p.button(auto_button, 2)
         p.tick(1, False)
-        if p.register_file.PC in (0x108, 0x109):
+        if p.register_file.PC in (0x109, 0x10A):
             return
-    raise AssertionError(n + " did not return")
+    raise AssertionError(
+        f"{n} did not return: bank={p.memory[a('hLoadedROMBank')]:02x} "
+        f"PC={p.register_file.PC:04x} SP={p.register_file.SP:04x}"
+    )
 
 
 # Real save routine and checksum-checked restore, including the new bytes.
@@ -954,6 +971,44 @@ call("TryContextStrength", 1200, "b")
 assert not p.memory[a("wd728")] & 1, "No activated Strength"
 print("PASS: signs/NPCs retain A priority; Strength badge/Classic/No checks hold")
 
+# The independent animation setting preserves native Cut effects in both modes.
+cut_animations = []
+fly_animations = []
+hook("AnimCut", lambda _: cut_animations.append(True))
+hook("DoFlyAnimation", lambda _: fly_animations.append(True))
+for mode, prefs in [(0, 2), (1, 2), (1, 0)]:
+    enter_npc_map(5, [15, 57, 70, 0], species=0x15, map_id=13, width=10, y=11)
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[3, 0xD001] = prefs
+    p.memory[a("wWhichPokemon")] = 0
+    call("_GetTileAndCoordsInFrontOfPlayer")
+    call("SaveScreenTilesToBuffer2")
+    ptr = (
+        p.memory[a("wCurrentTileBlockMapViewPointer")]
+        + 256 * p.memory[a("wCurrentTileBlockMapViewPointer") + 1]
+    )
+    block = ptr + 34
+    old = p.memory[block]
+    before = len(cut_animations)
+    p.memory[0xFF40] = 0xE3
+    call("UsedCut", 1200, "a")
+    assert p.memory[block] != old
+    assert len(cut_animations) - before == (0 if prefs & 2 else 1)
+    p.memory[a("wd732")] = 8  # Fly warp; neither Teleport nor dungeon warp.
+    p.memory[a("wSpritePlayerStateData1YPixels")] = 60
+    p.memory[0xFF40] = 0xE3
+    before = len(fly_animations)
+    call("_LeaveMapAnim", 1200)
+    p.memory[a("wFlags_D733")] |= 0x80
+    p.memory[0xFF40] = 0xE3
+    call("EnterMapAnim", 1200)
+    assert p.memory[a("wSpritePlayerStateData1YPixels")] == 60
+    assert not p.memory[a("wFlags_D733")] & 0x80
+    assert (len(fly_animations) == before) == bool(prefs & 2)
+print(
+    "PASS: Cut/Fly cosmetic animation skip works independently of mode and preserves effect/state"
+)
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [
@@ -1140,6 +1195,7 @@ def assert_menu_font():
 coords = tuple(
     p.memory[a(n)] for n in ("wCurMap", "wXCoord", "wYCoord", "wWalkBikeSurfState")
 )
+p.memory[3, 0xD001] = 0x80  # unknown future preference bit must survive UI edits
 hold_select(100)
 assert not opened, "short hold opened shortcut"
 release_select()
@@ -1198,11 +1254,13 @@ tap("left")
 tap("right")
 tap("down")
 tap("down")
-assert p.memory[a("wSpriteMenuCursorRow")] == 2
+tap("down")
+assert p.memory[a("wSpriteMenuCursorRow")] == 3
 assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED, "Back cursor is not visible"
 assert p.memory[a("wTileMap") + 8 * 20 + 9] == 0xEC, "Mode retained the solid cursor"
 # Back must have its own cursor position for either active mode.
 for direction, mode in [("left", 0), ("right", 1)]:
+    tap("up")
     tap("up")
     assert p.memory[a("wSpriteMenuCursorRow")] == 1
     tap(direction)
@@ -1211,13 +1269,43 @@ for direction, mode in [("left", 0), ("right", 1)]:
     assert p.memory[a("wTileMap") + 8 * 20 + mode_x] == 0xED
     assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0x7F
     tap("down")
-    assert p.memory[a("wSpriteMenuCursorRow")] == 2
+    tap("down")
+    assert p.memory[a("wSpriteMenuCursorRow")] == 3
     assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED
     assert p.memory[a("wTileMap") + 8 * 20 + mode_x] == 0xEC
     assert p.memory[a("wTileMap") + 3 * 20 + 13] == 0xEC
 tap("left")
 assert not closed and p.memory[a("wPlayerGender")] == 1
 assert p.memory[a("wGameplayModeCache")] == 1
+# The page link has its own visible cursor and opens the comfort page.
+tap("up")
+assert p.memory[a("wTileMap") + 13 * 20 + 1] == 0xED
+tap("a")
+assert p.memory[a("wHiddenMenuPage")] == 1
+assert not closed
+tap("right")
+assert p.memory[3, 0xD001] == 0x82
+assert p.memory[a("wTileMap") + 3 * 20 + 13] == 0xED
+tap("a")
+assert not closed, "A on VM option closed the menu"
+tap("down")
+assert p.memory[a("wTileMap") + 13 * 20 + 1] == 0xED
+tap("a")
+assert p.memory[a("wHiddenMenuPage")] == 0
+assert p.memory[a("wSpriteMenuCursorRow")] == 2
+tap("up")
+tap("left")  # Classic still allows the independent preference.
+assert p.memory[a("wGameplayModeCache")] == 0
+tap("down")
+tap("a")
+tap("left")
+assert not p.memory[3, 0xD001] & 2
+tap("right")
+assert p.memory[3, 0xD001] & 2
+assert p.memory[a("wGameplayModeCache")] == 0
+tap("down")
+tap("down")
+assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED
 tap("a")
 assert len(closed) == 1, "A on Back failed to exit"
 assert_menu_font()

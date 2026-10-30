@@ -9,6 +9,8 @@ PrintStrengthTxt:
 UsedStrengthText:
 	text_far _UsedStrengthText
 	text_asm
+	farcall SkipVMAnimationsEnabled
+	jp nz, TextScriptEnd
 	ld a, [wcf91]
 	call PlayCry
 	call Delay3
