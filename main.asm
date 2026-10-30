@@ -977,3 +977,5 @@ INCLUDE "engine/items/inventory_migration.asm"
 INCLUDE "engine/menus/feature_save.asm"
 
 INCLUDE "engine/menus/gameplay_mode.asm"
+
+INCLUDE "engine/events/rare_encounters.asm"

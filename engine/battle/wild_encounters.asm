@@ -1,6 +1,8 @@
 ; try to initiate a wild pokemon encounter
 ; returns success in Z
 TryDoWildEncounter:
+	xor a
+	ld [wRareSurfPikachu], a
 	ld a, [wNPCMovementScriptPointerTableNum]
 	and a
 	ret nz
@@ -78,6 +80,7 @@ TryDoWildEncounter:
 	ld a, [hl]
 	ld [wcf91], a
 	ld [wEnemyMonSpecies2], a
+	farcall TrySurfPikachu
 	ld a, [wRepelRemainingSteps]
 	and a
 	jr z, .willEncounter

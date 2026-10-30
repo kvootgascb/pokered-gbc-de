@@ -269,6 +269,35 @@ assert distances[1] > distances[0], (
 )
 print("PASS: held B moves farther in Extended than Classic in actual overworld play")
 
+restore()
+for roll, species in [(0, 0x62), (1, 0x5A), (2, 0x54), (99, 0x54)]:
+    p.memory[a("wCurOpponent")] = 0x54
+    p.register_file.A = roll
+    call("FossilFishingRoll")
+    assert p.memory[a("wCurOpponent")] == species
+p.memory[a("wGameplayModeCache")] = 0
+p.memory[a("wCurMap")] = 0xE3
+p.memory[a("wSpecialSuperRod")] = 1
+p.memory[a("wRodResponse")] = 1
+p.memory[a("wCurOpponent")] = 0x54
+call("TryFossilFishing")
+assert p.memory[a("wCurOpponent")] == 0x54
+p.register_file.A = 0
+call("SurfPikachuRoll")
+assert p.memory[a("wEnemyMonSpecies2")] == 0x54
+p.memory[a("wIsInBattle")] = 1
+call("ApplySurfPikachuMove")
+assert p.memory[a("wEnemyMonMoves")] == 57
+p.memory[a("wPartyCount")] = 1
+p.memory[a("wcf91")] = 0x54
+call("PreserveSurfPikachuInParty")
+assert p.memory[a("wPartyMon1Moves")] == 57
+assert p.memory[a("wPartyMon1PP")] == 15
+call("PreserveSurfPikachuInBox")
+assert p.memory[a("wBoxMon1Moves")] == 57
+assert p.memory[a("wBoxMon1PP")] == 15
+print("PASS: rare-roll boundaries, Classic gate, and Surf retained in party/box")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [

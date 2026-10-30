@@ -6243,6 +6243,7 @@ LoadEnemyMonData:
 	ld [wLearningMovesFromDayCare], a
 	predef WriteMonMoves ; get moves based on current level
 .loadMovePPs
+	farcall ApplySurfPikachuMove
 	ld hl, wEnemyMonMoves
 	ld de, wEnemyMonPP - 1
 	predef LoadMovePPs

@@ -553,11 +553,13 @@ ItemUseBall:
 	ld [wMonDataLocation], a
 	call ClearSprites
 	call AddPartyMon
+	farcall PreserveSurfPikachuInParty
 	jr .done
 
 .sendToBox
 	call ClearSprites
 	call SendNewMonToBox
+	farcall PreserveSurfPikachuInBox
 	ld hl, ItemUseBallText07
 	CheckEvent EVENT_MET_BILL
 	jr nz, .printTransferredToPCText
@@ -1855,6 +1857,8 @@ INCLUDE "data/wild/good_rod.asm"
 ItemUseSuperRod:
 	call FishingInit
 	jp c, ItemUseNotTime
+	ld a, 1
+	ld [wSpecialSuperRod], a
 	call ReadSuperRodData
 	ld a, e
 RodResponse:
@@ -1871,6 +1875,7 @@ RodResponse:
 	ld [wCurOpponent], a
 
 .next
+	farcall TryFossilFishing
 	ld hl, wWalkBikeSurfState
 	ld a, [hl] ; store the value in a
 	push af
@@ -1885,6 +1890,9 @@ RodResponse:
 ; checks if fishing is possible and if so, runs initialization code common to all rods
 ; unsets carry if fishing is possible, sets carry if not
 FishingInit:
+	xor a
+	ld [wSpecialSuperRod], a
+	ld [wRareSurfPikachu], a
 	ld a, [wIsInBattle]
 	and a
 	jr z, .notInBattle

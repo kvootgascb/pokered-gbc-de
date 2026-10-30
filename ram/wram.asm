@@ -2061,7 +2061,9 @@ wWalkBikeSurfState:: db
 wPlayerGender:: db
 wPlayerGenderTag:: db
 wGameplayModeCache:: db
-	ds 7
+wSpecialSuperRod:: db
+wRareSurfPikachu:: db
+	ds 5
 
 wTownVisitedFlag:: flag_array NUM_CITY_MAPS
 
