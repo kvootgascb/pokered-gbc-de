@@ -1009,6 +1009,56 @@ print(
     "PASS: Cut/Fly cosmetic animation skip works independently of mode and preserves effect/state"
 )
 
+# Nurse interaction: identical native healing, short texts and no machine animation.
+healing_animations = []
+fast_healing_talks = []
+hook("AnimateHealingMachine", lambda _: healing_animations.append(True))
+hook("TryFastPokemonCenter.enabled", lambda _: fast_healing_talks.append(True))
+healing_frames = {}
+for mode, prefs, accept in [(0, 1, True), (1, 1, True), (1, 0, True), (1, 1, False)]:
+    enter_npc_map(3, [84, 15, 57, 70], species=0x15, map_id=0x3A, width=7, y=3)
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[3, 0xD001] = prefs
+    p.memory[a("wLastMap")] = 2
+    p.memory[a("wLastBlackoutMap")] = 3
+    p.memory[a("wPartyMon1HP") : a("wPartyMon1HP") + 2] = [0, 0]
+    p.memory[a("wPartyMon1Status")] = 8
+    p.memory[a("wPartyMon1PP") : a("wPartyMon1PP") + 4] = [0x81, 1, 1, 1]
+    expected = list(p.memory[a("wPartyMon1") : a("wPartyMon2")])
+    if accept:
+        hp = a("wPartyMon1HP") - a("wPartyMon1")
+        status = a("wPartyMon1Status") - a("wPartyMon1")
+        pp = a("wPartyMon1PP") - a("wPartyMon1")
+        expected[hp : hp + 2] = list(
+            p.memory[a("wPartyMon1MaxHP") : a("wPartyMon1MaxHP") + 2]
+        )
+        expected[status] = 0
+        expected[pp : pp + 4] = [0xAA, 30, 15, 15]
+    before_animations = len(healing_animations)
+    before_fast = len(fast_healing_talks)
+    shortcut_tap("a")
+    for frames in range(150):
+        shortcut_tap("a" if accept else "b")
+        if not p.memory[a("wFontLoaded")] & 1:
+            break
+    assert frames < 149, "nurse dialogue did not close"
+    assert list(p.memory[a("wPartyMon1") : a("wPartyMon2")]) == expected, (
+        mode,
+        prefs,
+        accept,
+    )
+    assert p.memory[a("wLastBlackoutMap")] == (2 if accept else 3)
+    assert len(healing_animations) - before_animations == (
+        1 if accept and not prefs else 0
+    )
+    assert len(fast_healing_talks) - before_fast == (1 if prefs else 0)
+    if accept:
+        healing_frames[mode, prefs] = frames
+assert healing_frames[1, 1] < healing_frames[1, 0]
+print(
+    "PASS: actual nurse heals HP/status/PP/PP-Ups in both modes; fast/normal/No/blackout checks"
+)
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [
@@ -1289,6 +1339,12 @@ assert p.memory[a("wTileMap") + 3 * 20 + 13] == 0xED
 tap("a")
 assert not closed, "A on VM option closed the menu"
 tap("down")
+tap("right")
+assert p.memory[3, 0xD001] == 0x83
+assert p.memory[a("wTileMap") + 8 * 20 + 9] == 0xED
+tap("a")
+assert not closed, "A on fast healing closed the menu"
+tap("down")
 assert p.memory[a("wTileMap") + 13 * 20 + 1] == 0xED
 tap("a")
 assert p.memory[a("wHiddenMenuPage")] == 0
@@ -1299,10 +1355,16 @@ assert p.memory[a("wGameplayModeCache")] == 0
 tap("down")
 tap("a")
 tap("left")
-assert not p.memory[3, 0xD001] & 2
+assert p.memory[3, 0xD001] == 0x81  # preserve fast healing and the reserved bit
 tap("right")
-assert p.memory[3, 0xD001] & 2
+assert p.memory[3, 0xD001] == 0x83
 assert p.memory[a("wGameplayModeCache")] == 0
+tap("down")
+tap("left")
+assert p.memory[3, 0xD001] == 0x82
+tap("right")
+assert p.memory[3, 0xD001] == 0x83
+assert p.memory[a("wTileMap") + 3 * 20 + 13] == 0xEC
 tap("down")
 tap("down")
 assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED

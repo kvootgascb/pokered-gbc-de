@@ -48,3 +48,8 @@ Das vorhandene Pokéball-Fangsymbol im Gegner-HUD erscheint nur in Erweitert
 und nur bei bereits gefangenen wilden Arten. Trainer-Pokémon und unbekannte
 Geister im Pokémon-Turm erhalten keine Markierung. Die HUD-Tests prüfen auch,
 dass ein altes Symbol beim nächsten Gegner oder Moduswechsel wieder verschwindet.
+
+Independent comfort options are available on hidden-menu page 2 via WEITER:
+VM animations on/off and fast healing off/on. Both apply in either mode,
+persist through normal saving and default to the original behavior.
+Details: [comfort-options.md](comfort-options.md).

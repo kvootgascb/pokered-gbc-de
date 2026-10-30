@@ -90,6 +90,18 @@ ShowPlayerSpriteMenu:
 	hlcoord 14, 3
 	ld de, .off
 	call PlaceString
+	hlcoord 0, 5
+	lb bc, 3, 18
+	call TextBoxBorder
+	hlcoord 1, 6
+	ld de, .healingHeading
+	call PlaceString
+	hlcoord 2, 8
+	ld de, .off
+	call PlaceString
+	hlcoord 10, 8
+	ld de, .on
+	call PlaceString
 	hlcoord 2, 13
 	ld de, .previousPage
 .pageLinks
@@ -123,8 +135,8 @@ ShowPlayerSpriteMenu:
 	jr nc, .checkConfirm
 	jr .checkLeftRight
 .comfortInput
-	and a
-	jr nz, .checkConfirm
+	cp 2
+	jr nc, .checkConfirm
 .checkLeftRight
 	bit BIT_D_LEFT, b
 	jr nz, .left
@@ -147,9 +159,9 @@ ShowPlayerSpriteMenu:
 	ld [wSpriteMenuCursorRow], a
 	jp .redraw
 .comfortConfirm
-	cp 2
+	cp 3
 	jr z, .done
-	cp 1
+	cp 2
 	jp nz, .input
 	xor a
 	ld [wHiddenMenuPage], a
@@ -175,11 +187,7 @@ ShowPlayerSpriteMenu:
 	ld [wSpriteMenuCursorRow], a
 	jp .input
 .lastRow
-	ld a, [wHiddenMenuPage]
-	and a
 	ld a, 3
-	ret z
-	dec a
 	ret
 .left
 	xor a
@@ -190,7 +198,7 @@ ShowPlayerSpriteMenu:
 	ld c, a
 	ld a, [wHiddenMenuPage]
 	and a
-	jr nz, .selectAnimation
+	jr nz, .selectComfort
 	ld a, [wSpriteMenuCursorRow]
 	and a
 	ld a, c
@@ -221,6 +229,16 @@ ShowPlayerSpriteMenu:
 	jp z, .input
 	farcall CommitGameplayMode
 	jp .input
+.selectComfort
+	ld a, [wSpriteMenuCursorRow]
+	and a
+	jr z, .selectAnimation
+	ld a, [wHiddenMenuPreferences]
+	res 0, a
+	bit 0, c
+	jr z, .storePreference
+	set 0, a
+	jr .storePreference
 .selectAnimation
 	ld a, [wHiddenMenuPreferences]
 	res 1, a
@@ -295,11 +313,25 @@ ShowPlayerSpriteMenu:
 	hlcoord 13, 3
 .animationCursor
 	ld [hl], "▷"
+	hlcoord 1, 8
+	ld a, [wHiddenMenuPreferences]
+	bit 0, a
+	jr z, .healingCursor
+	hlcoord 9, 8
+.healingCursor
+	ld [hl], "▷"
 	ld a, [wSpriteMenuCursorRow]
-	cp 2
+	cp 3
 	jr z, .backCursor
-	cp 1
+	cp 2
 	jr z, .pageCursor
+	and a
+	jr nz, .drawArrow
+	hlcoord 4, 3
+	ld a, [wHiddenMenuPreferences]
+	bit 1, a
+	jr z, .drawArrow
+	hlcoord 13, 3
 	jr .drawArrow
 .pageCursor
 	hlcoord 1, 13
@@ -323,6 +355,8 @@ ShowPlayerSpriteMenu:
 	db "ERWEITERT@"
 .animationHeading
 	db "VM-ANIMATIONEN@"
+.healingHeading
+	db "SCHNELLE HEILUNG@"
 .on
 	db "AN@"
 .off

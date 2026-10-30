@@ -1,4 +1,6 @@
 DisplayPokemonCenterDialogue_::
+	farcall TryFastPokemonCenter
+	ret c
 	call SaveScreenTilesToBuffer1 ; save screen
 	ld hl, PokemonCenterWelcomeText
 	call PrintText
