@@ -48,6 +48,8 @@ for i in range(250):
     p.tick(20, False)
     if "mode" in seen:
         p.tick(20, False)
+        mode_top = list(p.memory[a("wTileMap") : a("wTileMap") + 20])
+        mode_bottom = list(p.memory[a("wTileMap") + 120 : a("wTileMap") + 140])
         menu_state = io.BytesIO()
         p.save_state(menu_state)
         p.button("a", 2)
@@ -64,6 +66,32 @@ for i in range(250):
         assert p.memory[3, 0xD000] == 1
         break
 assert "gender" in seen
+assert list(p.memory[a("wTileMap") : a("wTileMap") + 20]) == mode_top
+assert list(p.memory[a("wTileMap") + 120 : a("wTileMap") + 140]) == mode_bottom
+bank, addr = sym["DefaultNamesGirlList"]
+assert list(p.memory[bank, addr : addr + 20]) == [
+    0x8D,
+    0x80,
+    0x8C,
+    0x84,
+    0x50,
+    0x86,
+    0xB1,
+    0xD5,
+    0xAD,
+    0x50,
+    0x84,
+    0xAB,
+    0xAB,
+    0xB8,
+    0x50,
+    0x93,
+    0xA8,
+    0xAD,
+    0xA0,
+    0x50,
+]
+
 p.tick(30, False)
 p.button("down", 2)
 p.tick(12, False)
@@ -100,21 +128,20 @@ def restore():
 
 
 def call(n, limit=180):
-    sentinel = (0, 0x100)
-    for offset, byte in enumerate([0x3E, 0x91, 0xE0, 0x40, 0x18, 0xFE]):
-        p.memory[0, 0x100 + offset] = byte
     bank, pc = sym[n]
+    # A frame snapshot can be inside an interrupt. Enable interrupts before
+    # invoking routines which wait for VBlank, then return to a ROM0 loop.
+    trampoline = [0xFB, 0xCD, pc & 255, pc >> 8, 0x3E, 0x91, 0xE0, 0x40, 0x18, 0xFE]
+    for offset, byte in enumerate(trampoline):
+        p.memory[0, 0x100 + offset] = byte
+    p.memory[0xFF70] = 0
     if bank:
         p.memory[0x2000] = bank
         p.memory[a("hLoadedROMBank")] = bank
-    sp = p.register_file.SP - 2
-    p.register_file.SP = sp
-    p.memory[sp] = sentinel[1] & 255
-    p.memory[sp + 1] = sentinel[1] >> 8
-    p.register_file.PC = pc
+    p.register_file.PC = 0x100
     for _ in range(limit):
         p.tick(1, False)
-        if p.register_file.PC in (0x104, 0x105):
+        if p.register_file.PC in (0x108, 0x109):
             return
     raise AssertionError(n + " did not return")
 
@@ -176,9 +203,12 @@ for mode in (0, 1):
     assert p.memory[3, 0xD000] == mode
     p.memory[a("wEXPBarKeepFullFlag")] = 1
     dest = a("wTileMap") + 11 * 20 + 17
+    p.memory[dest - 8] = 0x44
+    p.memory[dest + 1] = 0x55
     p.register_file.D, p.register_file.E = dest >> 8, dest & 255
     call("PrintEXPBar")
-    assert list(p.memory[dest - 7 : dest + 1]) == [0x7F if mode == 0 else 0xC8] * 8
+    assert list(p.memory[dest - 7 : dest + 1]) == [0xC0 if mode == 0 else 0xC8] * 8
+    assert p.memory[dest - 8] == 0x44 and p.memory[dest + 1] == 0x55
     for held, transport, scripted, jumping in [
         (0, 0, 0, 0),
         (2, 0, 0, 0),

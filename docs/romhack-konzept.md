@@ -74,7 +74,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Größere Münzkäufe | Nein | Ja | In der Spielhalle mehr Münzen auf einmal kaufen. Mengen und Preise offen. |
 | Fangsymbol bei wilden Pokémon | Nein | Ja | Anzeigen, ob die Art bereits gefangen wurde. |
 | Attacken-Lernlisten aus Pokémon Gelb | Ja | Ja | Gelb als gemeinsame Moveset-Grundlage; bisher nur geplant. Gen-1-Kampfmechanik unverändert. |
-| EP-Leiste | Nein | Ja | Umgesetzt: EP-Leiste in Erweitert anzeigen, in Classic in Kampf und Status ausblenden; EP-Gewinn bleibt unverändert. |
+| EP-Leiste | Nein | Ja | Umgesetzt: EP-Leiste in Erweitert anzeigen; in Classic nur die blaue Füllung ausblenden, HUD und leere Leiste erhalten. EP-Gewinn bleibt unverändert. |
 | Hinweis auf volle Box | Nein | Ja | Nur ein Hinweis; kein automatischer Boxwechsel. |
 | Registrierbares Basis-Item | Nein | Ja | Ein Basis-Item auf Select legen, z. B. Fahrrad oder Angel. Außerhalb des Optionsmenüs direkt verwendbar. |
 | Schutz erneut verwenden | Nein | Ja | Nach Ablauf anbieten, ein weiteres vorhandenes Exemplar einzusetzen. |

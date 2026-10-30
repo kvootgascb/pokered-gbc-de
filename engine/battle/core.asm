@@ -7130,7 +7130,7 @@ PrintEXPBar:
 	ld h, d
 	ld l, e
 	ld b, 8
-	ld a, " "
+	ld a, $c0 ; retain the empty HUD track, hide only its blue fill
 .clearClassic
 	ld [hld], a
 	dec b

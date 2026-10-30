@@ -37,10 +37,10 @@ ShowPlayerSpriteMenu:
 	hlcoord 1, 1
 	ld de, .heading
 	call PlaceString
-	hlcoord 3, 3
+	hlcoord 5, 3
 	ld de, .male
 	call PlaceString
-	hlcoord 10, 3
+	hlcoord 14, 3
 	ld de, .female
 	call PlaceString
 	hlcoord 0, 5
@@ -152,9 +152,9 @@ ShowPlayerSpriteMenu:
 
 .drawCursor
 	ld a, " "
-	hlcoord 2, 3
+	hlcoord 4, 3
 	ld [hl], a
-	hlcoord 9, 3
+	hlcoord 13, 3
 	ld [hl], a
 	hlcoord 1, 8
 	ld [hl], a
@@ -176,9 +176,9 @@ ShowPlayerSpriteMenu:
 .genderCursor
 	ld a, [wCurrentMenuItem]
 	and a
-	hlcoord 2, 3
+	hlcoord 4, 3
 	jr z, .drawArrow
-	hlcoord 9, 3
+	hlcoord 13, 3
 .drawArrow
 	ld [hl], "▶"
 	ret

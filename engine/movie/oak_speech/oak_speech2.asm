@@ -231,13 +231,13 @@ LinkMenuEmptyText:
 
 DefaultNamesGirl:
 	db "NAME"
-	next "GREEN"
-	next "GRÜN"
-	next "ANNA"
+	next "Grün"
+	next "Elly"
+	next "Tina"
 	db "@"
 
 DefaultNamesGirlList:
 	db "NAME@"
-	db "GREEN@"
-	db "GRÜN@"
-	db "ANNA@"
+	db "Grün@"
+	db "Elly@"
+	db "Tina@"

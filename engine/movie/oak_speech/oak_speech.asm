@@ -262,17 +262,21 @@ ChoosePlayerGender:
 	res 1, a ; menu cursor: two rows per choice
 	ldh [hUILayoutFlags], a
 	call ClearScreen
-	hlcoord 1, 2
+	hlcoord 0, 0
+	lb bc, 5, 18
+	call TextBoxBorder
+	hlcoord 1, 1
 	ld de, .question
 	call PlaceString
-	hlcoord 3, 6
+	hlcoord 3, 3
 	ld de, .choices
 	call PlaceString
 	xor a
 	ld [wCurrentMenuItem], a
 	ld [wLastMenuItem], a
+	ld [wMenuJoypadPollCount], a
 	ld [wMenuWatchMovingOutOfBounds], a
-	ld a, 6
+	ld a, 3
 	ld [wTopMenuItemY], a
 	ld a, 2
 	ld [wTopMenuItemX], a
@@ -289,9 +293,7 @@ ChoosePlayerGender:
 	ldh [hUILayoutFlags], a
 	jp ClearScreen
 .question
-	db "Bist Du ein Junge?"
-	next "Oder ein Mädchen?"
-	db "@"
+	db "GESCHLECHT@"
 .choices
 	db "JUNGE"
 	next "MÄDCHEN@"
