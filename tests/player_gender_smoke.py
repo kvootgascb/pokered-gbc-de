@@ -390,6 +390,21 @@ assert p.memory[a("wPostgameAction")] == 2
 assert list(p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2]) == [0x99, 0x99]
 print("PASS: 500-coin purchase costs 10000, with no overflow or payment on a full case")
 
+restore()
+p.memory[a("wPartyCount")] = 5
+p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = [0x25, 0]
+p.memory[a("wPostgameAction")] = 0
+call("ValidateExtraPrizePurchase")
+assert p.memory[a("wPostgameAction")] == 0
+p.memory[a("wPostgameAction")] = 1
+call("ValidateExtraPrizePurchase")
+assert p.memory[a("wPostgameAction")] == 4
+p.memory[a("wPartyCount")] = 6
+p.memory[a("wPostgameAction")] = 0
+call("ValidateExtraPrizePurchase")
+assert p.memory[a("wPostgameAction")] == 5
+print("PASS: extra prize prices and full-party checks")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [

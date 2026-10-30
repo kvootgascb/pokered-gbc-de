@@ -987,3 +987,5 @@ INCLUDE "engine/events/oak_battle.asm"
 INCLUDE "engine/events/mew_truck.asm"
 
 INCLUDE "engine/events/expanded_coin_shop.asm"
+
+INCLUDE "engine/events/extra_prizes.asm"
