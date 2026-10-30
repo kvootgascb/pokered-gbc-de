@@ -4,11 +4,11 @@ SECTION "Champion Event State", ROMX
 ; or harbor. New victories always refresh one opportunity, never a stack.
 EnsureChampionFeatures::
 	ld hl, wFeatureSchemaFlags
-	homecall GetFeatureByte
+	read_feature_byte
 	bit 0, c
 	ret nz
 	set 0, c
-	homecall SetFeatureByte
+	write_feature_byte
 	ld a, [wNumHoFTeams]
 	and a
 	ret z
@@ -16,9 +16,9 @@ EnsureChampionFeatures::
 
 RegisterChampionVictory::
 	ld hl, wFeatureSchemaFlags
-	homecall GetFeatureByte
+	read_feature_byte
 	set 0, c
-	homecall SetFeatureByte
+	write_feature_byte
 	ld a, 3
 	ldh [rSVBK], a
 	ld hl, wFeatureEliteFourWins
@@ -31,17 +31,17 @@ RegisterChampionVictory::
 	ldh [rSVBK], a
 RefreshChampionOpportunities:
 	ld hl, wFeatureOakPendingStarter
-	homecall GetFeatureByte
+	read_feature_byte
 	ld a, c
 	and a
 	jr nz, .ship
 	ld hl, wFeatureOakBattleAvailable
 	ld c, 1
-	homecall SetFeatureByte
+	write_feature_byte
 .ship
 	ld hl, wFeatureAnneState
 	ld c, 1
-	homecall SetFeatureByte
+	write_feature_byte
 	ret
 
 PrepareAnneVisit::
@@ -59,7 +59,7 @@ PrepareAnneVisit::
 .expanded
 	call EnsureChampionFeatures
 	ld hl, wFeatureAnneState
-	homecall GetFeatureByte
+	read_feature_byte
 	ld a, c
 	cp 1
 	ret nz
@@ -72,5 +72,5 @@ PrepareAnneVisit::
 ConsumeAnneVisit::
 	ld hl, wFeatureAnneState
 	ld c, 0
-	homecall SetFeatureByte
+	write_feature_byte
 	ret

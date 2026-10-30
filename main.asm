@@ -981,3 +981,5 @@ INCLUDE "engine/menus/gameplay_mode.asm"
 INCLUDE "engine/events/rare_encounters.asm"
 
 INCLUDE "engine/events/champion_events.asm"
+
+INCLUDE "engine/events/oak_battle.asm"

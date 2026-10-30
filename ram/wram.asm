@@ -2063,7 +2063,11 @@ wPlayerGenderTag:: db
 wGameplayModeCache:: db
 wSpecialSuperRod:: db
 wRareSurfPikachu:: db
-	ds 5
+wFeatureAccessResult:: db
+wFeatureAccessLow:: db
+wFeatureAccessHigh:: db
+wFeatureAccessValue:: db
+	ds 1
 
 wTownVisitedFlag:: flag_array NUM_CITY_MAPS
 

@@ -30,6 +30,8 @@ OaksLab_ScriptPointers:
 	dw_const OaksLabOakGivesPokedexScript,           SCRIPT_OAKSLAB_OAK_GIVES_POKEDEX
 	dw_const OaksLabRivalLeavesWithPokedexScript,    SCRIPT_OAKSLAB_RIVAL_LEAVES_WITH_POKEDEX
 	dw_const OaksLabNoopScript,                      SCRIPT_OAKSLAB_NOOP
+	dw_const OaksLabPostgameBattleScript, SCRIPT_OAKSLAB_POSTGAME_BATTLE
+	ASSERT SCRIPT_OAKSLAB_POSTGAME_BATTLE == 19
 
 OaksLabDefaultScript:
 	CheckEvent EVENT_OAK_APPEARED_IN_PALLET
@@ -964,6 +966,8 @@ OaksLabLastMonText:
 
 OaksLabOak1Text:
 	text_asm
+	farcall OakPostgameTalk
+	jp c, TextScriptEnd
 	CheckEvent EVENT_PALLET_AFTER_GETTING_POKEBALLS
 	jr nz, .already_got_poke_balls
 	ld hl, wPokedexOwned
@@ -1230,3 +1234,9 @@ OaksLabScientistText:
 .Text:
 	text_far _OaksLabScientistText
 	text_end
+
+OaksLabPostgameBattleScript:
+	farcall ResolveOakPostgameBattle
+	ld a, SCRIPT_OAKSLAB_NOOP
+	ld [wOaksLabCurScript], a
+	ret

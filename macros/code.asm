@@ -29,3 +29,34 @@ MACRO player_graphics
 	call SelectPlayerGraphics
 	pop hl
 ENDM
+
+; Bank-safe feature access from any ROM bank. HL is the payload address;
+; C is the output/input value. Restore HL/C after the farcall trampoline.
+MACRO read_feature_byte
+	ld a, l
+	ld [wFeatureAccessLow], a
+	ld a, h
+	ld [wFeatureAccessHigh], a
+	farcall ReadFeatureState
+	ld a, [wFeatureAccessResult]
+	ld c, a
+	ld a, [wFeatureAccessLow]
+	ld l, a
+	ld a, [wFeatureAccessHigh]
+	ld h, a
+ENDM
+MACRO write_feature_byte
+	ld a, l
+	ld [wFeatureAccessLow], a
+	ld a, h
+	ld [wFeatureAccessHigh], a
+	ld a, c
+	ld [wFeatureAccessValue], a
+	farcall WriteFeatureState
+	ld a, [wFeatureAccessValue]
+	ld c, a
+	ld a, [wFeatureAccessLow]
+	ld l, a
+	ld a, [wFeatureAccessHigh]
+	ld h, a
+ENDM

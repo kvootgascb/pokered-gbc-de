@@ -140,3 +140,21 @@ SetFeatureByte:
 	xor a
 	ldh [rSVBK], a
 	ret
+
+ReadFeatureState::
+	ld a, [wFeatureAccessLow]
+	ld l, a
+	ld a, [wFeatureAccessHigh]
+	ld h, a
+	call GetFeatureByte
+	ld a, c
+	ld [wFeatureAccessResult], a
+	ret
+WriteFeatureState::
+	ld a, [wFeatureAccessLow]
+	ld l, a
+	ld a, [wFeatureAccessHigh]
+	ld h, a
+	ld a, [wFeatureAccessValue]
+	ld c, a
+	jp SetFeatureByte

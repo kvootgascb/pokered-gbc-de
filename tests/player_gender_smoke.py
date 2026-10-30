@@ -325,6 +325,21 @@ call("PrepareAnneVisit")
 assert list(p.memory[a("wEventFlags"):a("wEventFlags") + 320]) == [255] * 320
 print("PASS: champion refresh does not stack, preserves pending reward, and resets only ship exit events")
 
+restore()
+for roll, species in [(0, 0x99), (1, 0xB0), (2, 0xB1)]:
+    p.register_file.A = roll
+    call("OakRewardRoll")
+    assert p.memory[3, 0xD00E] == species
+call("SaveSAVtoSRAM0")
+p.memory[3, 0xD00E] = 0
+call("LoadSAV0")
+assert p.memory[3, 0xD00E] == 0xB1
+p.memory[3, 0xD00E] = 0
+p.memory[a("wBattleResult")] = 1
+call("ResolveOakPostgameBattle")
+assert p.memory[3, 0xD00E] == 0
+print("PASS: three Oak reward species, pending gift persistence, and no reward on loss")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [
