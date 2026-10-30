@@ -1003,3 +1003,5 @@ INCLUDE "engine/events/repeat_repel.asm"
 INCLUDE "engine/events/context_field_moves.asm"
 
 INCLUDE "engine/events/comfort_options.asm"
+
+INCLUDE "engine/events/ship_merchant.asm"

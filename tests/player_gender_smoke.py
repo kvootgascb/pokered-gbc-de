@@ -497,6 +497,9 @@ def enter_npc_map(x, moves, species=0x55, map_id=0x63, width=10, y=6):
     p.memory[a("wNumHoFTeams")] = 1
     p.memory[a("wCurMap")] = map_id
     p.memory[a("wCurMapTileset")] = 0
+    if map_id == 0x63:
+        # Postgame service tests must not enter an unrelated first-time sailor battle.
+        p.memory[a("wEventFlags") + 0x5C0 // 8] |= 0x30
     if map_id == 0x28:
         p.memory[a("wOaksLabCurScript")] = 18
         p.memory[a("wEventFlags") + 4] = 0xFF
@@ -1058,6 +1061,99 @@ assert healing_frames[1, 1] < healing_frames[1, 0]
 print(
     "PASS: actual nurse heals HP/status/PP/PP-Ups in both modes; fast/normal/No/blackout checks"
 )
+
+
+# Ship merchant: each exact price, repeat purchases, insufficient money and capacity.
+def set_money(value):
+    p.memory[a("wPlayerMoney") : a("wPlayerMoney") + 3] = list(
+        bytes.fromhex(f"{value:06d}")
+    )
+
+
+def money_value():
+    return int(
+        "".join(f"{v:02x}" for v in p.memory[a("wPlayerMoney") : a("wPlayerMoney") + 3])
+    )
+
+
+for choice, item, price in [
+    (0, 0x4F, 20000),
+    (1, 0x51, 3000),
+    (2, 0x52, 5000),
+    (3, 0x53, 10000),
+    (4, 0x0A, 5000),
+]:
+    restore()
+    p.memory[a("wGameplayModeCache")] = 1
+    p.memory[a("wNumHoFTeams")] = 1
+    p.memory[a("wNumBagItems") : a("wNumBagItems") + 2] = [0, 255]
+    p.memory[a("wTutorCandidate")] = choice
+    set_money(price - 1)
+    call("BuyShipMerchantItem")
+    assert p.memory[a("wPostgameAction")] == 2
+    assert money_value() == price - 1 and p.memory[a("wNumBagItems")] == 0
+    set_money(price)
+    call("BuyShipMerchantItem")
+    assert p.memory[a("wPostgameAction")] == 1
+    assert money_value() == 0
+    assert list(p.memory[a("wBagItems") : a("wBagItems") + 2]) == [item, 1]
+    set_money(price * 2)
+    call("BuyShipMerchantItem")
+    call("BuyShipMerchantItem")
+    assert p.memory[a("wBagItems") + 1] == 3 and money_value() == 0
+restore()
+p.memory[a("wGameplayModeCache")] = 1
+p.memory[a("wNumHoFTeams")] = 1
+p.memory[a("wTutorCandidate")] = 0
+p.memory[a("wNumBagItems")] = 30
+for slot in range(30):
+    p.memory[a("wBagItems") + slot * 2 : a("wBagItems") + slot * 2 + 2] = [slot + 1, 1]
+p.memory[a("wBagItems") + 60] = 255
+set_money(20000)
+call("BuyShipMerchantItem")
+assert p.memory[a("wPostgameAction")] == 3 and money_value() == 20000
+p.memory[a("wBagItems") : a("wBagItems") + 2] = [0x4F, 99]
+call("BuyShipMerchantItem")
+assert p.memory[a("wPostgameAction")] == 3 and money_value() == 20000
+p.memory[a("wBagItems") + 1] = 98
+call("BuyShipMerchantItem")
+assert p.memory[a("wBagItems") + 1] == 99 and money_value() == 0
+for mode, champion in [(0, 1), (1, 0)]:
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[a("wNumHoFTeams")] = champion
+    set_money(20000)
+    call("BuyShipMerchantItem")
+    assert p.memory[a("wPostgameAction")] == 4 and money_value() == 20000
+print(
+    "PASS: ship merchant prices, unlimited stock, bag/stack limits and champion/Classic gates"
+)
+
+# A real NPC transaction on deck, plus visibility at the natural refresh point.
+merchant_menus = []
+hook("ShipMerchantTalk.menu", lambda _: merchant_menus.append(True))
+enter_npc_map(10, [84, 0, 0, 0], map_id=0x63, width=10, y=11)
+p.memory[a("wNumBagItems") : a("wNumBagItems") + 2] = [0, 255]
+set_money(20000)
+for _ in range(80):
+    shortcut_tap("a")
+    if p.memory[a("wNumBagItems")] == 1:
+        break
+assert merchant_menus, "new merchant NPC cannot be reached"
+assert list(p.memory[a("wBagItems") : a("wBagItems") + 2]) == [0x4F, 1]
+assert money_value() == 0
+for _ in range(25):
+    shortcut_tap("b")
+assert not p.memory[a("wFontLoaded")] & 1
+for mode, champion, hidden in [(0, 1, True), (1, 0, True), (1, 1, False)]:
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[a("wNumHoFTeams")] = champion
+    p.memory[a("wCurrentMapScriptFlags")] |= 0x40
+    call("RefreshMoveTutorObjects")
+    assert (
+        bool(p.memory[a("wMissableObjectFlags") + 0xE6 // 8] & (1 << (0xE6 % 8)))
+        == hidden
+    )
+print("PASS: real ship merchant confirmation/payment and post-champion visibility")
 
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()

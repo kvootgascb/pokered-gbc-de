@@ -24,6 +24,7 @@ SSAnneBow_TextPointers:
 
 	dw_const SSAnneBowMoveDeleterText, TEXT_SSANNEBOW_MOVE_DELETER
 	dw_const SSAnneBowMoveReminderText, TEXT_SSANNEBOW_MOVE_REMINDER
+	dw_const SSAnneBowMerchantText, TEXT_SSANNEBOW_MERCHANT
 
 SSAnne5TrainerHeaders:
 	def_trainers 4
@@ -89,4 +90,9 @@ SSAnneBowMoveDeleterText:
 SSAnneBowMoveReminderText:
 	text_asm
 	farcall MoveReminderTalk
+	jp TextScriptEnd
+
+SSAnneBowMerchantText:
+	text_asm
+	farcall ShipMerchantTalk
 	jp TextScriptEnd

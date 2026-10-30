@@ -74,7 +74,7 @@ Weitere geplante Menüpunkte, insbesondere der Starter-Editor, sind noch offen.
 | Wiederverwendbare TMs | Nein | Ja | Umgesetzt: TMs werden nach erfolgreichem Erlernen nicht verbraucht. Classic verbraucht sie weiterhin. |
 | Rückkehr der M.S. Anne | Nein | Ja | Kehrt nach jedem Top-Vier-Sieg zurück. Nach dem Verlassen fährt sie wieder ab; für die nächste Rückkehr sind die Top Vier erneut zu besiegen. |
 | Attacken-Helfer | Nein | Ja | Zwei neue NPCs: einer verlernt VMs, einer erinnert Attacken. Umgesetzt: kostenlos auf dem Deck der M.S. Anne nach dem ersten Top-Vier-Sieg. |
-| Spezialhändler auf der M.S. Anne | Nein | Ja | Geplant: erscheint nach dem ersten Top-Vier-Sieg wie die Attacken-Helfer; verkauft sonst nicht kaufbare Items. Sortiment und Preise noch abzustimmen. |
+| Spezialhändler auf der M.S. Anne | Nein | Ja | Umgesetzt: erscheint nach dem ersten Top-Vier-Sieg wie die Attacken-Helfer; eigene Preise und unbegrenzter Vorrat. Details: [ship-merchant.md](ship-merchant.md). |
 | Kontextabhängige VMs | Nein | Ja | Umgesetzt: Zerschneider, Stärke und Surfer per A und Ja/Nein am Hindernis aktivieren. Team-Attacke und ursprünglicher Orden nötig. Details: [context-field-moves.md](context-field-moves.md). |
 | Größere Münzkäufe | Nein | Ja | In der Spielhalle mehr Münzen auf einmal kaufen. Umgesetzt: zusätzlich 500 Münzen für 10000 Geld. |
 | Fangsymbol bei wilden Pokémon | Nein | Ja | Umgesetzt: vorhandenes Pokéball-Zeichen im Gegner-HUD nur in Erweitert, bei bereits gefangenen wilden Arten. Keine Anzeige bei Trainer-Pokémon oder unbekannten Geistern. |
@@ -301,35 +301,15 @@ Noch zu entscheiden:
 
 Dieses Feature ist **nur geplant, noch nicht implementiert**.
 
-## Geplant: Spezialhändler auf der M.S. Anne
+## Umgesetzt: Spezialhändler auf der M.S. Anne
 
-Ein weiterer NPC erscheint im erweiterten Modus nach dem ersten Top-Vier-Sieg
-auf der M.S. Anne, unter denselben Freischaltbedingungen wie die beiden
-Attacken-Helfer. Er ist bei den wiederkehrenden Schiffsbesuchen erreichbar.
-In Classic erscheint sein zusätzliches Angebot nicht.
-
-Er verkauft nützliche Items, die im Original nicht regulär gekauft werden
-können. Gewünscht sind AP-Plus und der beste Äther, also Top-Äther.
-Ergänzende Sortimentsideen:
-
-| Item | Status / Nutzen |
-| --- | --- |
-| AP-Plus | Gewünscht; erhöht dauerhaft die maximalen AP einer Attacke. |
-| Top-Äther | Gewünscht; füllt die AP einer Attacke vollständig auf. |
-| Elixier | Vorschlag; stellt AP aller Attacken wieder her. |
-| Top-Elixier | Vorschlag; füllt die AP aller Attacken vollständig auf. |
-| Entwicklungssteine | Optional, noch nicht beschlossen; besonders Mondstein als sonst nicht regulär kaufbarer Stein. Die anderen Steine sind bereits im Kaufhaus erhältlich. |
-
-Hintergrundidee: Ein weit gereister Händler bringt seltene Vorräte von seinen
-Reisen mit. Dialogvorschlag: „Für einen CHAMPION habe ich etwas Besonderes an
-Bord. Solche Vorräte findest Du in keinem normalen Laden!“
-
-Noch offen sind genaue Preise, das endgültige Sortiment, der Platz an Bord
-und mögliche Kaufbegrenzungen. Unbegrenzter Vorrat ist bisher nicht festgelegt;
-insbesondere AP-Plus soll bewusst bepreist werden. Die Gen-1-Itemwirkungen
-bleiben unverändert.
-
-Dieses Feature ist **nur geplant, noch nicht implementiert**.
+Der zusätzliche Händler erscheint in Erweitert nach dem ersten Top-Vier-Sieg
+auf dem Deck wie die beiden Attacken-Helfer. Er verkauft bei jedem erneuten
+Besuch AP-Plus (20000), Top-Äther (3000), Elixier (5000), Top-Elixier (10000)
+und Mondstein (5000). Der Vorrat ist unbegrenzt; jeder Kauf wird bestätigt.
+Andere Entwicklungssteine bleiben im ursprünglichen Kaufhaus erhältlich.
+Itemwirkungen und normale Ladenpreise bleiben unverändert.
+Details und Testumfang: [ship-merchant.md](ship-merchant.md).
 
 ## Noch nicht beschlossene Vorschläge
 

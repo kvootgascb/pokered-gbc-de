@@ -18,12 +18,18 @@ RefreshMoveTutorObjects::
 	ld a, HS_SS_ANNE_MOVE_REMINDER
 	ld [wMissableObjectIndex], a
 	predef ShowObject
+	ld a, HS_SS_ANNE_MERCHANT
+	ld [wMissableObjectIndex], a
+	predef ShowObject
 	ret
 .hide
 	ld a, HS_SS_ANNE_MOVE_DELETER
 	ld [wMissableObjectIndex], a
 	predef HideObject
 	ld a, HS_SS_ANNE_MOVE_REMINDER
+	ld [wMissableObjectIndex], a
+	predef HideObject
+	ld a, HS_SS_ANNE_MERCHANT
 	ld [wMissableObjectIndex], a
 	predef HideObject
 	ret

@@ -239,4 +239,5 @@ DEF SHOW EQU $15
 	const HS_ARTICUNO                      ; E3 X
 	const HS_SS_ANNE_MOVE_DELETER
 	const HS_SS_ANNE_MOVE_REMINDER
+	const HS_SS_ANNE_MERCHANT
 DEF NUM_HS_OBJECTS EQU const_value
