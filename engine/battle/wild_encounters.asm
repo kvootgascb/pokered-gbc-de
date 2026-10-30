@@ -22,7 +22,7 @@ TryDoWildEncounter:
 	and a
 	jr z, .next
 	dec a
-	jr z, .lastRepelStep
+	jp z, .lastRepelStep
 	ld [wRepelRemainingSteps], a
 .next
 ; determine if wild pokemon can appear in the half-block we're standing in
@@ -73,6 +73,15 @@ TryDoWildEncounter:
 ; since the bottom right tile of a "left shore" half-block is $14 but the bottom left tile is not,
 ; "left shore" half-blocks (such as the one in the east coast of Cinnabar) load grass encounters.
 .gotWildEncounterType
+	ld a, l
+	cp LOW(wWaterMons)
+	ld a, 0
+	jr nz, .terrainSelected
+	inc a
+.terrainSelected
+	ld [wTutorMode], a
+	ld a, c
+	ld [wTutorCandidate], a
 	ld b, 0
 	add hl, bc
 	ld a, [hli]
@@ -80,6 +89,7 @@ TryDoWildEncounter:
 	ld a, [hl]
 	ld [wcf91], a
 	ld [wEnemyMonSpecies2], a
+	farcall ChooseMergedWildMon
 	farcall TrySurfPikachu
 	ld a, [wRepelRemainingSteps]
 	and a

@@ -627,6 +627,33 @@ for mode in [0, 1]:
     assert p.memory[a("wPartyMon1Moves") + 1] == 85
 print("PASS: both modes generate and teach Yellow's level-26 Pikachu Thunderbolt")
 
+# Route 7's first exclusive slot can choose either original edition in Extended.
+restore()
+p.memory[a("wCurMap")] = 18
+p.memory[a("wTutorMode")] = 0
+p.memory[a("wTutorCandidate")] = 2
+own_species = 0xB9 if rom == "pokered" else 0xBC
+found = set()
+for _ in range(64):
+    p.memory[a("wGameplayModeCache")] = 1
+    p.memory[a("wcf91")] = own_species
+    p.memory[a("wEnemyMonSpecies2")] = own_species
+    p.memory[a("wCurEnemyLVL")] = 19
+    call("ChooseMergedWildMon")
+    found.add(p.memory[a("wcf91")])
+    assert p.memory[a("wEnemyMonSpecies2")] == p.memory[a("wcf91")]
+    assert p.memory[a("wCurEnemyLVL")] == 19
+assert found == {0xB9, 0xBC}, found
+for mode, terrain in [(0, 0), (1, 1)]:
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[a("wTutorMode")] = terrain
+    p.memory[a("wcf91")] = own_species
+    call("ChooseMergedWildMon")
+    assert p.memory[a("wcf91")] == own_species
+print(
+    "PASS: Extended chooses both edition slots; Classic and water slots remain unchanged"
+)
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [

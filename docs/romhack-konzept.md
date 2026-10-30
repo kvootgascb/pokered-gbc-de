@@ -65,7 +65,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Kampf gegen Professor Eich | Nein | Ja | Nach jedem Top-Vier-Sieg einmal verfügbar, danach bis zum nächsten Top-Vier-Sieg gesperrt. Ein Sieg über Eich gibt einen zufälligen Starter als Preis. |
 | Arena-Rückkämpfe | Nein | Ja | Geplant: nach jedem Top-Vier-Sieg jeder Leiter einmal erneut herausforderbar; Gelegenheiten sammeln sich nicht an. Teams und Level noch offen. |
 | Tausch-zurück-Trainer | Nein | Ja | Umgesetzt: rechter Assistent in Eichs Labor, nach der Starterwahl. Testet das zuvor wackelige Linkkabel; Pokémon wird sofort zurückgegeben und kann sich durch Tausch entwickeln. |
-| Alle 151 Pokémon erhältlich | Nein | Ja | Jede Art soll ohne externen Tausch in einem Spielstand erhältlich sein. Einmal pro Art genügt; keine Fanggarantie. |
+| Alle 151 Pokémon erhältlich | Nein | Ja | Umgesetzt und als Beschaffungsgraph geprüft: jede Art ohne externen Tausch in einem Spielstand erhältlich. Einmal pro Art genügt; keine Fanggarantie. Details: [obtainability.md](obtainability.md). |
 | Wiederverwendbare TMs | Nein | Ja | Umgesetzt: TMs werden nach erfolgreichem Erlernen nicht verbraucht. Classic verbraucht sie weiterhin. |
 | Rückkehr der M.S. Anne | Nein | Ja | Kehrt nach jedem Top-Vier-Sieg zurück. Nach dem Verlassen fährt sie wieder ab; für die nächste Rückkehr sind die Top Vier erneut zu besiegen. |
 | Attacken-Helfer | Nein | Ja | Zwei neue NPCs: einer verlernt VMs, einer erinnert Attacken. Umgesetzt: kostenlos auf dem Deck der M.S. Anne nach dem ersten Top-Vier-Sieg. |
