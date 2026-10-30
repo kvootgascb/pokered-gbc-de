@@ -102,21 +102,7 @@ ShowPlayerSpriteMenu:
 	ld a, [wSpriteMenuCursorRow]
 	cp 2
 	jr z, .done
-	and a
-	jr z, .confirmGender
-	ld a, [wModeMenuChoice]
-	ld c, a
-	farcall CommitGameplayMode
-	ret
-.confirmGender
-	ld a, [wCurrentMenuItem]
-	ld [wPlayerGender], a
-	ld a, $47
-	ld [wPlayerGenderTag], a
-	call ReloadSelectedPlayerSprite
-	; Animation frames share VRAM with the font; restore menu graphics.
-	call LoadFontTilePatterns
-	call LoadTextBoxTilePatterns
+	jp .input ; options take effect with Left/Right, like the normal menu
 .done
 	ret
 .backRow
@@ -145,9 +131,31 @@ ShowPlayerSpriteMenu:
 	ld a, c
 	jr nz, .selectMode
 	ld [wCurrentMenuItem], a
+	ld a, [wPlayerGenderTag]
+	cp $47
+	jr nz, .applyGender
+	ld a, [wPlayerGender]
+	cp c
+	jp z, .input
+.applyGender
+	ld a, c
+	ld [wPlayerGender], a
+	ld a, $47
+	ld [wPlayerGenderTag], a
+	call ReloadSelectedPlayerSprite
+	; The second 12-tile sprite block overlaps the first 12 font tiles.
+	; Restore only that range so further menu input is not delayed by a full font load.
+	ld de, FontGraphics
+	ld hl, vFont
+	lb bc, BANK(FontGraphics), 12
+	call CopyVideoDataDouble
 	jp .input
 .selectMode
 	ld [wModeMenuChoice], a
+	ld a, [wGameplayModeCache]
+	cp c
+	jp z, .input
+	farcall CommitGameplayMode
 	jp .input
 
 .drawCursor
@@ -162,7 +170,7 @@ ShowPlayerSpriteMenu:
 	ld [hl], a
 	hlcoord 1, 16
 	ld [hl], a
-	; Hollow arrows retain the saved values while the solid cursor moves.
+	; Hollow arrows show the active values on rows without the solid cursor.
 	hlcoord 4, 3
 	ld a, [wPlayerGenderTag]
 	cp $47

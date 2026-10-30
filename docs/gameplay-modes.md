@@ -2,8 +2,10 @@
 
 A new game asks for Classic or Erweitert before gender selection and Oak's
 introduction. In-game, hold Select for about three seconds in Start → OPTION,
-release it, move Down to SPIELMODUS, choose with Left/Right and confirm with A.
-B/Start or ZURÜCK cancel. The choice is stored by ordinary in-game saving.
+release it, move Down to SPIELMODUS and choose with Left/Right. The mode changes
+immediately while the menu stays open. Move to ZURÜCK and press A to exit;
+B or Start also exit without undoing the applied changes.
+The choice is stored by ordinary in-game saving.
 Existing saves require no restart; old unselected saves default to Classic.
 
 Implemented mode differences:

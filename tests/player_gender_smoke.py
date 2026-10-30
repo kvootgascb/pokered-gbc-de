@@ -713,12 +713,20 @@ p.tick(200, False)
 assert len(opened) == 1, "continued SELECT reopened menu"
 release_select()
 assert p.memory[a("wCurrentMenuItem")] == 1, "current Green selection not highlighted"
+closed = []
+hook("ShowPlayerSpriteMenu.done", lambda _: closed.append(True))
 tap("left")
-tap("a")
-p.tick(30, False)
-assert p.memory[a("wPlayerGender")] == 0, "boy choice not applied"
+assert p.memory[a("wPlayerGender")] == 0, "Left did not immediately apply boy"
+assert not closed, "Left closed the hidden menu"
 assert_menu_font()
 bank, addr = sym["RedSprite"]
+assert list(p.memory[0, 0x8000:0x80C0]) == list(p.memory[bank, addr : addr + 192])
+tap("a")
+assert not closed, "A on gender closed the hidden menu"
+tap("right")
+assert p.memory[a("wPlayerGender")] == 1, "Right did not immediately apply Green"
+assert_menu_font()
+bank, addr = sym["GreenSprite"]
 assert list(p.memory[0, 0x8000:0x80C0]) == list(p.memory[bank, addr : addr + 192])
 assert p.memory[a("wOptions")] == option_bits, "sprite menu changed game options"
 assert (
@@ -728,52 +736,53 @@ assert (
     == coords
 )
 print(
-    "PASS: real Start -> Options, continuous three-second hold, immediate boy graphics; options/location preserved"
+    "PASS: immediate gender changes stay in hidden menu, including A; font/options/location preserved"
 )
 
-# Cancellation and a second change work without leaving Options.
-hold_select(190)
-release_select()
-tap("down")
-tap("b")
-assert p.memory[a("wPlayerGender")] == 0, "B committed a selection"
-hold_select(190)
-release_select()
-tap("down")
-tap("down")
-tap("a")
-assert p.memory[a("wPlayerGender")] == 0, "ZURÜCK changed the selected figure"
-hold_select(190)
-release_select()
-tap("right")
-tap("a")
-p.tick(30, False)
-assert p.memory[a("wPlayerGender")] == 1, "Green choice not applied"
-assert_menu_font()
-bank, addr = sym["GreenSprite"]
-assert list(p.memory[0, 0x8000:0x80C0]) == list(p.memory[bank, addr : addr + 192])
-hold_select(190)
-release_select()
+# Both settings can be changed repeatedly in one visit. A only exits on Back.
 tap("down")
 tap("left")
-tap("a")
-p.tick(15, False)
 assert p.memory[a("wGameplayModeCache")] == 0
 assert p.memory[3, 0xD000] == 0
+assert not closed
+tap("a")
+assert not closed, "A on mode closed the hidden menu"
+tap("right")
+assert p.memory[a("wGameplayModeCache")] == 1
+assert p.memory[3, 0xD000] == 1
+assert_menu_font()
+tap("up")
+assert p.memory[a("wSpriteMenuCursorRow")] == 0
+tap("left")
+tap("right")
+tap("down")
+tap("down")
+tap("left")
+assert not closed and p.memory[a("wPlayerGender")] == 1
+assert p.memory[a("wGameplayModeCache")] == 1
+tap("a")
+assert len(closed) == 1, "A on Back failed to exit"
+assert_menu_font()
+print("PASS: immediate mode changes, navigation between rows, and A on Back")
+
+# B exits like normal options; changes already applied remain active.
+hold_select(190)
+release_select()
+tap("left")
+assert p.memory[a("wPlayerGender")] == 0
+tap("b")
+assert len(closed) == 2 and p.memory[a("wPlayerGender")] == 0
 assert_menu_font()
 hold_select(190)
 release_select()
-tap("down")
+assert p.memory[a("wCurrentMenuItem")] == 0
 tap("right")
-tap("a")
-p.tick(15, False)
-assert p.memory[a("wGameplayModeCache")] == 1
-assert p.memory[3, 0xD000] == 1
-print("PASS: hidden mode row switches between Classic and Extended")
-tap("b")
+tap("start")
+assert len(closed) == 3 and p.memory[a("wPlayerGender")] == 1
 assert_menu_font()
 tap("b")
-print("PASS: cancellation and repeated switching to Green, with normal return to game")
+tap("b")
+print("PASS: B/Start keep applied settings and return through intact normal menus")
 # The same options screen in the title menu cannot unlock this shortcut.
 restore()
 p.memory[a("wOptionsSelectHoldFrames")] = 0
