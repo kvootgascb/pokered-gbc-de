@@ -46,6 +46,7 @@ HallOfFameResetEventsAndSaveScript:
 	ld [wHallOfFameCurScript], a
 	ld a, PALLET_TOWN
 	ld [wLastBlackoutMap], a
+	farcall RegisterChampionVictory
 	farcall SaveSAVtoSRAM
 	ld b, 5
 .delayLoop

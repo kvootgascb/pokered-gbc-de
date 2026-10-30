@@ -1,4 +1,5 @@
 VermilionCity_Script:
+	farcall PrepareAnneVisit
 	call EnableAutoTextBoxDrawing
 	ld hl, wCurrentMapScriptFlags
 	bit 6, [hl]

@@ -37,6 +37,7 @@ VermilionDock_Script:
 	ret
 
 VermilionDockSSAnneLeavesScript:
+	farcall ConsumeAnneVisit
 	SetEventForceReuseHL EVENT_SS_ANNE_LEFT
 	ld a, SFX_STOP_ALL_MUSIC
 	ld [wJoyIgnore], a

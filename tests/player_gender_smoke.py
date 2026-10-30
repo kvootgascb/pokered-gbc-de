@@ -298,6 +298,33 @@ assert p.memory[a("wBoxMon1Moves")] == 57
 assert p.memory[a("wBoxMon1PP")] == 15
 print("PASS: rare-roll boundaries, Classic gate, and Surf retained in party/box")
 
+restore()
+p.memory[3, 0xD003] = 0
+p.memory[a("wNumHoFTeams")] = 2
+call("EnsureChampionFeatures")
+assert p.memory[3, 0xD004] == 1 and p.memory[3, 0xD005] == 1
+p.memory[3, 0xD004] = 0
+p.memory[3, 0xD00E] = 0x99
+call("RegisterChampionVictory")
+call("RegisterChampionVictory")
+assert p.memory[3, 0xD004] == 0 and p.memory[3, 0xD00E] == 0x99
+assert p.memory[3, 0xD005] == 1
+p.memory[3, 0xD00E] = 0
+call("RegisterChampionVictory")
+assert p.memory[3, 0xD004] == 1
+p.memory[a("wGameplayModeCache")] = 1
+p.memory[a("wCurrentMapScriptFlags")] = 0x40
+p.memory[a("wEventFlags"):a("wEventFlags") + 320] = [255] * 320
+call("PrepareAnneVisit")
+flags = list(p.memory[a("wEventFlags"):a("wEventFlags") + 320])
+assert sum(8 - n.bit_count() for n in flags) == 4
+call("ConsumeAnneVisit")
+assert p.memory[3, 0xD005] == 0
+p.memory[a("wEventFlags"):a("wEventFlags") + 320] = [255] * 320
+call("PrepareAnneVisit")
+assert list(p.memory[a("wEventFlags"):a("wEventFlags") + 320]) == [255] * 320
+print("PASS: champion refresh does not stack, preserves pending reward, and resets only ship exit events")
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [
