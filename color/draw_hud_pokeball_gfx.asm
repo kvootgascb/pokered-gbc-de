@@ -36,10 +36,15 @@ PlayerHUDTileMap:
 
 EnemyHUDHAX:
 	ld [hl], $72
+	ld a, [wGameplayModeCache]
+	and a
+	jr z, .notWildBattle
 	ld a, [wIsInBattle]
 	dec a
 	jr  nz, .notWildBattle
 	push hl
+	farcall IsGhostBattle
+	jr z, .notOwned ; do not identify a hidden ghost through the caught marker
 	ld a, [wEnemyMonSpecies2]
 	ld [wd11e], a
 	callfar IndexToPokedex

@@ -72,7 +72,7 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Spezialhändler auf der M.S. Anne | Nein | Ja | Geplant: erscheint nach dem ersten Top-Vier-Sieg wie die Attacken-Helfer; verkauft sonst nicht kaufbare Items. Sortiment und Preise noch abzustimmen. |
 | Kontextabhängige VMs | Nein | Ja | Zerschneider, Stärke und Surfer per A am passenden Hindernis aktivieren, wenn ein Team-Pokémon die VM beherrscht. Ordenvoraussetzungen bleiben erhalten. |
 | Größere Münzkäufe | Nein | Ja | In der Spielhalle mehr Münzen auf einmal kaufen. Umgesetzt: zusätzlich 500 Münzen für 10000 Geld. |
-| Fangsymbol bei wilden Pokémon | Nein | Ja | Anzeigen, ob die Art bereits gefangen wurde. |
+| Fangsymbol bei wilden Pokémon | Nein | Ja | Umgesetzt: vorhandenes Pokéball-Zeichen im Gegner-HUD nur in Erweitert, bei bereits gefangenen wilden Arten. Keine Anzeige bei Trainer-Pokémon oder unbekannten Geistern. |
 | Attacken-Lernlisten aus Pokémon Gelb | Ja | Ja | Umgesetzt: Gelb als gemeinsame Moveset-Grundlage. Gen-1-Kampfmechanik unverändert. |
 | EP-Leiste | Nein | Ja | Umgesetzt: EP-Leiste in Erweitert anzeigen; in Classic nur die blaue Füllung ausblenden, HUD und leere Leiste erhalten. EP-Gewinn bleibt unverändert. |
 | Hinweis auf volle Box | Nein | Ja | Nur ein Hinweis; kein automatischer Boxwechsel. |

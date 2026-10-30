@@ -43,3 +43,8 @@ Kompatibilität verbrauchen nichts. Ein Moduswechsel gilt beim nächsten Einsatz
 Die normalen Regeln für Attackenauswahl bleiben erhalten. Die TM-/VM-Kompatibilität
 stammt wie Start- und Level-Attacken in beiden Modi aus Gelb:
 [yellow-learnsets.md](yellow-learnsets.md).
+
+Das vorhandene Pokéball-Fangsymbol im Gegner-HUD erscheint nur in Erweitert
+und nur bei bereits gefangenen wilden Arten. Trainer-Pokémon und unbekannte
+Geister im Pokémon-Turm erhalten keine Markierung. Die HUD-Tests prüfen auch,
+dass ein altes Symbol beim nächsten Gegner oder Moduswechsel wieder verschwindet.

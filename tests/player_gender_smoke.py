@@ -654,6 +654,40 @@ print(
     "PASS: Extended chooses both edition slots; Classic and water slots remain unchanged"
 )
 
+# The existing ball glyph is Extended-only and never identifies hidden ghosts.
+restore()
+p.memory[a("wEnemyMonSpecies2")] = 0x54
+p.memory[a("wEnemyMonNick") : a("wEnemyMonNick") + 11] = [
+    0x8F,
+    0x88,
+    0x8A,
+    0x80,
+    0x50,
+] + [0x50] * 6
+p.memory[a("wEnemyMonLevel")] = 10
+p.memory[a("wEnemyMonStatus")] = 0
+for field in ["wEnemyMonHP", "wEnemyMonMaxHP"]:
+    p.memory[a(field) : a(field) + 2] = [0, 20]
+p.memory[a("wNumBagItems")] = 0
+p.memory[a("wBagItems")] = 255
+for mode, battle, owned, map_id, expected in [
+    (1, 1, 1, 12, 0xE9),
+    (1, 1, 0, 12, 0x7F),
+    (0, 1, 1, 12, 0x7F),
+    (1, 2, 1, 12, 0x7F),
+    (1, 1, 1, 0x8E, 0x7F),
+    (1, 1, 1, 12, 0xE9),
+]:
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[a("wIsInBattle")] = battle
+    p.memory[a("wPokedexOwned") + 3] = owned  # dex 25, bit 24
+    p.memory[a("wCurMap")] = map_id
+    call("DrawEnemyHUDAndHPBar")
+    assert p.memory[a("wTileMap") + 21] == expected, (mode, battle, owned, map_id)
+print(
+    "PASS: actual enemy HUD caught marker is Extended-only, owned-only, wild-only and ghost-safe"
+)
+
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
 for inventory, capacity, guard in [
