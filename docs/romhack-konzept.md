@@ -69,9 +69,9 @@ Standardwerte der neuen Schalter und die endgültige Menügestaltung sind offen.
 | Alle 151 Pokémon erhältlich | Nein | Ja | Jede Art soll ohne externen Tausch in einem Spielstand erhältlich sein. Einmal pro Art genügt; keine Fanggarantie. |
 | Wiederverwendbare TMs | Nein | Ja | TMs werden beim Einsatz nicht verbraucht. |
 | Rückkehr der M.S. Anne | Nein | Ja | Kehrt nach jedem Top-Vier-Sieg zurück. Nach dem Verlassen fährt sie wieder ab; für die nächste Rückkehr sind die Top Vier erneut zu besiegen. |
-| Attacken-Helfer | Nein | Ja | Zwei neue NPCs: einer verlernt VMs, einer erinnert Attacken. Standorte und Bedingungen offen. |
+| Attacken-Helfer | Nein | Ja | Zwei neue NPCs: einer verlernt VMs, einer erinnert Attacken. Umgesetzt: kostenlos auf dem Deck der M.S. Anne nach dem ersten Top-Vier-Sieg. |
 | Kontextabhängige VMs | Nein | Ja | Zerschneider, Stärke und Surfer per A am passenden Hindernis aktivieren, wenn ein Team-Pokémon die VM beherrscht. Ordenvoraussetzungen bleiben erhalten. |
-| Größere Münzkäufe | Nein | Ja | In der Spielhalle mehr Münzen auf einmal kaufen. Mengen und Preise offen. |
+| Größere Münzkäufe | Nein | Ja | In der Spielhalle mehr Münzen auf einmal kaufen. Umgesetzt: zusätzlich 500 Münzen für 10000 Geld. |
 | Fangsymbol bei wilden Pokémon | Nein | Ja | Anzeigen, ob die Art bereits gefangen wurde. |
 | Attacken-Lernlisten aus Pokémon Gelb | Ja | Ja | Gelb als gemeinsame Moveset-Grundlage; bisher nur geplant. Gen-1-Kampfmechanik unverändert. |
 | EP-Leiste | Nein | Ja | Umgesetzt: EP-Leiste in Erweitert anzeigen; in Classic nur die blaue Füllung ausblenden, HUD und leere Leiste erhalten. EP-Gewinn bleibt unverändert. |
@@ -283,13 +283,8 @@ legendärer Pokémon. Änderungen an der Gen-1-Kampfmechanik sind ausgeschlossen
 - Abgleich weiterer vorhandener GBC-Erweiterungen mit dem Classic-Ziel.
 - Weitere Anforderungen an Beutel und PC über die umgesetzten 30/70 Plätze hinaus.
 - Gegebenenfalls später gewünschte Einschränkungen oder Freischaltung der bereits umgesetzten Laufschuhe.
-- Eich: Team, Level, Voraussetzungen, Dialog und Starter-Belohnungsverteilung;
-  Zusammenspiel eines erneut verfügbaren Kampfes mit einer noch offenen Belohnung.
-- Neue Begegnungsraten, Surfer-Pikachu-Level und -Attacken, Preise in der Spielhalle.
 - Welche Entwicklungssteine zusätzlich nötig sind und wo sie erhältlich werden.
-- Attacken-Erinnerer: angebotene Attacken, Kosten und Standort; VM-Verlerner-Standort.
 - Genaue Auslösung und Wiederholungssperre des Box-Hinweises.
-- Mew-Level, Texte, technische Interaktionsflächen und sichere Hafen-Zugänglichkeit.
 - Endgültige Gerüchte, Sprecher und Platzierung.
 
 ## Bestehende technische Grundlage
@@ -300,8 +295,10 @@ erweitert; alte 20/50- und 30/60-Spielstände werden beim Laden übernommen. Gre
 der experimentelle grüne-Kleid-Commit wurde auf Wunsch zurückgenommen.
 Details und Herkunft der Grafiken stehen in [green-sprites.md](green-sprites.md).
 
-Die übrigen Punkte dieses Dokuments sind Planung und dürfen nicht als bereits
-implementierte Funktionen verstanden werden. Die Implementierung der Inventarkapazitäten ist in [inventory-storage.md](inventory-storage.md) beschrieben.
+Der Umsetzungsstand der Champion-Ereignisse, seltenen Begegnungen, Spielhalle
+und Attacken-Helfer steht in [postgame-features.md](postgame-features.md).
+Weitere Konzeptpunkte bleiben geplant. Die Inventarkapazitäten sind in
+[inventory-storage.md](inventory-storage.md) beschrieben.
 
 
 Für künftige Features ist bereits ein versionierter Speicherbereich mit 512 Bytes
@@ -327,7 +324,7 @@ nicht aktiviert. Details: [gameplay-modes.md](gameplay-modes.md).
   Starter-Belohnungen sind gleich wahrscheinlich. Solange ein Geschenk offen
   ist, kämpft er nicht erneut und ein Top-Vier-Sieg schaltet ihn nicht wieder
   frei. Das Geschenk kann später mit einem passenden Kommentar abgeholt werden.
-- Seltene Amonitas, Kabuto und Surfer-Pikachu: vorläufig je 1 % pro Art,
+- Seltene Amonitas, Kabuto und Surfer-Pikachu: je 1 % pro Art,
   Level passend zum Gebiet. Fossil-Pokémon nur mit der besten Angel (Superangel).
 - Mew: Level 30, reguläre bis dahin erlernte Attacken.
 - Spielhallenpreise orientieren sich an Blau; die größte Münzkaufmenge wird
@@ -338,3 +335,6 @@ nicht aktiviert. Details: [gameplay-modes.md](gameplay-modes.md).
   der Vorentwicklungen.
 - Im Geheimmenü markieren leere Pfeile die gespeicherten Werte, der volle Pfeil
   zeigt den aktuellen Auswahlcursor.
+
+Die zuletzt präzisierten Features sind umgesetzt; genaue Level, Preise,
+Freischaltungen und Testumfang: [postgame-features.md](postgame-features.md).

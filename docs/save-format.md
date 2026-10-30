@@ -5,9 +5,9 @@ without starting a new game. On loading, it migrates inventories to 30/70,
 preserves existing progress and initializes feature data to safe zero defaults.
 The ordinary save command writes the new `I2` format and feature extension.
 
-Mode selection, the EXP-bar switch and running are now implemented. Other
-reserved preferences, the registered-item shortcut, new encounters and story
-events remain planned; reserving their state does not activate them. The existing gender field stays in the base save.
+Mode selection, the EXP-bar switch, running and the champion events are implemented.
+The independent preferences and registered-item shortcut remain reserved.
+The existing gender field stays in the base save. See [postgame-features.md](postgame-features.md) for the active events.
 
 ## Fixed storage
 
@@ -29,16 +29,17 @@ events remain planned; reserving their state does not activate them. The existin
 | 0 | 1 | Mode: 0 Classic, 1 Extended; default Classic |
 | 1 | 1 | Independent preferences: fast healing bit 0, skip VM animation bit 1; both off |
 | 2 | 1 | Registered basis item; 0 means none |
-| 3 | 1 | Feature-initialization/schema flags; zero |
+| 3 | 1 | Feature-initialization flags; bit 0: champion events initialized |
 | 4 | 1 | Oak battle availability; zero |
-| 5 | 1 | M.S. Anne state; zero |
+| 5 | 1 | M.S. Anne availability: 0 unavailable, 1 available |
 | 6 | 1 | Mew state: 0 unseen, 1 front, 2 rear, 3 encounter consumed |
 | 7 | 1 | Box reminder state; zero |
 | 8 | 2 | Elite Four victory counter; zero |
 | 10 | 2 | Oak victory counter; zero |
 | 12 | 1 | Starter reward tracking; zero |
 | 13 | 1 | Trade-back state; zero |
-| 14 | 2 | Reserved |
+| 14 | 1 | Pending Oak starter species; 0 means no gift |
+| 15 | 1 | Reserved |
 | 16 | 64 | Future event flags, including per-feature initialization flags |
 | 80 | 32 | Future counters |
 | 112 | 400 | General reserve |
@@ -54,8 +55,9 @@ Keep published offsets stable. Assign new fields from the reserve instead of
 inserting bytes. Preserve the entire payload, including currently unused bytes.
 For a feature whose initial state cannot simply be zero, assign an initialization
 flag and initialize it once from existing game progress when that feature ships.
-For example, a later Oak/Anne feature must consider existing champion progress;
-merely reserving a victory counter now does not reconstruct earlier victories.
+Oak/Anne initialize once from `wNumHoFTeams` for existing champions, using
+schema-flags bit 0. This offers one opportunity without inventing an old victory
+count. New championships increment the counter and refresh one opportunity.
 
 If the payload schema ever changes, explicitly migrate supported earlier
 versions in `LoadFeatureSaveData`; never silently reset an existing block.
@@ -96,3 +98,7 @@ mirror from the feature payload; it is not an independent setting. Mode UI uses
 `SetGameplayMode` locally or the register-argument-free farcall entry
 `CommitGameplayMode`, which reads `wModeMenuChoice`. Normal farcall trampolines
 clobber HL and BC, so do not pass their pointers/values through them unchanged.
+
+ROMX callers use `read_feature_byte` / `write_feature_byte` (HL address, C value).
+These macros use base-WRAM scratch and register-free farcall entry points.
+Do not use `homecall` to switch banks from executing ROMX code.

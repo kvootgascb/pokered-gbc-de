@@ -314,16 +314,18 @@ call("RegisterChampionVictory")
 assert p.memory[3, 0xD004] == 1
 p.memory[a("wGameplayModeCache")] = 1
 p.memory[a("wCurrentMapScriptFlags")] = 0x40
-p.memory[a("wEventFlags"):a("wEventFlags") + 320] = [255] * 320
+p.memory[a("wEventFlags") : a("wEventFlags") + 320] = [255] * 320
 call("PrepareAnneVisit")
-flags = list(p.memory[a("wEventFlags"):a("wEventFlags") + 320])
+flags = list(p.memory[a("wEventFlags") : a("wEventFlags") + 320])
 assert sum(8 - n.bit_count() for n in flags) == 4
 call("ConsumeAnneVisit")
 assert p.memory[3, 0xD005] == 0
-p.memory[a("wEventFlags"):a("wEventFlags") + 320] = [255] * 320
+p.memory[a("wEventFlags") : a("wEventFlags") + 320] = [255] * 320
 call("PrepareAnneVisit")
-assert list(p.memory[a("wEventFlags"):a("wEventFlags") + 320]) == [255] * 320
-print("PASS: champion refresh does not stack, preserves pending reward, and resets only ship exit events")
+assert list(p.memory[a("wEventFlags") : a("wEventFlags") + 320]) == [255] * 320
+print(
+    "PASS: champion refresh does not stack, preserves pending reward, and resets only ship exit events"
+)
 
 restore()
 for roll, species in [(0, 0x99), (1, 0xB0), (2, 0xB1)]:
@@ -366,33 +368,35 @@ call("SaveSAVtoSRAM0")
 p.memory[3, 0xD006] = 0
 call("LoadSAV0")
 assert p.memory[3, 0xD006] == 3
-print("PASS: first Mew attempt fails, same-side attempts do not roll, and consumed encounter persists")
+print(
+    "PASS: first Mew attempt fails, same-side attempts do not roll, and consumed encounter persists"
+)
 
 restore()
 p.memory[a("wNumBagItems")] = 1
-p.memory[a("wBagItems"):a("wBagItems") + 3] = [0x45, 1, 255]
-p.memory[a("wPlayerMoney"):a("wPlayerMoney") + 3] = [0x10, 0, 0]
-p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = [0, 0]
+p.memory[a("wBagItems") : a("wBagItems") + 3] = [0x45, 1, 255]
+p.memory[a("wPlayerMoney") : a("wPlayerMoney") + 3] = [0x10, 0, 0]
+p.memory[a("wPlayerCoins") : a("wPlayerCoins") + 2] = [0, 0]
 p.memory[a("wPostgameAction")] = 1
 call("BuyExpandedCoins")
 assert p.memory[a("wPostgameAction")] == 2
-assert list(p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2]) == [5, 0]
-assert list(p.memory[a("wPlayerMoney"):a("wPlayerMoney") + 3]) == [9, 0, 0]
-p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = [0x95, 0]
+assert list(p.memory[a("wPlayerCoins") : a("wPlayerCoins") + 2]) == [5, 0]
+assert list(p.memory[a("wPlayerMoney") : a("wPlayerMoney") + 3]) == [9, 0, 0]
+p.memory[a("wPlayerCoins") : a("wPlayerCoins") + 2] = [0x95, 0]
 p.memory[a("wPostgameAction")] = 1
 call("BuyExpandedCoins")
 assert p.memory[a("wPostgameAction")] == 4
-assert list(p.memory[a("wPlayerMoney"):a("wPlayerMoney") + 3]) == [9, 0, 0]
-p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = [0x99, 0x49]
+assert list(p.memory[a("wPlayerMoney") : a("wPlayerMoney") + 3]) == [9, 0, 0]
+p.memory[a("wPlayerCoins") : a("wPlayerCoins") + 2] = [0x99, 0x49]
 p.memory[a("wPostgameAction")] = 0
 call("BuyExpandedCoins")
 assert p.memory[a("wPostgameAction")] == 2
-assert list(p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2]) == [0x99, 0x99]
+assert list(p.memory[a("wPlayerCoins") : a("wPlayerCoins") + 2]) == [0x99, 0x99]
 print("PASS: 500-coin purchase costs 10000, with no overflow or payment on a full case")
 
 restore()
 p.memory[a("wPartyCount")] = 5
-p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = [0x25, 0]
+p.memory[a("wPlayerCoins") : a("wPlayerCoins") + 2] = [0x25, 0]
 p.memory[a("wPostgameAction")] = 0
 call("ValidateExtraPrizePurchase")
 assert p.memory[a("wPostgameAction")] == 0
@@ -407,23 +411,26 @@ print("PASS: extra prize prices and full-party checks")
 
 restore()
 p.memory[a("wTutorPartyIndex")] = 0
-for index, moves, pp in [(1, [1,3,4,0], [0xC5,0x21,10,0]), (3,[1,2,3,0],[0xC5,0x81,0x21,0])]:
-    p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4] = [1,2,3,4]
-    p.memory[a("wPartyMon1PP"):a("wPartyMon1PP") + 4] = [0xC5,0x81,0x21,10]
+for index, moves, pp in [
+    (1, [1, 3, 4, 0], [0xC5, 0x21, 10, 0]),
+    (3, [1, 2, 3, 0], [0xC5, 0x81, 0x21, 0]),
+]:
+    p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4] = [1, 2, 3, 4]
+    p.memory[a("wPartyMon1PP") : a("wPartyMon1PP") + 4] = [0xC5, 0x81, 0x21, 10]
     p.memory[a("wTutorCandidate")] = index
     call("DeleteTutorMove")
-    assert list(p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4]) == moves
-    assert list(p.memory[a("wPartyMon1PP"):a("wPartyMon1PP") + 4]) == pp
+    assert list(p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4]) == moves
+    assert list(p.memory[a("wPartyMon1PP") : a("wPartyMon1PP") + 4]) == pp
 print("PASS: move deletion shifts moves and PP-Up data together, including last slot")
 
 restore()
 p.memory[a("wTutorPartyIndex")] = 0
 p.memory[a("wPartyMon1")] = 0x55
 p.memory[a("wPartyMon1Level")] = 30
-p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4] = [0,0,0,0]
+p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4] = [0, 0, 0, 0]
 call("BuildTutorMoveList")
 count = p.memory[a("wTutorMoveCount")]
-moves = list(p.memory[a("wTutorMoves"):a("wTutorMoves") + count])
+moves = list(p.memory[a("wTutorMoves") : a("wTutorMoves") + count])
 assert 98 in moves, "Raichu cannot recall Pikachu's Quick Attack"
 assert 87 not in moves, "level-30 Pokemon offered future Thunder"
 assert len(moves) == len(set(moves)) and count <= 64
@@ -431,12 +438,80 @@ assert p.memory[a("wTutorMoves") + count] == 255
 p.memory[a("wPartyMon1Moves")] = 98
 call("BuildTutorMoveList")
 count = p.memory[a("wTutorMoveCount")]
-assert 98 not in list(p.memory[a("wTutorMoves"):a("wTutorMoves") + count])
+assert 98 not in list(p.memory[a("wTutorMoves") : a("wTutorMoves") + count])
 p.memory[a("wPartyMon1Level")] = 50
 call("BuildTutorMoveList")
 count = p.memory[a("wTutorMoveCount")]
-assert 87 in list(p.memory[a("wTutorMoves"):a("wTutorMoves") + count])
-print("PASS: reminder includes pre-evolution moves, filters known/duplicate/future moves")
+assert 87 in list(p.memory[a("wTutorMoves") : a("wTutorMoves") + count])
+print(
+    "PASS: reminder includes pre-evolution moves, filters known/duplicate/future moves"
+)
+
+
+# Enter the real bow map and speak to each new NPC through the overworld.
+# A fresh stack and LCD mode restore leave the subroutine-test trampoline.
+def enter_tutor_map(x, moves):
+    restore()
+    p.tick(120, False)
+    p.memory[a("wPartyCount")] = 0
+    p.memory[a("wMonDataLocation")] = 0x10  # player party, skip naming prompt
+    p.memory[a("wcf91")] = 0x55  # Raichu
+    p.memory[a("wCurEnemyLVL")] = 30
+    call("_AddPartyMon")
+    p.memory[a("wPartyMonNicks") : a("wPartyMonNicks") + 11] = [
+        0x91,
+        0x80,
+        0x88,
+        0x82,
+        0x87,
+        0x94,
+        0x50,
+        0x50,
+        0x50,
+        0x50,
+        0x50,
+    ]
+    p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4] = moves
+    p.memory[a("wPartyMon1PP") : a("wPartyMon1PP") + 4] = [15, 30, 0, 0]
+    p.memory[a("wGameplayModeCache")] = 1
+    p.memory[3, 0xD000] = 1
+    p.memory[a("wNumHoFTeams")] = 1
+    p.memory[a("wCurMap")] = 0x63
+    p.memory[a("wCurMapTileset")] = 0
+    p.memory[a("wYCoord")] = 6
+    p.memory[a("wXCoord")] = x
+    p.memory[a("wYBlockCoord")] = 0
+    p.memory[a("wXBlockCoord")] = 0
+    ptr = a("wOverworldMap") + 4 * 16 + x // 2 + 1
+    p.memory[a("wCurrentTileBlockMapViewPointer")] = ptr & 255
+    p.memory[a("wCurrentTileBlockMapViewPointer") + 1] = ptr >> 8
+    p.memory[0xFF40] = 0xE3
+    p.register_file.SP = a("wStack")
+    entry = a("EnterMap")
+    for offset, byte in enumerate([0xFB, 0xC3, entry & 255, entry >> 8]):
+        p.memory[0, 0x100 + offset] = byte
+    p.register_file.PC = 0x100
+    p.tick(120, False)
+    p.memory[a("wSpritePlayerStateData1FacingDirection")] = 4  # up
+
+
+enter_tutor_map(10, [84, 0, 0, 0])
+for _ in range(120):
+    p.button("a", 2)
+    p.tick(20, False)
+    if p.memory[a("wPartyMon1Moves") + 1] != 0:
+        break
+assert p.memory[a("wPartyMon1Moves") + 1] == 45, "NPC reminder failed to teach Growl"
+assert p.memory[a("wPartyMon1PP") + 1] == 40
+enter_tutor_map(8, [57, 84, 0, 0])
+for _ in range(120):
+    p.button("a", 2)
+    p.tick(20, False)
+    if p.memory[a("wPartyMon1Moves")] != 57:
+        break
+assert list(p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4]) == [84, 0, 0, 0]
+assert p.memory[a("wPartyMon1PP")] == 30
+print("PASS: real bow NPCs open party/attack menus, teach a move and delete an HM")
 
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()
