@@ -862,6 +862,66 @@ for obj, x, y, talk in shore_cases:
     assert p.memory[3, 0xD005] == 1, "a conversation consumed the ship visit"
 
 
+# The sailor recognizes Surf only on a Pikachu actually in the current team.
+def set_reaction_party(members):
+    p.memory[a("wPartyCount")] = 0
+    p.memory[a("wPartySpecies")] = 255
+    p.memory[a("wIsInBattle")] = 0
+    for index, (species, moves, fainted) in enumerate(members):
+        p.memory[a("wMonDataLocation")] = 0x10
+        p.memory[a("wcf91")] = species
+        p.memory[a("wCurEnemyLVL")] = 30
+        call("_AddPartyMon")
+        p.memory[
+            a(f"wPartyMon{index + 1}Moves") : a(f"wPartyMon{index + 1}Moves") + 4
+        ] = moves
+        if fainted:
+            p.memory[
+                a(f"wPartyMon{index + 1}HP") : a(f"wPartyMon{index + 1}HP") + 2
+            ] = [0, 0]
+            p.memory[
+                a(f"wPartyMon{index + 1}PP") : a(f"wPartyMon{index + 1}PP") + 4
+            ] = [0] * 4
+
+
+surf_reactions = []
+hook("SurfPikachuRumorTalk.react", lambda _: surf_reactions.append(True))
+normal_pika = (0x54, [84, 0, 0, 0], False)
+surf_pika = (0x54, [57, 84, 0, 0], False)
+normal_other = (0x55, [84, 0, 0, 0], False)
+surf_other = (0x13, [57, 0, 0, 0], False)
+for members, expected in [
+    ([], False),
+    ([normal_pika], False),
+    ([surf_other], False),
+    ([normal_pika, surf_other], False),
+    ([surf_pika], True),
+    ([normal_other] * 5 + [(0x54, [84, 0, 0, 57], True)], True),
+    ([normal_pika, surf_pika], True),
+    ([normal_other], False),
+]:
+    load_shore(1, 1, 1)
+    set_reaction_party(members)
+    # A matching boxed Pokemon and stale data after the team end must not count.
+    p.memory[a("wBoxCount")] = 1
+    p.memory[a("wBoxMon1Species")] = 0x54
+    p.memory[a("wBoxMon1Moves")] = 57
+    if len(members) < 6:
+        p.memory[a(f"wPartyMon{len(members) + 1}Species")] = 0x54
+        p.memory[a(f"wPartyMon{len(members) + 1}Moves")] = 57
+    team_before = list(p.memory[a("wPartyDataStart") : a("wPartyDataEnd")])
+    features_before = list(p.memory[3, 0xD000:0xD200])
+    before = len(surf_reactions)
+    p.memory[a("hSpriteIndexOrTextID")] = 7
+    call("DisplayTextID", 900, "a")
+    assert len(surf_reactions) - before == int(expected)
+    assert list(p.memory[a("wPartyDataStart") : a("wPartyDataEnd")]) == team_before
+    assert list(p.memory[3, 0xD000:0xD200]) == features_before
+print(
+    "PASS: actual sailor reacts only to a team Pikachu with Surf, including slot six/fourth move/fainted/zero PP; no team/event changes"
+)
+
+
 # The two-tile pier must remain passable with either lane occupied by the
 # original sailor. Freeze him there in test ROM data; do not remove any NPC.
 # This reproduces the bottleneck caused by the former fixed sailor at (22,27).

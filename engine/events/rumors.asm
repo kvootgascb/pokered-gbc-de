@@ -215,8 +215,27 @@ FossilRumorTalk::
 	done
 
 SurfPikachuRumorTalk::
+	ld b, PIKACHU
+	ld c, SURF
+	call PartyHasRumorPokemon
+	jr c, .react
 	ld hl, .text
 	jp PrintText
+.react
+	ld hl, .reaction
+	jp PrintText
+.reaction
+	text "Hast du schon"
+	line "gehört?"
+	para "Du glaubst mir"
+	line "also!"
+	para "Moment mal ..."
+	line "Dein PIKACHU kann"
+	cont "ja wirklich"
+	cont "schwimmen!"
+	para "Das kann doch"
+	line "nicht ...!"
+	done
 .text
 	text "Hast du schon"
 	line "gehört?"
@@ -232,6 +251,56 @@ SurfPikachuRumorTalk::
 	line "glauben mir bis"
 	cont "heute kein Wort!"
 	done
+
+; B = species, C = required move (zero = any moveset). Search only the
+; current team, including fainted Pokemon and moves with zero remaining PP.
+; Carry = found. Species and move must belong to the same team member.
+; No party, Pokédex, box or event state is changed.
+PartyHasRumorPokemon:
+	ld a, [wPartyCount]
+	and a
+	ret z
+	cp PARTY_LENGTH + 1
+	jr c, .count
+	ld a, PARTY_LENGTH
+.count
+	ld d, a
+	ld hl, wPartyMon1
+.mon
+	ld a, [hl]
+	cp b
+	jr nz, .next
+	ld a, c
+	and a
+	jr z, .found
+	push hl
+	push de
+	ld de, wPartyMon1Moves - wPartyMon1
+	add hl, de
+	ld e, NUM_MOVES
+.move
+	ld a, [hli]
+	cp c
+	jr z, .foundMove
+	dec e
+	jr nz, .move
+	pop de
+	pop hl
+.next
+	push de
+	ld de, wPartyMon2 - wPartyMon1
+	add hl, de
+	pop de
+	dec d
+	jr nz, .mon
+	and a
+	ret
+.foundMove
+	pop de
+	pop hl
+.found
+	scf
+	ret
 
 ShoreSailorFeetTalk::
 	ld hl, .text

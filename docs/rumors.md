@@ -62,6 +62,21 @@ Der erste Matrose erzählt:
 > Ich konnte meinen Augen nicht trauen!
 > Die anderen glauben mir bis heute kein Wort!
 
+Mit einem **Pikachu, das Surfer beherrscht, im aktuellen Team** reagiert
+derselbe Matrose stattdessen überrascht:
+
+> Hast du schon gehört?
+> Du glaubst mir also!
+> Moment mal ... Dein PIKACHU kann ja wirklich schwimmen!
+> Das kann doch nicht ...!
+
+Die Art und Surfer müssen zum selben Pokémon gehören. Alle sechs Teamplätze
+und alle vier Attackenplätze zählen, auch bei besiegten Pokémon oder 0 AP.
+Ein Pikachu in der Box, ein Pokédex-Eintrag oder Surfer auf einem anderen
+Teammitglied genügt nicht. Ohne passenden Team-Eintrag bleibt das ursprüngliche
+Gerücht erhalten. Die Reaktion wird bei jedem Gespräch neu gewählt; sie
+verbraucht keine Schiffsbesuche und ändert weder Team noch Ereignisse.
+
 Die übrigen drei führen normale Alltagsgespräche und verwenden deshalb nicht
 die Einleitung eines Gerüchts. Die ursprünglichen Stadtbewohner und Matrosen
 bleiben erhalten. Die Stadt hat damit zehn Objekte; die neuen Standorte und
@@ -99,3 +114,7 @@ sichtbar auf ihrer kurzen Strecke; der vierte bleibt stehen. Alle vier
 Kartendialoge werden ausgeführt. Die Abreiseprüfung nutzt die vorhandene
 Verbrauchsroutine des Schiffs; die komplette Abfahrtsanimation wird dabei
 nicht erneut durchgespielt. Die bisherigen Gameplay-Tests laufen mit.
+Für die Pikachu-Reaktion werden zusätzlich der normale Dialog, andere Arten,
+Surfer auf einem anderen Teammitglied, Teamplatz sechs, Attackenplatz vier,
+0 KP/AP sowie Pokémon nur in der Box oder hinter dem Teamende geprüft.
+Teamdaten und Feature-Speicher bleiben dabei unverändert.
