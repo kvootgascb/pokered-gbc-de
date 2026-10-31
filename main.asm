@@ -1009,3 +1009,5 @@ INCLUDE "engine/events/ship_merchant.asm"
 INCLUDE "engine/events/gym_rematches.asm"
 
 INCLUDE "engine/movie/title_gender.asm"
+
+INCLUDE "engine/events/box_reminder.asm"

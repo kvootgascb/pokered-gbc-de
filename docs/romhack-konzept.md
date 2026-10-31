@@ -80,15 +80,14 @@ Weitere geplante Menüpunkte, insbesondere der Starter-Editor, sind noch offen.
 | Fangsymbol bei wilden Pokémon | Nein | Ja | Umgesetzt: vorhandenes Pokéball-Zeichen im Gegner-HUD nur in Erweitert, bei bereits gefangenen wilden Arten. Keine Anzeige bei Trainer-Pokémon oder unbekannten Geistern. |
 | Attacken-Lernlisten aus Pokémon Gelb | Ja | Ja | Umgesetzt: Gelb als gemeinsame Moveset-Grundlage. Gen-1-Kampfmechanik unverändert. |
 | EP-Leiste | Nein | Ja | Umgesetzt: EP-Leiste in Erweitert anzeigen; in Classic nur die blaue Füllung ausblenden, HUD und leere Leiste erhalten. EP-Gewinn bleibt unverändert. |
-| Hinweis auf volle Box | Nein | Ja | Nur ein Hinweis; kein automatischer Boxwechsel. |
+| Hinweis auf volle Box | Nein | Ja | Umgesetzt: Gedanke nach dem Fang, der die aktuelle Box füllt; kein automatischer Boxwechsel. Details: [box-reminder.md](box-reminder.md). |
 | Registrierbares Basis-Item | Nein | Ja | Umgesetzt: im Beutel registrieren, außerhalb der Menüs per Select benutzen. Details: [registered-item.md](registered-item.md). |
 | Schutz erneut verwenden | Nein | Ja | Umgesetzt: nach Ablauf bei vorhandenem Vorrat dieselbe Schutzart erneut anbieten; Ja/Nein. Details: [repeat-repel.md](repeat-repel.md). |
 | Schnelle Heilung / kürzere Wiederholungstexte | Optional | Optional | Umgesetzt: Seite 2, schnelle Heilung mit kurzen Pokémon-Center-Texten; unabhängig vom Modus. |
 | VM-Animationen überspringen | Optional | Optional | Umgesetzt: auf Seite 1 des Geheimmenüs „VM-Animationen“ auf Aus stellen; unabhängig vom Modus. |
 | Kleine Gerüchte über Geheimnisse | Nein | Ja | Wenige passende NPC-Hinweise, ohne die Lösung ausdrücklich zu verraten. Ausgestaltung später. |
 
-Die vorgeschlagene Auslösung des Box-Hinweises ist noch zu bestätigen:
-Nach dem Fang, der die aktuelle Box füllt, einmalig einen Gedanken anzeigen,
+Der Box-Hinweis erscheint nach dem Fang, der die aktuelle Box füllt, als Gedanke,
 z. B. „Ich sollte meine Pokémon-Box prüfen. Vielleicht ist sie schon voll …“.
 Die ursprüngliche Beschränkung bei gleichzeitig vollem Team und voller Box bleibt.
 
@@ -314,7 +313,6 @@ legendärer Pokémon. Änderungen an der Gen-1-Kampfmechanik sind ausgeschlossen
 - Weitere Anforderungen an Beutel und PC über die umgesetzten 30/70 Plätze hinaus.
 - Gegebenenfalls später gewünschte Einschränkungen oder Freischaltung der bereits umgesetzten Laufschuhe.
 - Welche Entwicklungssteine zusätzlich nötig sind und wo sie erhältlich werden.
-- Genaue Auslösung und Wiederholungssperre des Box-Hinweises.
 - Endgültige Gerüchte, Sprecher und Platzierung.
 
 ## Bestehende technische Grundlage

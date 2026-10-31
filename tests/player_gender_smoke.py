@@ -389,6 +389,41 @@ assert distances[1] > distances[0], (
 )
 print("PASS: held B moves farther in Extended than Classic in actual overworld play")
 
+# Actual Master Ball captures fill the box; only the filling transfer warns.
+box_reminders = []
+hook("RemindAboutFullBox.warn", lambda _: box_reminders.append(True))
+for mode, count in [(0, 19), (1, 18), (1, 19)]:
+    restore()
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[a("wCurMap")] = 3
+    p.memory[a("wIsInBattle")] = 1
+    p.memory[a("wBattleType")] = 0
+    p.memory[a("wEnemyMonSpecies2")] = 0x54
+    p.memory[a("wCurEnemyLVL")] = 23
+    call("LoadEnemyMonData")
+    p.memory[a("wPartyCount")] = 6
+    p.memory[a("wBoxCount")] = count
+    p.memory[a("wBoxSpecies") : a("wBoxSpecies") + count + 1] = [0x24] * count + [255]
+    p.memory[a("wPokedexOwned") : a("wPokedexOwned") + 19] = [255] * 19
+    p.memory[a("wNumBagItems")] = 1
+    p.memory[a("wBagItems") : a("wBagItems") + 3] = [1, 2, 255]
+    p.memory[a("wcf91")] = 1  # Master Ball guarantees the capture.
+    p.memory[a("wWhichPokemon")] = 0
+    p.memory[0xFF40] = 0xE3
+    before = len(box_reminders)
+    call("ItemUseBall", 1800, "b")
+    assert p.memory[a("wBoxCount")] == count + 1
+    assert p.memory[a("wPartyCount")] == 6
+    assert p.memory[a("wBoxMon1Species")] == 0x54
+    assert len(box_reminders) - before == int(mode == 1 and count == 19)
+    before = len(box_reminders)
+    call("SaveSAVtoSRAM0")
+    call("LoadSAV0")
+    assert len(box_reminders) == before
+print(
+    "PASS: native capture transfers warn on filling the box only in Extended; save/load never repeats it"
+)
+
 restore()
 for roll, species in [(0, 0x62), (1, 0x5A), (2, 0x54), (99, 0x54)]:
     p.memory[a("wCurOpponent")] = 0x54
