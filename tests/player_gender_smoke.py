@@ -723,6 +723,80 @@ def enter_npc_map(
     p.memory[a("wSpritePlayerStateData1FacingDirection")] = 4  # up
 
 
+# New rumor NPCs load before drawing and preserve all original hide/show IDs.
+rumor_talks = []
+for talk in ["OakRumorTalk", "MewRumorTalk", "FossilRumorTalk"]:
+    hook(talk, lambda _, talk=talk: rumor_talks.append(talk))
+
+
+def hs_index(map_id, object_id):
+    bank, addr = sym["MissableObjects"]
+    for index in range(256):
+        entry = list(p.memory[bank, addr + index * 3 : addr + index * 3 + 3])
+        if entry[:2] == [map_id, object_id]:
+            return index
+        if entry[0] == 255:
+            break
+    raise AssertionError((map_id, object_id, "missing hide/show entry"))
+
+
+def object_hidden(index):
+    return bool(p.memory[a("wMissableObjectFlags") + index // 8] & (1 << (index % 8)))
+
+
+def active_missables():
+    values = list(p.memory[a("wMissableObjectList") : a("wMissableObjectList") + 33])
+    return dict(zip(values[: values.index(255) : 2], values[1 : values.index(255) : 2]))
+
+
+rumor_cases = [
+    (0, 10, 4, 17, 10, 17, 11, 0x0B, "OakRumorTalk"),
+    (0x51, 7, 5, 8, 5, 8, 6, 0x0E, "MewRumorTalk"),
+    (8, 10, 3, 8, 13, 8, 12, 0x2F, "FossilRumorTalk"),
+]
+for map_id, width, obj, x, y, px, py, pic, talk in rumor_cases:
+    for mode, champion in [(0, 0), (0, 1), (1, 0), (1, 1)]:
+
+        def setup_rumor():
+            p.memory[a("wGameplayModeCache")] = mode
+            p.memory[3, 0xD000] = mode
+            p.memory[a("wNumHoFTeams")] = champion
+
+        enter_npc_map(
+            px, [84, 0, 0, 0], map_id=map_id, width=width, y=py, setup=setup_rumor
+        )
+        index = hs_index(map_id, obj)
+        assert index >= 0xE7, "new NPC shifted an original hide/show ID"
+        assert active_missables()[obj] == index
+        visible = mode == 1 and (map_id != 0 or champion == 1)
+        assert object_hidden(index) != visible
+        if not visible:
+            assert p.memory[a("wSpriteStateData1") + obj * 16 + 2] == 255
+            continue
+        assert p.memory[a("wSpriteStateData1") + obj * 16] == pic
+        positions = set()
+        for _ in range(45):
+            p.tick(20, False)
+            nx = p.memory[a("wSpriteStateData2") + obj * 16 + 5] - 4
+            ny = p.memory[a("wSpriteStateData2") + obj * 16 + 4] - 4
+            assert abs(nx - x) <= 1 and ny == y, (talk, nx, ny)
+            positions.add((nx, ny))
+        assert len(positions) >= 2, talk + " never moved"
+        p.tick(1, True)
+        p.screen.image.save("/tmp/" + rom + "-" + talk + ".png")
+        before = len(rumor_talks)
+        p.memory[a("hSpriteIndexOrTextID")] = obj
+        call("DisplayTextID", 900, "a")
+        assert rumor_talks[before:] == [talk]
+        # The next natural reload applies a switch to Classic.
+        p.memory[a("wGameplayModeCache")] = 0
+        call("LoadMapHeader")
+        assert object_hidden(index)
+assert hs_index(0, 1) == 0, "original Oak hide/show ID moved"
+print(
+    "PASS: new rumor NPCs, original hide/show IDs, Classic/champion gates, bounded native walking and real map dialogs"
+)
+
 # Choose each real lab ball with Simsala selected, then let the rival take his.
 for x, original, rival in [(6, 0xB0, 0xB1), (7, 0xB1, 0x99), (8, 0x99, 0xB0)]:
 

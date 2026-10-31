@@ -1013,3 +1013,5 @@ INCLUDE "engine/movie/title_gender.asm"
 INCLUDE "engine/events/box_reminder.asm"
 
 INCLUDE "engine/events/starter_editor.asm"
+
+INCLUDE "engine/events/rumors.asm"

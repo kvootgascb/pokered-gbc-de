@@ -65,6 +65,7 @@ LoadMissableObjects:
 .done
 	ld a, -1
 	ld [de], a                 ; write sentinel
+	farcall PrepareRumorObjects
 	ret
 
 InitializeMissableObjectsFlags:

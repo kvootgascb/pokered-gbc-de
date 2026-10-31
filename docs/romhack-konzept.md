@@ -86,7 +86,7 @@ Der Starter-Editor nutzt Level 5 und die passenden Gelb-Attacken; Details:
 | Schutz erneut verwenden | Nein | Ja | Umgesetzt: nach Ablauf bei vorhandenem Vorrat dieselbe Schutzart erneut anbieten; Ja/Nein. Details: [repeat-repel.md](repeat-repel.md). |
 | Schnelle Heilung / kürzere Wiederholungstexte | Optional | Optional | Umgesetzt: Seite 2, schnelle Heilung mit kurzen Pokémon-Center-Texten; unabhängig vom Modus. |
 | VM-Animationen überspringen | Optional | Optional | Umgesetzt: auf Seite 1 des Geheimmenüs „VM-Animationen“ auf Aus stellen; unabhängig vom Modus. |
-| Kleine Gerüchte über Geheimnisse | Nein | Ja | Wenige passende NPC-Hinweise, ohne die Lösung ausdrücklich zu verraten. Ausgestaltung später. |
+| Kleine Gerüchte über Geheimnisse | Nein | Ja | Neue NPCs mit einheitlichem Gesprächseinstieg; Details und Umsetzungsstand: [rumors.md](rumors.md). |
 
 Der Box-Hinweis erscheint nach dem Fang, der die aktuelle Box füllt, als Gedanke,
 z. B. „Ich sollte meine Pokémon-Box prüfen. Vielleicht ist sie schon voll …“.
@@ -209,20 +209,20 @@ Level und Attacken von Mew sind noch offen.
 
 ## Gerüchte und neue Dialoge
 
-Die Idee ist beschlossen; Sprecher, Standorte und endgültige Texte bleiben offen.
-Hinweise sollen neugierig machen und Entdeckungen belohnen, keine Questmarker
-oder ausdrückliche Schritt-für-Schritt-Lösungen liefern.
+Alle Gerüchte werden einheitlich mit **„Hast du schon gehört?“** eingeleitet.
+Dafür erscheinen neue NPCs nur in Erweitert; einige laufen auf kurzen Strecken.
 
-Unverbindliche Textideen:
+Umgesetzt sind der ältere Trainer rechts neben Eichs Labor (nach dem ersten
+Champion-Sieg), der Wanderer im Pokémon-Center bei der Felshöhle mit dem
+Lastwagen-/Flegmon-Gerücht und der Angler am Ufer der Zinnoberinsel mit dem
+unbestimmten Hinweis auf lebende Fossil-Pokémon tief in einer Höhle.
 
-- Surfer-Pikachu, eventuell im Pokémon-Center bei der Felshöhle:
-  „Im Kraftwerk soll ein PIKACHU leben, das keine Angst vor Wasser hat.
-  Seltsam, oder?“
-- Lastwagen:
-  „Am Hafen habe ich etwas unter einem alten Wagen verschwinden sehen.
-  Als ich nachschauen wollte, war es plötzlich auf der anderen Seite …“
-- Der Assistent in Eichs Labor erzählt von seinem reparierten Linkkabel und
-  möchte mit einem sofortigen Rücktausch dessen Funktion testen.
+Zusätzlich vereinbart: Mit der zurückgekehrten M.S. Anne haben vier neue
+Matrosen in Orania Landgang und verschwinden bei ihrer Abreise wieder.
+Einer erzählt, wie er vom Deck aus eine Gruppe Pikachu zum Kraftwerk schwimmen
+sah; die übrigen sprechen über ihren Landgang. Ihre Anwesenheit genügt als
+Hinweis auf das Schiff. Texte, Orte, Laufwege und technische Details:
+[rumors.md](rumors.md).
 
 ## Umgesetzt: Starter-Editor im Geheimmenü
 
@@ -314,7 +314,6 @@ legendärer Pokémon. Änderungen an der Gen-1-Kampfmechanik sind ausgeschlossen
 - Weitere Anforderungen an Beutel und PC über die umgesetzten 30/70 Plätze hinaus.
 - Gegebenenfalls später gewünschte Einschränkungen oder Freischaltung der bereits umgesetzten Laufschuhe.
 - Welche Entwicklungssteine zusätzlich nötig sind und wo sie erhältlich werden.
-- Endgültige Gerüchte, Sprecher und Platzierung.
 
 ## Bestehende technische Grundlage
 

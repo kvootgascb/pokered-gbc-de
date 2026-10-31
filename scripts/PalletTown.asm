@@ -154,6 +154,7 @@ PalletTown_TextPointers:
 	dw_const PalletTownOakText,              TEXT_PALLETTOWN_OAK
 	dw_const PalletTownGirlText,             TEXT_PALLETTOWN_GIRL
 	dw_const PalletTownFisherText,           TEXT_PALLETTOWN_FISHER
+	dw_const PalletTownRumorTrainerText,     TEXT_PALLETTOWN_RUMOR_TRAINER
 	dw_const PalletTownOaksLabSignText,      TEXT_PALLETTOWN_OAKSLAB_SIGN
 	dw_const PalletTownSignText,             TEXT_PALLETTOWN_SIGN
 	dw_const PalletTownPlayersHouseSignText, TEXT_PALLETTOWN_PLAYERSHOUSE_SIGN
@@ -198,6 +199,11 @@ PalletTownGirlText:
 PalletTownFisherText:
 	text_far _PalletTownFisherText
 	text_end
+
+PalletTownRumorTrainerText:
+	text_asm
+	farcall OakRumorTalk
+	jp TextScriptEnd
 
 PalletTownOaksLabSignText:
 	text_far _PalletTownOaksLabSignText

@@ -55,6 +55,7 @@ CinnabarIsland_TextPointers:
 	def_text_pointers
 	dw_const CinnabarIslandGirlText,           TEXT_CINNABARISLAND_GIRL
 	dw_const CinnabarIslandGamblerText,        TEXT_CINNABARISLAND_GAMBLER
+	dw_const CinnabarIslandRumorFisherText,    TEXT_CINNABARISLAND_RUMOR_FISHER
 	dw_const CinnabarIslandSignText,           TEXT_CINNABARISLAND_SIGN
 	dw_const MartSignText,                     TEXT_CINNABARISLAND_MART_SIGN
 	dw_const PokeCenterSignText,               TEXT_CINNABARISLAND_POKECENTER_SIGN
@@ -73,6 +74,11 @@ CinnabarIslandGirlText:
 CinnabarIslandGamblerText:
 	text_far _CinnabarIslandGamblerText
 	text_end
+
+CinnabarIslandRumorFisherText:
+	text_asm
+	farcall FossilRumorTalk
+	jp TextScriptEnd
 
 CinnabarIslandSignText:
 	text_far _CinnabarIslandSignText

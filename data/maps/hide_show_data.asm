@@ -568,5 +568,10 @@ SSAnneBowTutorsHS:
 	db SS_ANNE_BOW, SSANNEBOW_MOVE_DELETER, HIDE
 	db SS_ANNE_BOW, SSANNEBOW_MOVE_REMINDER, HIDE
 	db SS_ANNE_BOW, SSANNEBOW_MERCHANT, HIDE
+	; Appended to preserve every existing saved hide/show bit. These entries
+	; are added to the active map's list by PrepareRumorObjects.
+	db PALLET_TOWN, PALLETTOWN_RUMOR_TRAINER, HIDE
+	db ROCK_TUNNEL_POKECENTER, ROCKTUNNELPOKECENTER_RUMOR_HIKER, HIDE
+	db CINNABAR_ISLAND, CINNABARISLAND_RUMOR_FISHER, HIDE
 	db $FF, $01, SHOW ; end
 	assert_table_length NUM_HS_OBJECTS + 1

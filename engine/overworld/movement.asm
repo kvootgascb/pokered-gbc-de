@@ -582,6 +582,13 @@ UpdateSpriteImage:
 ; e: X movement delta (-1, 0 or 1)
 ; set carry on failure, clears carry on success
 CanWalkOntoTile:
+	; Only the added rumor NPCs have a short patrol; original movement is intact.
+	push bc
+	push de
+	farcall RumorNPCWalkBlocked
+	pop de
+	pop bc
+	ret c
 	ld h, HIGH(wSpriteStateData2)
 	ldh a, [hCurrentSpriteOffset]
 	add SPRITESTATEDATA2_MOVEMENTBYTE1
