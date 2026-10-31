@@ -1,11 +1,15 @@
-# Pokémon: Rote Edition and Blaue Edition [![Build Status][travis-badge]][travis]
+# Pokémon: Rote Edition DX / Blaue Edition DX
 
-This is a disassembly of Pokémon: Rote Edition and Blaue Edition.
+Ein ROMhack auf Grundlage der deutschen Pokémon-Rot-/Blau-GBC-Disassembly.
+Die DX-Fassungen enthalten die optionale Classic-/Erweitert-Auswahl und
+die in [docs/romhack-konzept.md](docs/romhack-konzept.md) beschriebenen Features.
 
 It builds the following ROMs:
 
-* pokered.gbc md5: 572A3FEC14C513EA0FD6C34657CAA4A0
-* pokeblue.gbc md5: CFDB054DCCB8DE068FC1D65D45AE5A0B
+* `pokered.gbc` — Rote Edition DX
+* `pokeblue.gbc` — Blaue Edition DX
+
+Die ROM-Dateinamen und das Spielstandformat bleiben unverändert.
 
 To set up the repository, see [**INSTALL.md**](INSTALL.md).
 

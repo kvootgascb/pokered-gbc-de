@@ -1,7 +1,7 @@
 # Konzept: Original mit optionalen QoL-Erweiterungen
 
 Stand: 31. Oktober 2026. Konzept und dokumentierter Umsetzungsstand.
-Ein endgültiger Name für den Hack ist noch nicht festgelegt.
+Der Hack heißt **Pokémon: Rote Edition DX / Blaue Edition DX**.
 
 ## Leitidee
 

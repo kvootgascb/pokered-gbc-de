@@ -58,7 +58,7 @@ DisplayTitleScreen:
 	ld a, BANK(PokemonLogoGraphics)
 	call FarCopyData2          ; second chunk
 	ld hl, Version_GFX
-	ld de, vChars2 tile $60 + (10 tiles - (Version_GFXEnd - Version_GFX) * 2) / 2
+	ld de, vChars2 tile $60
 	ld bc, Version_GFXEnd - Version_GFX
 	ld a, BANK(Version_GFX)
 	call FarCopyDataDouble
@@ -389,15 +389,18 @@ CopyrightTextString:
 
 INCLUDE "data/pokemon/title_mons.asm"
 
-; prints version text (red, blue)
+; Original German edition lettering followed by DX, centered as one label.
 PrintGameVersionOnTitleScreen:
-	hlcoord 6, 8
+	hlcoord (SCREEN_WIDTH - TITLE_EDITION_TILES) / 2, 8
 	ld de, VersionOnTitleScreenText
 	jp PlaceString
 
 ; these point to special tiles specifically loaded for that purpose and are not usual text
 VersionOnTitleScreenText:
-	db $60,$61,$62,$63,$64,$65,$66,$67,$68,$69,"@" ; "Version Rote" or "Version Blau"
+	FOR title_tile, TITLE_EDITION_TILES
+		db $60 + title_tile
+	ENDR
+	db "@" ; "ROTE EDITION DX" or "BLAUE EDITION DX"
 
 DebugNewGamePlayerName:
 	db "NINTEN@"
