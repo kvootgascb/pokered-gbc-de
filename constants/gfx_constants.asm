@@ -41,5 +41,5 @@ DEF REDRAW_ROW EQU 2
 	const TILEMAP_GAME_BOY
 	const TILEMAP_LINK_CABLE
 DEF NUM_TILEMAPS EQU const_value
-; Original 10-tile German edition name, space, and D/X from the game font.
-DEF TITLE_EDITION_TILES EQU 13
+; Nine visible German edition tiles and D/X from the game font.
+DEF TITLE_EDITION_TILES EQU 11

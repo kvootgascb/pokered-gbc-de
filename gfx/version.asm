@@ -2,14 +2,13 @@ SECTION "DX Edition Title Lettering", ROMX
 
 Version_GFX:
 IF DEF(_RED)
-	INCBIN "gfx/title/red_version.1bpp" ; 10 tiles
+	INCBIN "gfx/title/red_version.1bpp", 0, 9 * 8 ; omit empty trailing tile
 ENDC
 IF DEF(_BLUE)
-	INCBIN "gfx/title/blue_version.1bpp" ; 10 tiles
+	INCBIN "gfx/title/blue_version.1bpp", 0, 9 * 8 ; omit empty trailing tile
 ENDC
 	; Keep the original German edition lettering and add a readable DX suffix
 	; using existing font tiles, without changing the original PNG artwork.
-	ds 8, 0 ; space
 IF GEN_2_GRAPHICS
 	INCBIN "gfx/gs/font.1bpp", ("D" - $80) * 8, 8
 	INCBIN "gfx/gs/font.1bpp", ("X" - $80) * 8, 8

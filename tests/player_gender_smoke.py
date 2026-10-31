@@ -245,8 +245,9 @@ original_label = (
     / ("red_version.1bpp" if rom == "pokered" else "blue_version.1bpp")
 ).read_bytes()
 font = (root / "gfx/gs/font.1bpp").read_bytes()
-expected_label = original_label + bytes(8) + font[3 * 8 : 4 * 8] + font[23 * 8 : 24 * 8]
-assert len(expected_label) == 13 * 8
+assert original_label[-8:] == bytes(8), "trimming would remove visible edition pixels"
+expected_label = original_label[:-8] + font[3 * 8 : 4 * 8] + font[23 * 8 : 24 * 8]
+assert len(expected_label) == 11 * 8
 # Cold boots exercise the actual title path, including the default without a save.
 for saved, graphic in [
     (title_save, "GreenPlayerCharacterTitleGraphics"),
@@ -272,7 +273,7 @@ for saved, graphic in [
     expected_vram = [value for byte in expected_label for value in (byte, byte)]
     assert list(boot.memory[0, 0x9600 : 0x9600 + len(expected_vram)]) == expected_vram
     row = a("wTileMap") + 8 * 20
-    assert list(boot.memory[row + 3 : row + 16]) == list(range(0x60, 0x6D))
+    assert list(boot.memory[row + 4 : row + 15]) == list(range(0x60, 0x6B))
     assert list(boot.memory[1, 0xA000:0xBFFF]) == saved
     boot.screen.image.save(
         "/tmp/" + rom + "-title-" + ("girl" if saved is title_save else "boy") + ".png"
