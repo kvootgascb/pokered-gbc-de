@@ -1007,3 +1007,5 @@ INCLUDE "engine/events/comfort_options.asm"
 INCLUDE "engine/events/ship_merchant.asm"
 
 INCLUDE "engine/events/gym_rematches.asm"
+
+INCLUDE "engine/movie/title_gender.asm"

@@ -166,6 +166,106 @@ def call(n, limit=180, auto_button=None):
     )
 
 
+# The title reads persisted appearance without loading or migrating the save.
+call("SaveSAVtoSRAM0")
+title_save = list(p.memory[1, 0xA000:0xBFFF])
+title_main = list(p.memory[a("wMainDataStart") : a("wMainDataEnd")])
+
+
+def title_checksum():
+    data = p.memory[1, a("sGameData") : a("sGameDataEnd")]
+    p.memory[1, a("sMainDataCheckSum")] = (~sum(data)) & 255
+
+
+def check_title(expected):
+    before = list(p.memory[1, 0xA000:0xBFFF])
+    call("ReadTitlePlayerGender")
+    assert p.memory[a("wTitlePlayerGender")] == expected
+    assert list(p.memory[1, 0xA000:0xBFFF]) == before, "title rewrote SRAM"
+    # VBlank advances the normal play timer while the routine executes.
+    current = list(p.memory[a("wMainDataStart") : a("wMainDataEnd")])
+    timer = a("wPlayTimeHours") - a("wMainDataStart")
+    assert current[:timer] == title_main[:timer]
+    assert current[timer + 5 :] == title_main[timer + 5 :]
+
+
+check_title(1)
+for field, value in [
+    ("wPlayerGender", 0),
+    ("wPlayerGender", 2),
+    ("wPlayerGenderTag", 0),
+]:
+    p.memory[1, 0xA000:0xBFFF] = title_save
+    p.memory[1, a("sMainData") + a(field) - a("wMainDataStart")] = value
+    title_checksum()
+    check_title(0)
+for field in [
+    "sMainDataCheckSum",
+    "sFeatureSaveMagic",
+    "sFeatureSaveVersion",
+    "sFeatureSaveSize",
+    "sFeatureSavePayload",
+    "sFeatureSaveChecksum",
+]:
+    p.memory[1, 0xA000:0xBFFF] = title_save
+    p.memory[1, a(field)] ^= 1
+    check_title(0)
+p.memory[1, 0xA000:0xBFFF] = title_save
+p.memory[1, a("sPlayerName") : a("sPlayerName") + 11] = [255] * 11
+title_checksum()
+check_title(0)
+for marker in [b"I1", bytes(2)]:
+    p.memory[1, 0xA000:0xBFFF] = title_save
+    offset = a("sMainData") + a("wInventoryFormat") - a("wMainDataStart")
+    p.memory[1, offset : offset + 2] = list(marker)
+    p.memory[1, a("sFeatureSaveMagic")] = 0
+    title_checksum()
+    check_title(1)
+for gender, graphic in [
+    (0, "PlayerCharacterTitleGraphics"),
+    (1, "GreenPlayerCharacterTitleGraphics"),
+]:
+    p.memory[1, 0xA000:0xBFFF] = title_save
+    offset = a("sMainData") + a("wPlayerGender") - a("wMainDataStart")
+    p.memory[1, offset] = gender
+    title_checksum()
+    # The persisted value wins over an unsaved live change.
+    p.memory[a("wPlayerGender")] = 1 - gender
+    p.memory[0xFF40] = 0
+    call("LoadTitlePlayerGraphics")
+    bank, addr = sym[graphic]
+    assert list(p.memory[0, 0x8000:0x8230]) == list(p.memory[bank, addr : addr + 560])
+    assert p.memory[a("wPlayerGender")] == 1 - gender
+# Cold boots exercise the actual title path, including the default without a save.
+for saved, graphic in [
+    (title_save, "GreenPlayerCharacterTitleGraphics"),
+    ([255] * len(title_save), "PlayerCharacterTitleGraphics"),
+]:
+    boot = PyBoy(str(root / (rom + ".gbc")), window="null", sound_emulated=False)
+    boot.set_emulation_speed(0)
+    boot.memory[1, 0xA000:0xBFFF] = saved
+    drawn = []
+    boot.hook_register(
+        *sym["DrawPlayerCharacter.loop"], lambda _: drawn.append(True), None
+    )
+    for _ in range(1200):
+        boot.tick(1, False)
+        if drawn:
+            break
+    assert drawn, "cold boot never drew the title character"
+    boot.tick(180, True)
+    bank, addr = sym[graphic]
+    assert list(boot.memory[0, 0x8000:0x8230]) == list(
+        boot.memory[bank, addr : addr + 560]
+    )
+    assert list(boot.memory[1, 0xA000:0xBFFF]) == saved
+    boot.screen.image.save(
+        "/tmp/" + rom + "-title-" + ("girl" if saved is title_save else "boy") + ".png"
+    )
+    boot.stop(save=False)
+print("PASS: title selects saved graphics; invalid/legacy saves handled read-only")
+restore()
+
 # Real save routine and checksum-checked restore, including the new bytes.
 call("SaveSAVtoSRAM0")
 p.memory[a("wPlayerGender")] = 0

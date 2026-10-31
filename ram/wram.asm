@@ -184,7 +184,7 @@ wTutorMode:: db
 wTutorChainDepth:: db
 wHiddenMenuPage:: db
 wHiddenMenuPreferences:: db
-	ds 1
+wTitlePlayerGender:: db ; transient; never loaded into the running game's state
 
 
 SECTION "Overworld Map", WRAM0

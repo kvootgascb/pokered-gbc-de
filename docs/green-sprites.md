@@ -8,12 +8,15 @@ Imported PNGs retain the original pixels; only filenames changed:
 - `gfx/player/red.png`, `redb.png`, `shrink1.png`, `shrink2.png` → `gfx/player/green.png`, `greenb.png`, `green_shrink1.png`, `green_shrink2.png`
 - `gfx/sprites/red.png`, `red_bike.png` → `gfx/sprites/green.png`, `green_bike.png`
 - `gfx/overworld/red_fish_{front,back,side}.png` → corresponding `green_fish_*.png`
+- `gfx/title/player.png` → `gfx/title/green_player.png`
 
 The source repository does not provide an explicit graphics license or identify a separate sprite artist in its README. This attribution is a record of provenance, not a claim of an unrestricted license. Original Pokémon characters belong to their respective owners.
 
 The gender choice uses two previously unused bytes in the existing saved main-data block. A girl is recognized only when `wPlayerGenderTag` is `$47` and `wPlayerGender` is `1`; untagged legacy saves use the boy's graphics. Save-data offsets and sizes remain unchanged. The standard save checksum covers these bytes.
 
 Walking, cycling, fishing, introduction (including shrinking), trainer card, local battle back view and Hall of Fame select the player's graphics. Surfing retains the shared Seel sprite. Link opponents retain their existing graphics: the old link protocol does not transmit gender.
+
+The title screen also shows the saved protagonist, using Green's matching 40×56 title sprite. Without a valid save it shows the original boy. An appearance change in the hidden menu affects the next title display after the player saves normally. The title reads SRAM without loading gameplay state, migrating inventory, or rewriting any save bytes. It checks the original save checksum, the gender tag, and, for current I2 saves, the versioned feature header and checksum. Tagged legacy saves remain supported; untagged or invalid saves fall back to the boy. Logo, cycling Pokémon, ball animation and existing title palette remain unchanged. The title's temporary gender byte uses existing unsaved padding; save layout and version are unchanged.
 
 The female back picture uses the original 32×32 sprite scaling path, while the boy and old-man tutorial keep the existing Gen 2 back-picture path.
 

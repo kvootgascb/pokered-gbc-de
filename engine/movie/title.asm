@@ -317,11 +317,7 @@ ScrollTitleScreenGameVersion:
 	ret
 
 DrawPlayerCharacter:
-	ld hl, PlayerCharacterTitleGraphics
-	ld de, vSprites
-	ld bc, PlayerCharacterTitleGraphicsEnd - PlayerCharacterTitleGraphics
-	ld a, BANK(PlayerCharacterTitleGraphics)
-	call FarCopyData2
+	farcall LoadTitlePlayerGraphics
 	call ClearSprites
 	xor a
 	ld [wPlayerCharacterOAMTile], a
