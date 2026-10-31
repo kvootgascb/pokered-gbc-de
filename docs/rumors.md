@@ -29,6 +29,19 @@ Ausgangspunkt (8, 5). Er ist unabhängig vom Champion-Sieg vorhanden.
 
 Mew und sein Versteckspiel werden nicht ausdrücklich verraten.
 
+Mit **Mew im aktuellen Team** erkennt der Wanderer die Farbe wieder:
+
+> Hast du schon gehört?
+> Diese Farbe ...
+> Genau so sah der Schatten damals aus!
+> Aber ein FLEGMON ist das jedenfalls nicht.
+
+Alle sechs Teamplätze zählen, auch bei besiegtem Mew; bestimmte Attacken sind
+nicht nötig. Ein Pokédex-Eintrag oder Mew nur in der Box genügt nicht. Sobald
+Mew das Team verlässt, erzählt er wieder sein ursprüngliches Gerücht.
+Die Reaktion wird bei jedem Gespräch neu geprüft und verändert weder
+Pokémon-Daten noch den gespeicherten Zustand der Lastwagen-Begegnung.
+
 ## Angler auf der Zinnoberinsel
 
 Ein neuer Angler läuft am südlichen Ufer, Ausgangspunkt (8, 13).
@@ -118,3 +131,7 @@ Für die Pikachu-Reaktion werden zusätzlich der normale Dialog, andere Arten,
 Surfer auf einem anderen Teammitglied, Teamplatz sechs, Attackenplatz vier,
 0 KP/AP sowie Pokémon nur in der Box oder hinter dem Teamende geprüft.
 Teamdaten und Feature-Speicher bleiben dabei unverändert.
+Für den Wanderer werden Mew auf dem ersten und letzten Teamplatz, besiegtes
+Mew, andere Arten einschließlich Flegmon/Mewtu, der reine Pokédex-Eintrag,
+Box-/ungenutzte Teamdaten sowie die Rückkehr zum Gerücht nach Entfernen von
+Mew geprüft. Beide Textvarianten laufen über den echten Kartendialog.

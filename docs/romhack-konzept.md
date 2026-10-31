@@ -224,6 +224,12 @@ sah; die übrigen sprechen über ihren Landgang. Ihre Anwesenheit genügt als
 Hinweis auf das Schiff. Texte, Orte, Laufwege und technische Details:
 [rumors.md](rumors.md).
 
+Der Pikachu-Matrose reagiert überrascht auf ein Team-Pikachu mit Surfer;
+der Wanderer erkennt mit Mew im Team die Farbe des damaligen Schattens wieder.
+Ohne das passende Team-Pokémon erzählen beide weiterhin ihr ursprüngliches
+Gerücht. Ein reiner Box- oder Pokédex-Eintrag genügt nicht; es entstehen keine
+neuen persistenten Zustände oder Belohnungen.
+
 ## Umgesetzt: Starter-Editor im Geheimmenü
 
 Der Editor auf **Seite 2** des Geheimmenüs kann

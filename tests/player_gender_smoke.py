@@ -922,6 +922,46 @@ print(
 )
 
 
+# The hiker recognizes Mew itself, without any requirement on moves or flags.
+mew_reactions = []
+hook("MewRumorTalk.react", lambda _: mew_reactions.append(True))
+for members, expected in [
+    ([], False),
+    ([normal_other], False),
+    ([(0x25, [33, 0, 0, 0], False)], False),  # Slowpoke is still only a guess.
+    ([(0x83, [93, 0, 0, 0], False)], False),  # Mewtwo is a different species.
+    ([(0x15, [1, 0, 0, 0], False)], True),
+    ([normal_other] * 5 + [(0x15, [1, 0, 0, 0], True)], True),
+    ([(0x15, [0, 0, 0, 0], False)], True),
+]:
+    enter_npc_map(8, [84, 0, 0, 0], map_id=0x51, width=7, y=6)
+    set_reaction_party(members)
+    p.memory[a("wPokedexOwned") + 18] |= 0x40  # Mew owned, even in negative cases.
+    p.memory[a("wBoxCount")] = 1
+    p.memory[a("wBoxMon1Species")] = 0x15
+    if len(members) < 6:
+        p.memory[a(f"wPartyMon{len(members) + 1}Species")] = 0x15
+    team_before = list(p.memory[a("wPartyDataStart") : a("wPartyDataEnd")])
+    features_before = list(p.memory[3, 0xD000:0xD200])
+    before = len(mew_reactions)
+    p.memory[a("hSpriteIndexOrTextID")] = 5
+    call("DisplayTextID", 900, "a")
+    assert len(mew_reactions) - before == int(expected)
+    assert list(p.memory[a("wPartyDataStart") : a("wPartyDataEnd")]) == team_before
+    assert list(p.memory[3, 0xD000:0xD200]) == features_before
+    if expected:
+        # The same visit returns to the rumor as soon as Mew leaves the team.
+        p.memory[a("wPartyCount")] = 0
+        before = len(mew_reactions)
+        p.memory[a("hSpriteIndexOrTextID")] = 5
+        call("DisplayTextID", 900, "a")
+        assert len(mew_reactions) == before
+        assert list(p.memory[3, 0xD000:0xD200]) == features_before
+print(
+    "PASS: actual hiker recognizes team Mew including sixth slot/fainted; ignores other species/box/Pokedex/stale data and returns to rumor after removal"
+)
+
+
 # The two-tile pier must remain passable with either lane occupied by the
 # original sailor. Freeze him there in test ROM data; do not remove any NPC.
 # This reproduces the bottleneck caused by the former fixed sailor at (22,27).

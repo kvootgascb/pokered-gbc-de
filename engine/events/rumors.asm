@@ -177,8 +177,26 @@ OakRumorTalk::
 	done
 
 MewRumorTalk::
+	ld b, MEW
+	ld c, 0
+	call PartyHasRumorPokemon
+	jr c, .react
 	ld hl, .text
 	jp PrintText
+.react
+	ld hl, .reaction
+	jp PrintText
+.reaction
+	text "Hast du schon"
+	line "gehört?"
+	para "Diese Farbe ..."
+	para "Genau so sah der"
+	line "Schatten damals"
+	cont "aus!"
+	para "Aber ein FLEGMON"
+	line "ist das jedenfalls"
+	cont "nicht."
+	done
 .text
 	text "Hast du schon"
 	line "gehört?"
