@@ -68,7 +68,7 @@ Weitere geplante Menüpunkte, insbesondere der Starter-Editor, sind noch offen.
 | Größeres PC-Item-Lager | Ja | Ja | 70 Plätze (umgesetzt). |
 | Laufschuhe | Nein | Ja | Umgesetzt: B halten für doppeltes normales Gehtempo, auch in Innenräumen. Kein Extra-Tempo beim Surfen, Fahrrad, Springen oder geskripteten Bewegungen. |
 | Kampf gegen Professor Eich | Nein | Ja | Nach jedem Top-Vier-Sieg einmal verfügbar, danach bis zum nächsten Top-Vier-Sieg gesperrt. Ein Sieg über Eich gibt einen zufälligen Starter als Preis. |
-| Arena-Rückkämpfe | Nein | Ja | Geplant: nach jedem Top-Vier-Sieg jeder Leiter einmal erneut herausforderbar; Gelegenheiten sammeln sich nicht an. Teams und Level noch offen. |
+| Arena-Rückkämpfe | Nein | Ja | Umgesetzt: nach jedem Top-Vier-Sieg jeder Leiter einmal; Originalteams auf Level 60–65, Giovanni zurück in seiner Arena. Details: [gym-rematches.md](gym-rematches.md). |
 | Tausch-zurück-Trainer | Nein | Ja | Umgesetzt: rechter Assistent in Eichs Labor, nach der Starterwahl. Testet das zuvor wackelige Linkkabel; Pokémon wird sofort zurückgegeben und kann sich durch Tausch entwickeln. |
 | Alle 151 Pokémon erhältlich | Nein | Ja | Umgesetzt und als Beschaffungsgraph geprüft: jede Art ohne externen Tausch in einem Spielstand erhältlich. Einmal pro Art genügt; keine Fanggarantie. Details: [obtainability.md](obtainability.md). |
 | Wiederverwendbare TMs | Nein | Ja | Umgesetzt: TMs werden nach erfolgreichem Erlernen nicht verbraucht. Classic verbraucht sie weiterhin. |
@@ -265,41 +265,20 @@ der geplanten Gelb-Grundlage usw.). Der bisher gewünschte Umfang ist die Wahl
 der Pokémon-Art, kein allgemeiner Editor für Level, Werte, Items oder Teams.
 Dieses Feature ist **nur geplant, noch nicht implementiert**.
 
-## Geplant: Rückkämpfe gegen die Arenaleiter
+## Umgesetzt: Rückkämpfe gegen die Arenaleiter
 
-Nur im erweiterten Modus. Nach jedem Top-Vier-Sieg kann jeder der acht
-Arenaleiter erneut herausgefordert werden. Jeder Leiter hat seine eigene
-Verfügbarkeit; ein Rückkampf bei Rocko verbraucht beispielsweise nicht Mistys
-Gelegenheit. Mehrere Top-Vier-Siege sammeln keine zusätzlichen Kämpfe an.
-Classic pausiert die zusätzlichen Angebote, ohne die Zustände zurückzusetzen.
-Die Verfügbarkeit soll gespeichert werden und vorhandene Spielstände weiter
-unterstützen. Die ursprünglichen ersten Arenakämpfe bleiben erhalten.
+Nur in Erweitert: Nach jedem Top-Vier-Sieg ist jeder Leiter einmal erneut
+herausforderbar. Die Gelegenheiten sammeln sich nicht an. Nein behält die
+Gelegenheit, Ja verbraucht sie beim Annehmen, auch bei einer Niederlage.
+Originale Arten, Reihenfolge und Teamgröße bleiben gleich; nur die Level
+werden auf 60–65 angehoben. Die ursprünglichen Signaturattacken bleiben erhalten.
+Es gibt normales Preisgeld, aber keine erneuten Orden oder Arena-TMs.
 
-Dialogideen vor der Herausforderung, noch keine endgültigen Bildschirmtexte:
-
-| Leiter | Motivation / Dialogidee |
-| --- | --- |
-| Rocko | „Seit unserem ersten Kampf ist viel passiert. Zeig mir, wie stark Du geworden bist!“ |
-| Misty | „Du bist jetzt CHAMPION? Dann will ich sehen, ob Du auch gegen meine Strömung bestehst!“ |
-| Major Bob | „Diese Niederlage lässt mir keine Ruhe, Soldat! Zeit für eine Revanche!“ |
-| Erika | „Dein Können ist seit unserem letzten Treffen aufgeblüht. Darf ich es noch einmal erleben?“ |
-| Koga | „Ein wahrer Ninja hört nie auf zu trainieren. Prüfen wir, was wir beide gelernt haben!“ |
-| Sabrina | „Ich habe vorausgesehen, dass Du zurückkommst. Den Ausgang unseres Kampfes sehe ich diesmal nicht klar.“ |
-| Pyro | „Neue Frage: Wie schlägt sich ein CHAMPION gegen mein Feuer? Finden wir es heraus!“ |
-| Giovanni | Vorschlag bei einer möglichen Rückkehr: „Ich habe mich zurückgezogen, um meine Schwäche zu verstehen. Zeig mir, ob ich daraus gelernt habe.“ |
-
-Noch zu entscheiden:
-
-- Teams und Level der Rückkämpfe; verstärkte Teams sind ein Vorschlag.
-- Wird die Gelegenheit beim Kampfbeginn oder erst bei einem Sieg verbraucht?
-- Preisgeld und weitere Belohnungen. Vorschlag: keine erneuten Orden oder
-  ursprünglichen Arena-TMs.
-- Giovanni verschwindet im Original nach seiner Niederlage. Für den achten
-  Rückkampf braucht es eine ausdrücklich festgelegte Rückkehr oder einen
-  anderen Austragungsort; sein normaler Story-Abgang soll nicht versehentlich
-  rückgängig gemacht werden.
-
-Dieses Feature ist **nur geplant, noch nicht implementiert**.
+Giovanni kehrt nach dem Champion-Sieg in seine Arena zurück und erklärt seine
+Zeit im Rückzug und Training. Der ursprüngliche erste Story-Ablauf bleibt
+bestehen. Alle Leiter haben eine eigene Einladung beziehungsweise Motivation.
+Teams, Dialogkonzept, Speicherregeln und Testumfang:
+[gym-rematches.md](gym-rematches.md).
 
 ## Umgesetzt: Spezialhändler auf der M.S. Anne
 

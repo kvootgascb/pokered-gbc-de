@@ -30,7 +30,7 @@ The existing gender field stays in the base save. See [postgame-features.md](pos
 | 0 | 1 | Mode: 0 Classic, 1 Extended; default Classic |
 | 1 | 1 | Independent preferences (implemented): fast healing bit 0, skip VM animation bit 1; both off |
 | 2 | 1 | Registered basis item (implemented); 0 means none |
-| 3 | 1 | Feature-initialization flags; bit 0: champion events initialized |
+| 3 | 1 | Feature-initialization flags; bit 0: Oak/Anne initialized, bit 1: arena rematches initialized |
 | 4 | 1 | Oak battle availability; zero |
 | 5 | 1 | M.S. Anne availability: 0 unavailable, 1 available |
 | 6 | 1 | Mew state: 0 unseen, 1 front, 2 rear, 3 encounter consumed |
@@ -41,7 +41,8 @@ The existing gender field stays in the base save. See [postgame-features.md](pos
 | 13 | 1 | Trade-back state; zero |
 | 14 | 1 | Pending Oak starter species; 0 means no gift |
 | 15 | 1 | Last used repel item ID; 0 means unknown (implemented) |
-| 16 | 64 | Future event flags, including per-feature initialization flags |
+| 16 | 1 | Arena-rematch availability: badge-order bits 0–7; zero until champion initialization |
+| 17 | 63 | Future event flags |
 | 80 | 32 | Future counters |
 | 112 | 400 | General reserve |
 
@@ -103,3 +104,8 @@ clobber HL and BC, so do not pass their pointers/values through them unchanged.
 ROMX callers use `read_feature_byte` / `write_feature_byte` (HL address, C value).
 These macros use base-WRAM scratch and register-free farcall entry points.
 Do not use `homecall` to switch banks from executing ROMX code.
+
+Arena rematches use schema-flags bit 1 for independent one-time initialization
+from existing champion progress. Later championships refresh offset 16 to FF.
+Consuming one challenge clears only its bit; load and mode switches retain it.
+See [gym-rematches.md](gym-rematches.md).

@@ -54,6 +54,8 @@ VermilionGym_ScriptPointers:
 	dw_const DisplayEnemyTrainerTextAndStartBattle, SCRIPT_VERMILIONGYM_START_BATTLE
 	dw_const EndTrainerBattle,                      SCRIPT_VERMILIONGYM_END_BATTLE
 	dw_const VermilionGymLTSurgeAfterBattleScript,  SCRIPT_VERMILIONGYM_LT_SURGE_AFTER_BATTLE
+	dw_const VermilionGymRematchPostBattle, SCRIPT_VERMILIONGYM_REMATCH
+	EXPORT SCRIPT_VERMILIONGYM_REMATCH
 
 VermilionGymLTSurgeAfterBattleScript:
 	ld a, [wIsInBattle]
@@ -121,6 +123,8 @@ VermilionGymLTSurgeText:
 	call DisableWaitingAfterTextDisplay
 	jr .text_script_end
 .got_tm24_already
+	farcall TryGymRematchTalk
+	jp c, TextScriptEnd
 	ld hl, .PostBattleAdviceText
 	call PrintText
 	jr .text_script_end
@@ -248,3 +252,7 @@ VermilionGymGymGuideText:
 .BeatLTSurgeText:
 	text_far _VermilionGymGymGuideBeatLTSurgeText
 	text_end
+
+VermilionGymRematchPostBattle:
+	farcall FinishGymRematch
+	ret

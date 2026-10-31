@@ -1005,3 +1005,5 @@ INCLUDE "engine/events/context_field_moves.asm"
 INCLUDE "engine/events/comfort_options.asm"
 
 INCLUDE "engine/events/ship_merchant.asm"
+
+INCLUDE "engine/events/gym_rematches.asm"

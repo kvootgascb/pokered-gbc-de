@@ -99,3 +99,10 @@ ist nötig. Details stehen in [save-format.md](save-format.md).
 Begegnungsregeln, Münzgrenzen, Preisprüfungen und Attackenlisten sowie das
 Speichern, Laden und Migrieren alter Spielstände. Diese automatisierten Checks
 ersetzen keinen vollständigen manuellen Durchlauf der gesamten Handlung.
+
+## Weitere Champion-Inhalte
+
+Die acht Arenaleiter bieten nun unabhängige Rückkämpfe mit ihren Originalteams
+auf Level 60–65 an: [gym-rematches.md](gym-rematches.md).
+Der zusätzliche Händler auf dem Schiffsdeck verkauft seltene Vorräte:
+[ship-merchant.md](ship-merchant.md). Beide Inhalte gelten nur in Erweitert.

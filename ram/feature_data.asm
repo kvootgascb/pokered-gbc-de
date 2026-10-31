@@ -17,6 +17,7 @@ DEF wFeatureTradeBackState EQU wFeatureData + 13
 DEF wFeatureOakPendingStarter EQU wFeatureData + 14
 DEF wFeatureLastRepel EQU wFeatureData + 15
 DEF wFeatureEventFlags EQU wFeatureData + 16 ; 64 bytes
+DEF wFeatureGymRematches EQU wFeatureEventFlags ; one availability bit per arena
 DEF wFeatureCounters EQU wFeatureData + 80 ; 32 bytes
 DEF wFeatureReserved EQU wFeatureData + 112
 DEF wFeatureDataEnd EQU wFeatureData + FEATURE_DATA_SIZE

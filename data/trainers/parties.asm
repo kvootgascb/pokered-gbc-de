@@ -541,6 +541,9 @@ GiovanniData:
 ; Viridian Gym
 	db $FF, 45, RHYHORN, 42, DUGTRIO, 44, NIDOQUEEN, 45, NIDOKING, 50, RHYDON, 0
 
+; Extended rematch: original species/order, levels 60-65
+	db $FF, 60, RHYHORN, 61, DUGTRIO, 62, NIDOQUEEN, 63, NIDOKING, 65, RHYDON, 0
+
 RocketData:
 ; Mt. Moon B2F
 	db 13, RATTATA, ZUBAT, 0
@@ -643,23 +646,44 @@ BrunoData:
 BrockData:
 	db $FF, 12, GEODUDE, 14, ONIX, 0
 
+; Extended rematch: original species/order, levels 60-65
+	db $FF, 60, GEODUDE, 65, ONIX, 0
+
 MistyData:
 	db $FF, 18, STARYU, 21, STARMIE, 0
+
+; Extended rematch: original species/order, levels 60-65
+	db $FF, 60, STARYU, 65, STARMIE, 0
 
 LtSurgeData:
 	db $FF, 21, VOLTORB, 18, PIKACHU, 24, RAICHU, 0
 
+; Extended rematch: original species/order, levels 60-65
+	db $FF, 60, VOLTORB, 62, PIKACHU, 65, RAICHU, 0
+
 ErikaData:
 	db $FF, 29, VICTREEBEL, 24, TANGELA, 29, VILEPLUME, 0
+
+; Extended rematch: original species/order, levels 60-65
+	db $FF, 60, VICTREEBEL, 62, TANGELA, 65, VILEPLUME, 0
 
 KogaData:
 	db $FF, 37, KOFFING, 39, MUK, 37, KOFFING, 43, WEEZING, 0
 
+; Extended rematch: original species/order, levels 60-65
+	db $FF, 60, KOFFING, 62, MUK, 60, KOFFING, 65, WEEZING, 0
+
 BlaineData:
 	db $FF, 42, GROWLITHE, 40, PONYTA, 42, RAPIDASH, 47, ARCANINE, 0
 
+; Extended rematch: original species/order, levels 60-65
+	db $FF, 60, GROWLITHE, 60, PONYTA, 62, RAPIDASH, 65, ARCANINE, 0
+
 SabrinaData:
 	db $FF, 38, KADABRA, 37, MR_MIME, 38, VENOMOTH, 43, ALAKAZAM, 0
+
+; Extended rematch: original species/order, levels 60-65
+	db $FF, 60, KADABRA, 62, MR_MIME, 62, VENOMOTH, 65, ALAKAZAM, 0
 
 GentlemanData:
 ; SS Anne 1F Rooms

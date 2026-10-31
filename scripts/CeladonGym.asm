@@ -35,6 +35,8 @@ CeladonGym_ScriptPointers:
 	dw_const DisplayEnemyTrainerTextAndStartBattle, SCRIPT_CELADONGYM_START_BATTLE
 	dw_const EndTrainerBattle,                      SCRIPT_CELADONGYM_END_BATTLE
 	dw_const CeladonGymErikaPostBattleScript,       SCRIPT_CELADONGYM_ERIKA_POST_BATTLE
+	dw_const CeladonGymRematchPostBattle, SCRIPT_CELADONGYM_REMATCH
+	EXPORT SCRIPT_CELADONGYM_REMATCH
 
 CeladonGymErikaPostBattleScript:
 	ld a, [wIsInBattle]
@@ -113,6 +115,8 @@ CeladonGymErikaText:
 	call DisableWaitingAfterTextDisplay
 	jr .done
 .afterBeat
+	farcall TryGymRematchTalk
+	jp c, TextScriptEnd
 	ld hl, .PostBattleAdviceText
 	call PrintText
 	jr .done
@@ -288,3 +292,7 @@ CeladonGymEndBattleText8:
 CeladonGymAfterBattleText8:
 	text_far _CeladonGymAfterBattleText8
 	text_end
+
+CeladonGymRematchPostBattle:
+	farcall FinishGymRematch
+	ret

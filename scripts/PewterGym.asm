@@ -35,6 +35,8 @@ PewterGym_ScriptPointers:
 	dw_const DisplayEnemyTrainerTextAndStartBattle, SCRIPT_PEWTERGYM_START_BATTLE
 	dw_const EndTrainerBattle,                      SCRIPT_PEWTERGYM_END_BATTLE
 	dw_const PewterGymBrockPostBattle,              SCRIPT_PEWTERGYM_BROCK_POST_BATTLE
+	dw_const PewterGymRematchPostBattle, SCRIPT_PEWTERGYM_REMATCH
+	EXPORT SCRIPT_PEWTERGYM_REMATCH
 
 PewterGymBrockPostBattle:
 	ld a, [wIsInBattle]
@@ -105,6 +107,8 @@ PewterGymBrockText:
 	call DisableWaitingAfterTextDisplay
 	jr .done
 .afterBeat
+	farcall TryGymRematchTalk
+	jp c, TextScriptEnd
 	ld hl, .PostBattleAdviceText
 	call PrintText
 	jr .done
@@ -223,3 +227,7 @@ PewterGymGuideFreeServiceText:
 PewterGymGuidePostBattleText:
 	text_far _PewterGymGuidePostBattleText
 	text_end
+
+PewterGymRematchPostBattle:
+	farcall FinishGymRematch
+	ret

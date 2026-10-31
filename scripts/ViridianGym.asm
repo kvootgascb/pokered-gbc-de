@@ -1,4 +1,5 @@
 ViridianGym_Script:
+	farcall PrepareGiovanniRematch
 	ld hl, .CityName
 	ld de, .LeaderName
 	call LoadGymLeaderAndCityName
@@ -30,6 +31,8 @@ ViridianGym_ScriptPointers:
 	dw_const EndTrainerBattle,                      SCRIPT_VIRIDIANGYM_END_BATTLE
 	dw_const ViridianGymGiovanniPostBattle,         SCRIPT_VIRIDIANGYM_GIOVANNI_POST_BATTLE
 	dw_const ViridianGymPlayerSpinningScript,       SCRIPT_VIRIDIANGYM_PLAYER_SPINNING
+	dw_const ViridianGymRematchPostBattle, SCRIPT_VIRIDIANGYM_REMATCH
+	EXPORT SCRIPT_VIRIDIANGYM_REMATCH
 
 ViridianGymDefaultScript:
 	ld a, [wYCoord]
@@ -214,6 +217,8 @@ ViridianGymGiovanniText:
 	call DisableWaitingAfterTextDisplay
 	jr .text_script_end
 .afterBeat
+	farcall TryGymRematchTalk
+	jp c, TextScriptEnd
 	ld a, $1
 	ld [wDoNotWaitForButtonPressAfterDisplayingText], a
 	ld hl, .PostBattleAdviceText
@@ -440,3 +445,7 @@ ViridianGymGuidePreBattleText:
 ViridianGymGuidePostBattleText:
 	text_far _ViridianGymGuidePostBattleText
 	text_end
+
+ViridianGymRematchPostBattle:
+	farcall FinishGymRematch
+	ret

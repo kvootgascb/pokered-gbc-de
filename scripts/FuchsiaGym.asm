@@ -37,6 +37,8 @@ FuchsiaGym_ScriptPointers:
 	dw_const DisplayEnemyTrainerTextAndStartBattle, SCRIPT_FUCHSIAGYM_START_BATTLE
 	dw_const EndTrainerBattle,                      SCRIPT_FUCHSIAGYM_END_BATTLE
 	dw_const FuchsiaGymKogaPostBattleScript,        SCRIPT_FUCHSIAGYM_KOGA_POST_BATTLE
+	dw_const FuchsiaGymRematchPostBattle, SCRIPT_FUCHSIAGYM_REMATCH
+	EXPORT SCRIPT_FUCHSIAGYM_REMATCH
 
 FuchsiaGymKogaPostBattleScript:
 	ld a, [wIsInBattle]
@@ -113,6 +115,8 @@ FuchsiaGymKogaText:
 	call DisableWaitingAfterTextDisplay
 	jr .done
 .afterBeat
+	farcall TryGymRematchTalk
+	jp c, TextScriptEnd
 	ld hl, .PostBattleAdviceText
 	call PrintText
 	jr .done
@@ -289,3 +293,7 @@ FuchsiaGymGymGuideText:
 .BeatKogaText:
 	text_far _FuchsiaGymGymGuideBeatKogaText
 	text_end
+
+FuchsiaGymRematchPostBattle:
+	farcall FinishGymRematch
+	ret

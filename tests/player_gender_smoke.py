@@ -7,6 +7,7 @@ Tests execute the real intro and ROM graphics/save routines without writing a sa
 from pyboy import PyBoy
 from pathlib import Path
 import io
+import json
 import sys
 
 root = Path(__file__).resolve().parents[1]
@@ -469,13 +470,15 @@ print(
 
 # Enter the real bow map and speak to each new NPC through the overworld.
 # A fresh stack and LCD mode restore leave the subroutine-test trampoline.
-def enter_npc_map(x, moves, species=0x55, map_id=0x63, width=10, y=6):
+def enter_npc_map(
+    x, moves, species=0x55, map_id=0x63, width=10, y=6, level=30, setup=None
+):
     restore()
     p.tick(120, False)
     p.memory[a("wPartyCount")] = 0
     p.memory[a("wMonDataLocation")] = 0x10  # player party, skip naming prompt
     p.memory[a("wcf91")] = species
-    p.memory[a("wCurEnemyLVL")] = 30
+    p.memory[a("wCurEnemyLVL")] = level
     call("_AddPartyMon")
     p.memory[a("wPartyMonNicks") : a("wPartyMonNicks") + 11] = [
         0x91,
@@ -511,6 +514,8 @@ def enter_npc_map(x, moves, species=0x55, map_id=0x63, width=10, y=6):
     p.memory[a("wCurrentTileBlockMapViewPointer")] = ptr & 255
     p.memory[a("wCurrentTileBlockMapViewPointer") + 1] = ptr >> 8
     p.memory[0xFF40] = 0xE3
+    if setup:
+        setup()
     p.register_file.SP = a("wStack")
     entry = a("EnterMap")
     for offset, byte in enumerate([0xFB, 0xC3, entry & 255, entry >> 8]):
@@ -1154,6 +1159,289 @@ for mode, champion, hidden in [(0, 1, True), (1, 0, True), (1, 1, False)]:
         == hidden
     )
 print("PASS: real ship merchant confirmation/payment and post-champion visibility")
+
+# Independent arena bits, one-time existing-champion initialization and saves.
+gym_cases = [
+    (0x36, "wPewterGymCurScript", ["GEODUDE", "ONIX"], [60, 65], [12, 14]),
+    (0x41, "wCeruleanGymCurScript", ["STARYU", "STARMIE"], [60, 65], [18, 21]),
+    (
+        0x5C,
+        "wVermilionGymCurScript",
+        ["VOLTORB", "PIKACHU", "RAICHU"],
+        [60, 62, 65],
+        [21, 18, 24],
+    ),
+    (
+        0x86,
+        "wCeladonGymCurScript",
+        ["VICTREEBEL", "TANGELA", "VILEPLUME"],
+        [60, 62, 65],
+        [29, 24, 29],
+    ),
+    (
+        0x9D,
+        "wFuchsiaGymCurScript",
+        ["KOFFING", "MUK", "KOFFING", "WEEZING"],
+        [60, 62, 60, 65],
+        [37, 39, 37, 43],
+    ),
+    (
+        0xB2,
+        "wSaffronGymCurScript",
+        ["KADABRA", "MR_MIME", "VENOMOTH", "ALAKAZAM"],
+        [60, 62, 62, 65],
+        [38, 37, 38, 43],
+    ),
+    (
+        0xA6,
+        "wCinnabarGymCurScript",
+        ["GROWLITHE", "PONYTA", "RAPIDASH", "ARCANINE"],
+        [60, 60, 62, 65],
+        [42, 40, 42, 47],
+    ),
+    (
+        0x2D,
+        "wViridianGymCurScript",
+        ["RHYHORN", "DUGTRIO", "NIDOQUEEN", "NIDOKING", "RHYDON"],
+        [60, 61, 62, 63, 65],
+        [45, 42, 44, 45, 50],
+    ),
+]
+restore()
+p.memory[a("wNumHoFTeams")] = 2
+p.memory[a("wObtainedBadges")] = 255
+p.memory[a("wGameplayModeCache")] = 1
+p.memory[3, 0xD003] = 1  # existing save, older champion-event initialization
+p.memory[3, 0xD010] = 0
+call("EnsureGymRematches")
+assert p.memory[3, 0xD003] == 3 and p.memory[3, 0xD010] == 255
+mask = 255
+for index, (map_id, script, *_) in enumerate(gym_cases):
+    p.memory[a("wCurMap")] = map_id
+    call("ConsumeGymRematch")
+    assert p.register_file.F & 0x10
+    mask &= ~(1 << index)
+    assert p.memory[3, 0xD010] == mask
+    call("ConsumeGymRematch")
+    assert not p.register_file.F & 0x10 and p.memory[3, 0xD010] == mask
+call("SaveSAVtoSRAM0")
+p.memory[3, 0xD010] = 255
+call("LoadSAV0")
+call("EnsureGymRematches")
+assert p.memory[3, 0xD010] == 0, "load/initialization restored consumed chances"
+call("RegisterChampionVictory")
+call("RegisterChampionVictory")
+assert p.memory[3, 0xD010] == 255
+p.memory[a("wCurMap")] = 0x36
+for mode, champ, badges in [(0, 2, 255), (1, 0, 255), (1, 2, 0)]:
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[a("wNumHoFTeams")] = champ
+    p.memory[a("wObtainedBadges")] = badges
+    call("ConsumeGymRematch")
+    assert not p.register_file.F & 0x10
+    assert p.memory[3, 0xD010] == 255
+print(
+    "PASS: eight saved arena opportunities, no stacking/reset on load, Classic/champion/badge gates"
+)
+
+# Read the real trainer party engine: original species/order/signature moves,
+# new levels, and the untouched original trainer instances.
+species_ids = {
+    m["name"]: m["species"]
+    for m in json.loads((root / "tests/fixtures/yellow_learnsets.json").read_text())[
+        "pokemon"
+    ]
+}
+party_stride = a("wEnemyMon2") - a("wEnemyMon1")
+bank, table = sym["GymRematchData"]
+records = [list(p.memory[bank, table + i * 6 : table + i * 6 + 6]) for i in range(8)]
+signature_moves = [117, 61, 85, 72, 92, 149, 126, 90]
+for index, ((map_id, script, names, levels, old_levels), record) in enumerate(
+    zip(gym_cases, records)
+):
+    assert record[0] == map_id
+    assert record[4] + 256 * record[5] == a(script)
+    assert record[3] == (5 if index == 7 else 4)
+    for number, expected_levels in [
+        (record[2], levels),
+        (3 if index == 7 else 1, old_levels),
+    ]:
+        restore()
+        p.memory[a("wCurOpponent")] = record[1]
+        p.memory[a("wTrainerNo")] = number
+        p.memory[a("wGymLeaderNo")] = index + 1
+        p.memory[a("wTrainerBaseMoney") : a("wTrainerBaseMoney") + 2] = [0, 0x20]
+        call("ReadTrainer", 600)
+        assert p.memory[a("wEnemyPartyCount")] == len(names)
+        assert list(
+            p.memory[a("wEnemyPartySpecies") : a("wEnemyPartySpecies") + len(names)]
+        ) == [species_ids[n] for n in names]
+        assert [
+            p.memory[a("wEnemyMon1Level") + j * party_stride] for j in range(len(names))
+        ] == expected_levels
+        assert (
+            p.memory[a("wEnemyMon1Moves") + (len(names) - 1) * party_stride + 2]
+            == signature_moves[index]
+        )
+    # Every arena uses a separate post-fight script and never writes original flags.
+    restore()
+    p.memory[a("wCurMap")] = map_id
+    p.memory[a("wGameplayModeCache")] = 1
+    p.memory[a("wNumHoFTeams")] = 1
+    p.memory[a("wObtainedBadges")] = 255
+    p.memory[3, 0xD003] = 3
+    p.memory[3, 0xD010] = 255
+    flags_before = list(p.memory[a("wEventFlags") : a("wEventFlags") + 320])
+    call("StartGymRematch")
+    assert p.memory[a("wCurOpponent")] == record[1]
+    assert p.memory[a("wTrainerNo")] == record[2]
+    assert p.memory[a(script)] == record[3]
+    assert p.memory[a("wCurMapScript")] == record[3]
+    assert p.memory[a("wGymLeaderNo")] == index + 1
+    assert p.memory[3, 0xD010] == 255 & ~(1 << index)
+    call("FinishGymRematch")
+    assert p.memory[a(script)] == 0 and p.memory[a("wCurMapScript")] == 0
+    assert p.memory[a("wJoyIgnore")] == 0
+    assert p.memory[a("wObtainedBadges")] == 255
+    assert list(p.memory[a("wEventFlags") : a("wEventFlags") + 320]) == flags_before
+    p.memory[a("wCurOpponent")] = 0
+    call("RefreshGymRematches")
+    call("TryGymRematchTalk", 1800, "b")
+    assert p.memory[3, 0xD010] == 255
+    assert p.memory[a("wCurOpponent")] == 0
+print(
+    "PASS: all eight original/rematch parties, signature moves, No dialogues and safe post-fight scripts"
+)
+
+# Source-defined event indices keep native leader/TM flags in sync with tests.
+event_ids = {}
+event_counter = 0
+for raw in (root / "constants/event_constants.asm").read_text().splitlines():
+    parts = raw.split(";")[0].split()
+    if not parts:
+        continue
+    op = parts[0]
+    if op in ("const_def", "const_next"):
+        event_counter = int(parts[1].replace("$", "0x"), 0) if len(parts) > 1 else 0
+    elif op == "const_skip":
+        event_counter += int(parts[1], 0) if len(parts) > 1 else 1
+    elif op == "const":
+        event_ids[parts[1]] = event_counter
+        event_counter += 1
+
+
+def set_event(name):
+    event = event_ids[name]
+    p.memory[a("wEventFlags") + event // 8] |= 1 << (event % 8)
+
+
+def champion_gym_setup(mode=1):
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[3, 0xD000] = mode
+    p.memory[a("wObtainedBadges")] = 255
+    p.memory[3, 0xD003] = 3
+    p.memory[3, 0xD010] = 255
+    for name in [
+        "EVENT_BEAT_BROCK",
+        "EVENT_GOT_TM34",
+        "EVENT_BEAT_VIRIDIAN_GYM_GIOVANNI",
+        "EVENT_GOT_TM27",
+    ]:
+        set_event(name)
+    # Giovanni has already made his original story exit.
+    p.memory[a("wMissableObjectFlags") + 0x32 // 8] |= 1 << (0x32 % 8)
+
+
+# NPC No leaves the chance intact; Yes runs a full native Rocko rematch.
+gym_starts = []
+gym_finishes = []
+gym_parties = []
+hook("StartGymRematch", lambda _: gym_starts.append(p.memory[a("wCurMap")]))
+hook("FinishGymRematch", lambda _: gym_finishes.append(p.memory[a("wCurMap")]))
+hook(
+    "ReadTrainer.FinishUp",
+    lambda _: gym_parties.append(
+        (
+            p.memory[a("wCurOpponent")],
+            p.memory[a("wTrainerNo")],
+            [
+                p.memory[a("wEnemyMon1Level") + i * party_stride]
+                for i in range(p.memory[a("wEnemyPartyCount")])
+            ],
+        )
+    ),
+)
+enter_npc_map(
+    4,
+    [57, 0, 0, 0],
+    species=0x15,
+    map_id=0x36,
+    width=5,
+    y=2,
+    level=100,
+    setup=champion_gym_setup,
+)
+p.memory[a("wNumBagItems") : a("wNumBagItems") + 2] = [0, 255]
+flags_before = list(p.memory[a("wEventFlags") : a("wEventFlags") + 320])
+before_money = money_value()
+shortcut_tap("a")
+for _ in range(50):
+    shortcut_tap("b")
+    if not p.memory[a("wFontLoaded")] & 1:
+        break
+assert not gym_starts and p.memory[3, 0xD010] == 255
+for _ in range(600):
+    shortcut_tap("a")
+    if (
+        gym_finishes
+        and p.memory[a("wPewterGymCurScript")] == 0
+        and not p.memory[a("wIsInBattle")]
+    ):
+        break
+assert gym_starts == [0x36] and gym_finishes == [0x36], (gym_starts, gym_finishes)
+assert (records[0][1], 2, [60, 65]) in gym_parties
+assert p.memory[a("wBattleResult")] == 0
+assert money_value() > before_money, "rematch did not pay normal trainer winnings"
+assert p.memory[3, 0xD010] == 254
+assert p.memory[a("wNumBagItems")] == 0, "rematch granted another TM"
+assert p.memory[a("wObtainedBadges")] == 255
+assert list(p.memory[a("wEventFlags") : a("wEventFlags") + 320]) == flags_before
+assert p.memory[a("wJoyIgnore")] == 0
+print(
+    "PASS: real Rocko No/Yes, full battle victory, separate finish and no duplicate TM/badge events"
+)
+
+# Returning Giovanni is visible only in Extended after his original departure.
+for mode in [1, 0]:
+    enter_npc_map(
+        2,
+        [57, 0, 0, 0],
+        species=0x15,
+        map_id=0x2D,
+        width=10,
+        y=2,
+        setup=lambda: champion_gym_setup(mode),
+    )
+    hidden = bool(p.memory[a("wMissableObjectFlags") + 0x32 // 8] & (1 << (0x32 % 8)))
+    assert hidden == (mode == 0)
+    if mode == 1:
+        before = len(gym_starts)
+        shortcut_tap("a")
+        for _ in range(60):
+            shortcut_tap("b")
+            if not p.memory[a("wFontLoaded")] & 1:
+                break
+        assert len(gym_starts) == before and p.memory[3, 0xD010] == 255
+        p.memory[3, 0xD010] = 127  # his opportunity consumed
+        for _ in range(35):
+            shortcut_tap("a")
+        assert not p.memory[a("wMissableObjectFlags") + 0x32 // 8] & (
+            1 << (0x32 % 8)
+        ), "returned Giovanni ran his old departure again"
+        assert len(gym_starts) == before
+print(
+    "PASS: Giovanni's natural Extended return, Classic hide, No and consumed-chance dialogue"
+)
 
 # Fill both inventories beyond their former limits and verify hard boundaries.
 restore()

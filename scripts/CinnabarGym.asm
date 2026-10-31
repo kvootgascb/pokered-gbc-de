@@ -48,6 +48,8 @@ CinnabarGym_ScriptPointers:
 	dw_const CinnabarGymGetOpponentTextScript,  SCRIPT_CINNABARGYM_GET_OPPONENT_TEXT
 	dw_const CinnabarGymOpenGateScript,         SCRIPT_CINNABARGYM_OPEN_GATE
 	dw_const CinnabarGymBlainePostBattleScript, SCRIPT_CINNABARGYM_BLAINE_POST_BATTLE
+	dw_const CinnabarGymRematchPostBattle, SCRIPT_CINNABARGYM_REMATCH
+	EXPORT SCRIPT_CINNABARGYM_REMATCH
 
 CinnabarGymDefaultScript:
 	ld a, [wOpponentAfterWrongAnswer]
@@ -219,6 +221,8 @@ CinnabarGymBlaineText:
 	call DisableWaitingAfterTextDisplay
 	jp TextScriptEnd
 .afterBeat
+	farcall TryGymRematchTalk
+	jp c, TextScriptEnd
 	ld hl, .PostBattleAdviceText
 	call PrintText
 	jp TextScriptEnd
@@ -475,3 +479,7 @@ CinnabarGymGymGuideText:
 .BeatBlaineText:
 	text_far _CinnabarGymGymGuideBeatBlaineText
 	text_end
+
+CinnabarGymRematchPostBattle:
+	farcall FinishGymRematch
+	ret

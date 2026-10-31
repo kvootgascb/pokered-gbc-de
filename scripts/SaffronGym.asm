@@ -35,6 +35,8 @@ SaffronGym_ScriptPointers:
 	dw_const DisplayEnemyTrainerTextAndStartBattle, SCRIPT_SAFFRONGYM_START_BATTLE
 	dw_const EndTrainerBattle,                      SCRIPT_SAFFRONGYM_END_BATTLE
 	dw_const SaffronGymSabrinaPostBattle,           SCRIPT_SAFFRONGYM_SABRINA_POST_BATTLE
+	dw_const SaffronGymRematchPostBattle, SCRIPT_SAFFRONGYM_REMATCH
+	EXPORT SCRIPT_SAFFRONGYM_REMATCH
 
 SaffronGymSabrinaPostBattle:
 	ld a, [wIsInBattle]
@@ -114,6 +116,8 @@ SaffronGymSabrinaText:
 	call DisableWaitingAfterTextDisplay
 	jr .done
 .afterBeat
+	farcall TryGymRematchTalk
+	jp c, TextScriptEnd
 	ld hl, .PostBattleAdviceText
 	call PrintText
 	jr .done
@@ -311,3 +315,7 @@ SaffronGymYoungster4EndBattleText:
 SaffronGymYoungster4AfterBattleText:
 	text_far _SaffronGymYoungster4AfterBattleText
 	text_end
+
+SaffronGymRematchPostBattle:
+	farcall FinishGymRematch
+	ret

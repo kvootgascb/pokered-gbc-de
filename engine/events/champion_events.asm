@@ -15,6 +15,7 @@ EnsureChampionFeatures::
 	jr RefreshChampionOpportunities
 
 RegisterChampionVictory::
+	farcall RefreshGymRematches
 	ld hl, wFeatureSchemaFlags
 	read_feature_byte
 	set 0, c
