@@ -19,5 +19,5 @@ Titelanzeige beim Kaltstart mit Green-Spielstand und ohne gültigen Spielstand.
 Alle bisherigen Gameplay- und Spielstandtests laufen weiter mit. Rot, Blau
 und Blau Debug werden gebaut; die Emulator-Suite läuft für Rot und Blau.
 
-Der neue blaue Stickerentwurf ist unter
-[artwork/pokeblue-dx-label.png](../artwork/pokeblue-dx-label.png) abgelegt.
+Die passenden Stickerentwürfe mit Green und Turtok bzw. Glurak sind unter
+[artwork/README.md](../artwork/README.md) mit beiden PNGs dokumentiert.

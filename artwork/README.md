@@ -1,13 +1,18 @@
-# Blaue Edition DX: Kassettenetikett
+# Rote Edition DX / Blaue Edition DX: Kassettenetiketten
 
-[pokeblue-dx-label.png](pokeblue-dx-label.png) ist der Stickerentwurf mit Turtok
-und Green sowie der Aufschrift **POKÉMON BLAUE EDITION DX**. Die ruhigeren
-Aquarellfarben und Tuschekonturen orientieren sich an den frühen Illustrationen
-der ersten Generation. Green behält ihr schwarzes Outfit und braune Haare.
+Die beiden Sticker bilden ein Paar mit ruhigen Aquarellfarben, Tuschekonturen,
+cremefarbener Papieroptik und einem deutlichen DX-Schriftzug. Sie orientieren
+sich an den frühen Illustrationen der ersten Generation. Green behält auf
+beiden Etiketten ihr schwarzes Outfit und braune Haare ohne Hut.
 
-Das PNG ist ein flacher Entwurf im ungefähren Seitenverhältnis 46:40, kein Foto
-einer Kassette. Die endgültige Druckgröße und Schnittkontur müssen zur
+| Edition | Motiv | PNG |
+| --- | --- | --- |
+| Blaue Edition DX | Turtok und Green, blaue Aquarellfarben | [pokeblue-dx-label.png](pokeblue-dx-label.png) |
+| Rote Edition DX | Glurak und Green, rote/orange Aquarellfarben | [pokered-dx-label.png](pokered-dx-label.png) |
+
+Beide PNGs sind 1344 × 1168 Pixel große, flache Entwürfe im ungefähren
+Seitenverhältnis 46:40, keine Fotos einer Kassette. Druckgröße und Schnittkontur müssen zur
 tatsächlich gemessenen Etikettfläche der verwendeten Kassette passen.
 
-Der Entwurf wurde mit dem Bildgenerator erstellt. Er ersetzt keine Grafiken
+Die Entwürfe wurden mit dem Bildgenerator erstellt. Sie ersetzen keine Grafiken
 im Spiel; die vorhandenen Pokémon- und Green-Sprites bleiben erhalten.
