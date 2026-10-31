@@ -1011,3 +1011,5 @@ INCLUDE "engine/events/gym_rematches.asm"
 INCLUDE "engine/movie/title_gender.asm"
 
 INCLUDE "engine/events/box_reminder.asm"
+
+INCLUDE "engine/events/starter_editor.asm"

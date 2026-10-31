@@ -32,6 +32,8 @@ FileDataDestroyedText:
 	text_end
 
 LoadSAV0:
+	xor a
+	ld [wStarterEditorChoice], a
 	ld a, SRAM_ENABLE
 	ld [MBC1SRamEnable], a
 	ld a, $1

@@ -2360,3 +2360,7 @@ SECTION "Stack", WRAM0
 ; the stack grows downward
 	ds $100 - 1
 wStack:: db
+
+; Outside every saved block. Reset on New Game and all save-load attempts.
+SECTION "Temporary Starter Editor State", WRAM0
+wStarterEditorChoice:: db ; Pokédex number 1..151, zero = original starter

@@ -100,6 +100,13 @@ ShowPlayerSpriteMenu:
 	hlcoord 14, 3
 	ld de, .on
 	call PlaceString
+	hlcoord 0, 5
+	lb bc, 3, 18
+	call TextBoxBorder
+	hlcoord 1, 6
+	ld de, .starterHeading
+	call PlaceString
+	farcall DrawStarterEditorChoice
 .footer
 	hlcoord 2, 16
 	ld de, .back
@@ -184,7 +191,7 @@ ShowPlayerSpriteMenu:
 	and a
 	ld a, 3
 	ret z
-	ld a, 1
+	ld a, 2
 	ret
 .left
 	xor a
@@ -195,7 +202,14 @@ ShowPlayerSpriteMenu:
 	ld c, a
 	ld a, [wHiddenMenuPage]
 	and a
-	jr nz, .selectHealing
+	jr z, .selectFirstPage
+	ld a, [wSpriteMenuCursorRow]
+	and a
+	jr z, .selectHealing
+	farcall CycleStarterEditor
+	farcall DrawStarterEditorChoice
+	jp .input
+.selectFirstPage
 	ld a, [wSpriteMenuCursorRow]
 	cp 2
 	jr z, .selectAnimation
@@ -253,6 +267,12 @@ ShowPlayerSpriteMenu:
 	ld [hl], a
 	hlcoord 13, 3
 	ld [hl], a
+	hlcoord 1, 16
+	ld [hl], a
+	ld a, [wHiddenMenuPage]
+	and a
+	jr nz, .comfortCursors
+	ld a, " "
 	hlcoord 1, 8
 	ld [hl], a
 	hlcoord 9, 8
@@ -261,11 +281,6 @@ ShowPlayerSpriteMenu:
 	ld [hl], a
 	hlcoord 13, 13
 	ld [hl], a
-	hlcoord 1, 16
-	ld [hl], a
-	ld a, [wHiddenMenuPage]
-	and a
-	jr nz, .comfortCursors
 	hlcoord 4, 3
 	ld a, [wPlayerGenderTag]
 	cp $47
@@ -311,6 +326,8 @@ ShowPlayerSpriteMenu:
 	hlcoord 13, 3
 	jr .drawArrow
 .comfortCursors
+	hlcoord 4, 8
+	ld [hl], "▷"
 	hlcoord 4, 3
 	ld a, [wHiddenMenuPreferences]
 	bit 0, a
@@ -321,6 +338,10 @@ ShowPlayerSpriteMenu:
 	ld a, [wSpriteMenuCursorRow]
 	and a
 	jr z, .drawArrow
+	cp 1
+	jr nz, .backCursor
+	hlcoord 4, 8
+	jr .drawArrow
 .backCursor
 	hlcoord 1, 16
 .drawArrow
@@ -342,6 +363,8 @@ ShowPlayerSpriteMenu:
 	db "VM-ANIMATIONEN@"
 .healingHeading
 	db "SCHNELLE HEILUNG@"
+.starterHeading
+	db "STARTER-EDITOR@"
 .on
 	db "AN@"
 .off

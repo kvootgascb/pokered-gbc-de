@@ -4,6 +4,7 @@ SECTION "Versioned Feature Save", ROMX
 ; resides in banked WRAM, so every return must restore bank 0 first.
 InitFeatureData:
 	xor a
+	ld [wStarterEditorChoice], a
 	ld [wGameplayModeCache], a
 	ld a, 3
 	ldh [rSVBK], a

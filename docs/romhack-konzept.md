@@ -1,6 +1,6 @@
 # Konzept: Original mit optionalen QoL-Erweiterungen
 
-Stand: 30. Oktober 2026. Arbeitskonzept, kein Implementierungsauftrag.
+Stand: 31. Oktober 2026. Konzept und dokumentierter Umsetzungsstand.
 Ein endgültiger Name für den Hack ist noch nicht festgelegt.
 
 ## Leitidee
@@ -41,7 +41,7 @@ ursprünglichen Konsequenzen verpasster Chancen nicht aufheben.
 Der vorhandene Zugang zum Geheimmenü bleibt die Grundlage:
 **Start → OPTION → Select ungefähr drei Sekunden halten, dann loslassen.**
 
-Geplante Menüpunkte:
+Menüpunkte:
 
 | Menüpunkt | Auswahl | Gültigkeit |
 | --- | --- | --- |
@@ -49,15 +49,16 @@ Geplante Menüpunkte:
 | Spielfigur | Junge / Green | Unabhängig vom Modus |
 | Schnelle Heilung und kürzere Wiederholungstexte | An / Aus | Unabhängig vom Modus |
 | VM-Animationen überspringen | An / Aus | Unabhängig vom Modus |
-| Starter-Editor (z. B. Seite 2) | Ersatz-Pokémon wählen / deaktivieren | Nur bei der ersten Starterwahl in Eichs Labor; Auswahl temporär, Modusverfügbarkeit noch offen |
+| Starter-Editor (Seite 2) | ORIGINAL / 151 Pokémon-Arten | Umgesetzt: vor der ersten Starterwahl in Eichs Labor; temporär, in beiden Modi |
 | Zurück | Menü schließen | — |
 
 Select blättert im Geheimmenü zwischen zwei Seiten; unten rechts steht
 S. 1/2 beziehungsweise S. 2/2. Seite 1 enthält Figur, Modus und VM-Animationen;
-Seite 2 die schnelle Heilung. ZURÜCK verlässt das gesamte Menü und behält
+Seite 2 die schnelle Heilung und den Starter-Editor. ZURÜCK verlässt das gesamte Menü und behält
 Änderungen beider Seiten. Voreinstellung:
 VM-Animationen AN, schnelle Heilung AUS. Links/Rechts übernimmt sofort.
-Weitere geplante Menüpunkte, insbesondere der Starter-Editor, sind noch offen.
+Der Starter-Editor nutzt Level 5 und die passenden Gelb-Attacken; Details:
+[starter-editor.md](starter-editor.md).
 
 ## Vereinbarte Features
 
@@ -223,11 +224,11 @@ Unverbindliche Textideen:
 - Der Assistent in Eichs Labor erzählt von seinem reparierten Linkkabel und
   möchte mit einem sofortigen Rücktausch dessen Funktion testen.
 
-## Geplanter Starter-Editor im Geheimmenü
+## Umgesetzt: Starter-Editor im Geheimmenü
 
-Ein zusätzlicher Editor, beispielsweise auf **Seite 2** des Geheimmenüs, soll
+Der Editor auf **Seite 2** des Geheimmenüs kann
 vor der ersten Starterwahl in **Professor Eichs Labor** ein Ersatz-Pokémon
-festlegen können. Die Auswahl soll jederzeit in dieser Phase direkt im Spiel
+festlegen. Die Auswahl soll jederzeit in dieser Phase direkt im Spiel
 möglich sein, ohne vorab eine ROM zu konfigurieren. Nach abgeschlossener
 Starterwahl ist keine nachträgliche Team-Ersetzung durch diesen Editor vorgesehen.
 
@@ -258,11 +259,11 @@ des Teams und wird regulär gespeichert. Nur die noch nicht angewendete
 Editor-Voreinstellung ist flüchtig; beim Laden wird kein vorhandenes Pokémon
 wieder gegen den ursprünglichen Starter ausgetauscht.
 
-Noch offen: endgültige Seitengestaltung und Artenauswahl, Verfügbarkeit in
-Classic/Erweitert sowie die genauen Erzeugungswerte (Level, Startattacken nach
-der geplanten Gelb-Grundlage usw.). Der bisher gewünschte Umfang ist die Wahl
-der Pokémon-Art, kein allgemeiner Editor für Level, Werte, Items oder Teams.
-Dieses Feature ist **nur geplant, noch nicht implementiert**.
+Umgesetzt in Classic und Erweitert: Links/Rechts wählt ORIGINAL oder eine der
+151 Arten in Pokédex-Reihenfolge. Das Ersatz-Pokémon wird regulär auf Level 5
+mit den zur Art und zum Level passenden Gelb-Attacken erzeugt. Es gibt keine
+Editorfelder für Level, Werte, Items oder Teams. Details und Tests:
+[starter-editor.md](starter-editor.md).
 
 ## Umgesetzt: Rückkämpfe gegen die Arenaleiter
 

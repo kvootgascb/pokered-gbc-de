@@ -930,7 +930,7 @@ OaksLabMonChoiceMenu:
 	ld [wCurEnemyLVL], a
 	ld a, [wcf91]
 	ld [wd11e], a
-	call AddPartyMon
+	farcall GiveEditedStarter
 	ld hl, wd72e
 	set 3, [hl]
 	ld a, SELECT | START | D_RIGHT | D_LEFT | D_UP | D_DOWN

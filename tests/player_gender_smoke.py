@@ -389,6 +389,69 @@ assert distances[1] > distances[0], (
 )
 print("PASS: held B moves farther in Extended than Classic in actual overworld play")
 
+# The temporary editor generates real Pokemon, leaving ball/story fields alone.
+for mode in (0, 1):
+    for dex, species in [(1, 0x99), (25, 0x54), (65, 0x95), (151, 0x15)]:
+        restore()
+        p.memory[a("wCurMap")] = 0x28
+        p.memory[a("wEventFlags") + 4] &= ~4  # EVENT_GOT_STARTER
+        p.memory[a("wGameplayModeCache")] = mode
+        p.memory[a("wPartyCount")] = 0
+        p.memory[a("wMonDataLocation")] = 0x10
+        p.memory[a("wCurEnemyLVL")] = 5
+        p.memory[a("wcf91")] = species
+        call("_AddPartyMon")
+        moves = list(p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4])
+        pp = list(p.memory[a("wPartyMon1PP") : a("wPartyMon1PP") + 4])
+        p.memory[a("wPartyCount")] = 0
+        p.memory[a("wStarterEditorChoice")] = dex
+        p.memory[a("wcf91")] = 0xB1  # Squirtle ball, regardless of replacement.
+        p.memory[a("wPlayerStarter")] = 0xB1
+        p.memory[a("wRivalStarterTemp")] = 0x99
+        call("GiveEditedStarter")
+        assert p.memory[a("wPartyCount")] == 1
+        assert p.memory[a("wPartyMon1Species")] == species
+        assert p.memory[a("wPartySpecies")] == species
+        assert p.memory[a("wPartyMon1Level")] == 5
+        assert list(p.memory[a("wPartyMon1Moves") : a("wPartyMon1Moves") + 4]) == moves
+        assert list(p.memory[a("wPartyMon1PP") : a("wPartyMon1PP") + 4]) == pp
+        assert p.memory[a("wPlayerStarter")] == 0xB1
+        assert p.memory[a("wRivalStarterTemp")] == 0x99
+        assert p.memory[a("wStarterEditorChoice")] == 0
+        assert list(p.memory[a("wPartyMon1OTID") : a("wPartyMon1OTID") + 2]) == list(
+            p.memory[a("wPlayerID") : a("wPlayerID") + 2]
+        )
+# Disabled, out-of-lab, completed, and invalid choices keep the native starter.
+for map_id, got, choice in [
+    (0x28, False, 0),
+    (0, False, 65),
+    (0x28, True, 65),
+    (0x28, False, 152),
+]:
+    restore()
+    p.memory[a("wCurMap")] = map_id
+    p.memory[a("wEventFlags") + 4] = 4 if got else 0
+    p.memory[a("wStarterEditorChoice")] = choice
+    p.memory[a("wPartyCount")] = 0
+    p.memory[a("wMonDataLocation")] = 0x10
+    p.memory[a("wCurEnemyLVL")] = 5
+    p.memory[a("wcf91")] = 0xB1
+    call("GiveEditedStarter")
+    assert p.memory[a("wPartyMon1Species")] == 0xB1
+# Loading clears the unused choice but preserves an already received replacement.
+restore()
+p.memory[a("wStarterEditorChoice")] = 65
+call("SaveSAVtoSRAM0")
+p.memory[a("wStarterEditorChoice")] = 151
+call("LoadSAV0")
+assert p.memory[a("wStarterEditorChoice")] == 0
+p.memory[a("wStarterEditorChoice")] = 65
+call("InitFeatureData")
+assert p.memory[a("wStarterEditorChoice")] == 0
+print(
+    "PASS: temporary starter editor generates level-5 Yellow moves/PP in both modes without changing story; load/new-game reset"
+)
+
 # Actual Master Ball captures fill the box; only the filling transfer warns.
 box_reminders = []
 hook("RemindAboutFullBox.warn", lambda _: box_reminders.append(True))
@@ -659,6 +722,43 @@ def enter_npc_map(
     p.tick(120, False)
     p.memory[a("wSpritePlayerStateData1FacingDirection")] = 4  # up
 
+
+# Choose each real lab ball with Simsala selected, then let the rival take his.
+for x, original, rival in [(6, 0xB0, 0xB1), (7, 0xB1, 0x99), (8, 0x99, 0xB0)]:
+
+    def setup_starter_lab():
+        p.memory[a("wPartyCount")] = 0
+        p.memory[a("wPartySpecies")] = 255
+        p.memory[a("wNumHoFTeams")] = 0
+        p.memory[a("wOaksLabCurScript")] = 6
+        p.memory[a("wEventFlags") + 4] = 3  # Followed Oak and invited to choose.
+        p.memory[a("wMissableObjectFlags") + 5] &= ~0x78  # Three balls + Oak.
+        p.memory[a("wStarterEditorChoice")] = 65
+
+    enter_npc_map(x, [0, 0, 0, 0], map_id=0x28, width=5, y=4, setup=setup_starter_lab)
+    # Accept the ball; decline only the subsequent optional nickname.
+    for _ in range(250):
+        p.button("b" if p.memory[a("wPartyCount")] else "a", 2)
+        p.tick(20, False)
+        if p.memory[a("wEventFlags") + 4] & 4:
+            break
+    assert p.memory[a("wPartyCount")] == 1, "real ball did not give a starter"
+    assert p.memory[a("wPartyMon1Species")] == 0x95
+    assert p.memory[a("wPartyMon1Level")] == 5
+    assert p.memory[a("wPlayerStarter")] == original
+    assert p.memory[a("wRivalStarter")] == rival
+    assert p.memory[a("wEventFlags") + 4] & 4
+    assert p.memory[a("wStarterEditorChoice")] == 0
+    # Save/load keeps the received Simsala, with no persistent editor setting.
+    call("SaveSAVtoSRAM0")
+    p.memory[a("wStarterEditorChoice")] = 151
+    call("LoadSAV0")
+    assert p.memory[a("wStarterEditorChoice")] == 0
+    assert p.memory[a("wPartyMon1Species")] == 0x95
+    assert p.memory[a("wPlayerStarter")] == original
+print(
+    "PASS: all three actual lab balls give Simsala, preserve original rival/story choices and save the received Pokemon"
+)
 
 enter_npc_map(10, [84, 0, 0, 0])
 for _ in range(120):
@@ -1888,8 +1988,7 @@ assert_page_number(0)
 tap("select")
 assert p.memory[a("wHiddenMenuPage")] == 1
 assert_page_number(1)
-# Healing is the first box on page 2; old option boxes leave no remnants.
-assert p.memory[a("wTileMap") + 8 * 20 + 9] == 0x7F
+# Healing is the first box; the starter editor occupies the second box.
 tap("right")
 assert p.memory[3, 0xD001] == 0x83
 assert p.memory[a("wTileMap") + 3 * 20 + 13] == 0xED
@@ -1897,6 +1996,52 @@ tap("a")
 assert not closed, "A on fast healing closed the menu"
 tap("down")
 assert p.memory[a("wSpriteMenuCursorRow")] == 1
+assert p.memory[a("wTileMap") + 8 * 20 + 4] == 0xED
+# Locked outside the lab; A does not exit and Left/Right cannot edit.
+choice_before = p.memory[a("wStarterEditorChoice")]
+tap("right")
+assert p.memory[a("wStarterEditorChoice")] == choice_before
+tap("a")
+assert not closed
+# Exercise the real page-2 controls before the initial lab choice.
+old_map = p.memory[a("wCurMap")]
+old_events = p.memory[a("wEventFlags") + 4]
+p.memory[a("wCurMap")] = 0x28
+p.memory[a("wEventFlags") + 4] &= ~4
+p.memory[a("wStarterEditorChoice")] = 0
+tap("left")
+assert p.memory[a("wStarterEditorChoice")] == 151
+tap("right")
+assert p.memory[a("wStarterEditorChoice")] == 0
+tap("right")
+assert p.memory[a("wStarterEditorChoice")] == 1
+p.memory[a("wStarterEditorChoice")] = 64
+tap("right")
+assert p.memory[a("wStarterEditorChoice")] == 65
+# SIMSALA is visible and the cursor cannot erase a letter in the name.
+assert list(p.memory[a("wTileMap") + 8 * 20 + 5 : a("wTileMap") + 8 * 20 + 12]) == [
+    0x92,
+    0x88,
+    0x8C,
+    0x92,
+    0x80,
+    0x8B,
+    0x80,
+]
+assert (
+    p.memory[a("wTileMap") + 8 * 20 + 19] == 0x7C
+), "editor text overwrote its box border"
+p.tick(30, True)
+p.screen.image.save("/tmp/" + rom + "-starter-editor.png")
+tap("a")
+assert not closed
+tap("select")
+tap("select")
+assert p.memory[a("wStarterEditorChoice")] == 65
+p.memory[a("wCurMap")] = old_map
+p.memory[a("wEventFlags") + 4] = old_events
+tap("down")
+tap("down")
 assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED
 tap("select")  # can turn pages from Back, too
 assert p.memory[a("wHiddenMenuPage")] == 0
@@ -1917,6 +2062,7 @@ assert p.memory[3, 0xD001] == 0x82
 tap("right")
 assert p.memory[3, 0xD001] == 0x83
 assert p.memory[a("wGameplayModeCache")] == 0
+tap("down")
 tap("down")
 assert p.memory[a("wTileMap") + 16 * 20 + 1] == 0xED
 tap("a")
