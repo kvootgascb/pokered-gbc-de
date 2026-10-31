@@ -9,6 +9,7 @@ IF DEF(_BLUE)
 ENDC
 	; Keep the original German edition lettering and add a readable DX suffix
 	; using existing font tiles, without changing the original PNG artwork.
+	ds 8, 0 ; one ordinary space before DX
 IF GEN_2_GRAPHICS
 	INCBIN "gfx/gs/font.1bpp", ("D" - $80) * 8, 8
 	INCBIN "gfx/gs/font.1bpp", ("X" - $80) * 8, 8
