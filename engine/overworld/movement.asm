@@ -119,6 +119,10 @@ UpdateNPCSprite:
 	ld hl, wMapSpriteData
 	add l
 	ld l, a
+	; The enlarged inventory can put this table across a page boundary.
+	jr nc, .movementPointerReady
+	inc h
+.movementPointerReady
 	ld a, [hl]        ; read movement byte 2
 	ld [wCurSpriteMovement2], a
 	ld h, HIGH(wSpriteStateData1)

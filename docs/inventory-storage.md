@@ -27,6 +27,20 @@ save should not be used with earlier ROM versions: those versions do not
 understand the expanded inventory layout. Emulator save states also retain
 old RAM/code execution state; use an ordinary in-game save when upgrading.
 
+## NPC movement table addressing
+
+The larger bag moves `wMapSpriteData` to `$d4f8`. Its 32 bytes now span
+two memory pages. `UpdateNPCSprite` must propagate the carry from the
+low-byte addition into the high byte; otherwise NPC 5 and later read
+unrelated data from `$d400` onward instead of their movement definitions.
+That made fixed trainers turn randomly and allowed unintended sight
+engagements followed by the original scripted walk through scenery.
+
+The lookup now handles the carry. Map object definitions, original facing
+directions, trainer sight and approach scripts are unchanged. Other accesses
+to this table (map loading, text lookup and movement-pointer access) already
+use carry-aware addressing. There is no new RAM field or save migration.
+
 ## Validation
 
 `tests/player_gender_smoke.py` exercises the real inventory add routine through
@@ -36,3 +50,11 @@ full-capacity save/load, and checksum-validated migration of a synthetic legacy
 progress, names, money and location, followed by another save/load to catch
 accidental repeated migration. Its existing UI tests also cover the horizontal
 gender selector, cancellation, return to Options/Start, and intact font VRAM.
+
+NPC regression checks execute the native movement update for all 15 NPC slots.
+Before the fix this fails at slot 5, returning movement byte 0 instead of
+`DOWN` (`$d0`). Emulator checks then stand at both reported Route 3 locations,
+`(21,6)` and `(22,6)`, with unbeaten trainers in Classic and Extended. Over
+1200 frames the trainers keep their original positions/facings and do not
+engage from an unintended direction. A positive check enters trainer 8's
+original sight line at `(26,6)` and verifies his normal approach to `(25,6)`.

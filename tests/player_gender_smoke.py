@@ -166,6 +166,28 @@ def call(n, limit=180, auto_button=None):
     )
 
 
+# Enlarged inventory places this table across a 256-byte page boundary.
+# Read every NPC slot through the actual update routine, not a Python lookup.
+for slot in range(1, 16):
+    restore()
+    expected_direction = 0xD0 + (slot - 1) % 4
+    p.memory[a("wMapSpriteData") + (slot - 1) * 2] = expected_direction
+    p.memory[a("wSpriteStateData1") + slot * 16 + 1] = 0  # initialize, then return
+    p.memory[a("hCurrentSpriteOffset")] = slot * 16
+    call("UpdateNPCSprite")
+    actual = p.memory[a("wCurSpriteMovement2")]
+    assert actual == expected_direction, (
+        "NPC movement lookup crossed a page",
+        slot,
+        hex(a("wMapSpriteData")),
+        actual,
+        expected_direction,
+    )
+restore()
+print(
+    "PASS: native NPC movement lookup reads all 15 slots correctly across the table page boundary"
+)
+
 # The title reads persisted appearance without loading or migrating the save.
 call("SaveSAVtoSRAM0")
 title_save = list(p.memory[1, 0xA000:0xBFFF])
@@ -761,6 +783,86 @@ def enter_npc_map(
     p.register_file.PC = 0x100
     p.tick(120, False)
     p.memory[a("wSpritePlayerStateData1FacingDirection")] = 4  # up
+
+
+# Route 3 at the reported positions: all trainers are unbeaten and should
+# keep their original directions, never turning to engage through scenery.
+route3_engagements = []
+hook(
+    "CheckFightingMapTrainers.trainerEngaging",
+    lambda _: route3_engagements.append(
+        (p.memory[a("wCurMap")], p.memory[a("wSpriteIndex")])
+    ),
+)
+route3_trainers = {
+    2: (10, 6, 12),
+    3: (14, 4, 0),
+    4: (16, 9, 8),
+    5: (19, 5, 0),
+    6: (23, 4, 8),
+    7: (22, 9, 8),
+    8: (24, 6, 12),
+    9: (33, 10, 4),
+}
+
+
+def setup_unbeaten_route3(mode):
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[3, 0xD000] = mode
+    p.memory[a("wNumHoFTeams")] = 0
+    p.memory[a("wRoute3CurScript")] = 0
+    p.memory[a("wEventFlags") + 0x3E0 // 8 : a("wEventFlags") + 0x3E0 // 8 + 2] = [0, 0]
+
+
+for mode in (0, 1):
+    for px in (21, 22):
+        before = len(route3_engagements)
+        enter_npc_map(
+            px,
+            [84, 0, 0, 0],
+            map_id=14,
+            width=35,
+            y=6,
+            setup=lambda mode=mode: setup_unbeaten_route3(mode),
+        )
+        for _ in range(120):
+            p.tick(10, False)
+            for obj, (x, y, facing) in route3_trainers.items():
+                assert p.memory[a("wSpriteStateData2") + obj * 16 + 4] == y + 4
+                assert p.memory[a("wSpriteStateData2") + obj * 16 + 5] == x + 4
+                if obj in (5, 6, 7, 8):  # in the visible area of both screenshots
+                    assert p.memory[a("wSpriteStateData1") + obj * 16 + 9] == facing, (
+                        mode,
+                        px,
+                        obj,
+                    )
+            assert p.memory[a("wRoute3CurScript")] == 0
+            assert p.memory[a("wIsInBattle")] == 0
+        assert len(route3_engagements) == before
+        p.tick(1, True)
+        p.screen.image.save(
+            "/tmp/" + rom + "-route3-fixed-" + str(mode) + "-" + str(px) + ".png"
+        )
+    # Normal sight engagement and the original walk-up script must still work.
+    before = len(route3_engagements)
+    enter_npc_map(
+        26,
+        [84, 0, 0, 0],
+        map_id=14,
+        width=35,
+        y=6,
+        setup=lambda mode=mode: setup_unbeaten_route3(mode),
+    )
+    for _ in range(120):
+        p.tick(10, False)
+        if p.memory[a("wSpriteStateData2") + 8 * 16 + 5] == 29:
+            break
+    assert route3_engagements[before:] == [(14, 8)]
+    assert p.memory[a("wSpriteStateData2") + 8 * 16 + 4] == 10
+    assert p.memory[a("wSpriteStateData2") + 8 * 16 + 5] == 29  # (25,6), next to player
+print(
+    "PASS: Route 3 unbeaten trainers keep original facings/positions in both modes at both reported positions; normal sight/walk-up still works"
+)
 
 
 # New rumor NPCs load before drawing and preserve all original hide/show IDs.
