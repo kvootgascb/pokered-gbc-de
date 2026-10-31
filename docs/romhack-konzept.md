@@ -86,7 +86,7 @@ Der Starter-Editor nutzt Level 5 und die passenden Gelb-Attacken; Details:
 | Schutz erneut verwenden | Nein | Ja | Umgesetzt: nach Ablauf bei vorhandenem Vorrat dieselbe Schutzart erneut anbieten; Ja/Nein. Details: [repeat-repel.md](repeat-repel.md). |
 | Schnelle Heilung / kürzere Wiederholungstexte | Optional | Optional | Umgesetzt: Seite 2, schnelle Heilung mit kurzen Pokémon-Center-Texten; unabhängig vom Modus. |
 | VM-Animationen überspringen | Optional | Optional | Umgesetzt: auf Seite 1 des Geheimmenüs „VM-Animationen“ auf Aus stellen; unabhängig vom Modus. |
-| Kleine Gerüchte über Geheimnisse | Nein | Ja | Neue NPCs mit einheitlichem Gesprächseinstieg; Details und Umsetzungsstand: [rumors.md](rumors.md). |
+| Kleine Gerüchte über Geheimnisse | Nein | Ja | Umgesetzt: drei neue Gerüchte-NPCs sowie vier Matrosen auf Landgang, einer mit Pikachu-Gerücht. Details: [rumors.md](rumors.md). |
 
 Der Box-Hinweis erscheint nach dem Fang, der die aktuelle Box füllt, als Gedanke,
 z. B. „Ich sollte meine Pokémon-Box prüfen. Vielleicht ist sie schon voll …“.
@@ -217,7 +217,7 @@ Champion-Sieg), der Wanderer im Pokémon-Center bei der Felshöhle mit dem
 Lastwagen-/Flegmon-Gerücht und der Angler am Ufer der Zinnoberinsel mit dem
 unbestimmten Hinweis auf lebende Fossil-Pokémon tief in einer Höhle.
 
-Zusätzlich vereinbart: Mit der zurückgekehrten M.S. Anne haben vier neue
+Ebenfalls umgesetzt: Mit der zurückgekehrten M.S. Anne haben vier neue
 Matrosen in Orania Landgang und verschwinden bei ihrer Abreise wieder.
 Einer erzählt, wie er vom Deck aus eine Gruppe Pikachu zum Kraftwerk schwimmen
 sah; die übrigen sprechen über ihren Landgang. Ihre Anwesenheit genügt als

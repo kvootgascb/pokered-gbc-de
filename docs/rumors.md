@@ -42,6 +42,38 @@ Er ist unabhängig vom Champion-Sieg vorhanden.
 Der Text nennt ausdrücklich keine bestimmte Höhle, Ebene oder Angel.
 Die tatsächlichen Textboxen teilen diese Sätze in kurze Zeilen und Seiten.
 
+## Vier Matrosen auf Landgang in Orania
+
+Nur in Erweitert, nach dem ersten Champion-Sieg und während ein erneuter
+M.S.-Anne-Besuch verfügbar ist. Ihre Anwesenheit ist der sichtbare Hinweis
+auf die Rückkehr des Schiffs; ein zusätzlicher Ankündigungsdialog ist unnötig.
+
+| Neuer Matrose | Ausgangspunkt | Bewegung | Gespräch |
+| --- | --- | --- | --- |
+| Beim Pokémon-Center | (13, 5) | Je ein Feld links/rechts | Surfer-Pikachu-Gerücht |
+| Beim Pokémon-Fanclub | (7, 14) | Je ein Feld links/rechts | Endlich wieder festen Boden unter den Füßen |
+| Beim Laden | (25, 14) | Je ein Feld links/rechts | Proviant vor der Abfahrt besorgen |
+| Am Hafen | (22, 27) | Steht mit Blick nach Süden | Landgang, danach zurück an Bord |
+
+Der erste Matrose erzählt:
+
+> Hast du schon gehört?
+> Vom Deck aus habe ich eine ganze Gruppe PIKACHU zum KRAFTWERK schwimmen sehen!
+> Ich konnte meinen Augen nicht trauen!
+> Die anderen glauben mir bis heute kein Wort!
+
+Die übrigen drei führen normale Alltagsgespräche und verwenden deshalb nicht
+die Einleitung eines Gerüchts. Die ursprünglichen Stadtbewohner und Matrosen
+bleiben erhalten. Die Stadt hat damit zehn Objekte; die neuen Standorte und
+kurzen Laufwege liegen außerhalb von Türen und des Kontrollpunkts am Hafen.
+
+Es gibt keinen eigenen Landgang-Zähler. Alle vier verwenden dieselbe gespeicherte
+Besuchsfreigabe `wFeatureAnneState` wie das Schiff. Nach dessen ursprünglichem
+Abreiseablauf sind sie beim nächsten Laden Oranias verschwunden. Ein weiterer
+Top-Vier-Sieg bringt sie mit dem Schiff zurück; Besuche sammeln sich nicht an.
+Gespräche verbrauchen keinen Besuch. Bestehende Champion-Spielstände erhalten
+dieselbe einmalige Initialisierung wie der bestehende Hafenzugang.
+
 ## Sichtbarkeit und Speicherstand
 
 Die neuen Hide/Show-Einträge werden hinten angehängt. Alle bisherigen globalen
@@ -55,7 +87,11 @@ Ein Moduswechsel darf wie vereinbart erst beim natürlichen Kartenladen greifen.
 Die Emulator-Suite prüft in Rot und Blau die Classic-/Champion-Freischaltung,
 die Hide/Show-Zuordnung einschließlich des ursprünglichen Eich-Eintrags,
 sichtbare Bewegung auf der kurzen Strecke und die tatsächlichen Dialoge über
-die Textzeiger der geladenen Karten. Die bisherigen Gameplay-Tests laufen mit.
-
-Die vereinbarten vier Matrosen auf Landgang und ihr Pikachu-Gerücht folgen
-als eigener Feature-Commit.
+die Textzeiger der geladenen Karten. Für die vier Matrosen werden zusätzlich
+verfügbare/verbrauchte Schiffsbesuche, die einmalige Übernahme alter
+Champion-Spielstände, Speichern/Laden in beiden Zuständen, erneute
+Champion-Siege und Moduswechsel beim Kartenladen geprüft. Drei laufen
+sichtbar auf ihrer kurzen Strecke; der vierte bleibt stehen. Alle vier
+Kartendialoge werden ausgeführt. Die Abreiseprüfung nutzt die vorhandene
+Verbrauchsroutine des Schiffs; die komplette Abfahrtsanimation wird dabei
+nicht erneut durchgespielt. Die bisherigen Gameplay-Tests laufen mit.

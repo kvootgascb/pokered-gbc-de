@@ -123,6 +123,10 @@ VermilionCity_TextPointers:
 	dw_const VermilionCityGambler2Text,           TEXT_VERMILIONCITY_GAMBLER2
 	dw_const VermilionCityMachopText,             TEXT_VERMILIONCITY_MACHOP
 	dw_const VermilionCitySailor2Text,            TEXT_VERMILIONCITY_SAILOR2
+	dw_const VermilionCityShoreSailor1Text,        TEXT_VERMILIONCITY_SHORE_SAILOR1
+	dw_const VermilionCityShoreSailor2Text,        TEXT_VERMILIONCITY_SHORE_SAILOR2
+	dw_const VermilionCityShoreSailor3Text,        TEXT_VERMILIONCITY_SHORE_SAILOR3
+	dw_const VermilionCityShoreSailor4Text,        TEXT_VERMILIONCITY_SHORE_SAILOR4
 	dw_const VermilionCitySignText,               TEXT_VERMILIONCITY_SIGN
 	dw_const VermilionCityNoticeSignText,         TEXT_VERMILIONCITY_NOTICE_SIGN
 	dw_const MartSignText,                        TEXT_VERMILIONCITY_MART_SIGN
@@ -134,6 +138,26 @@ VermilionCity_TextPointers:
 VermilionCityBeautyText:
 	text_far _VermilionCityBeautyText
 	text_end
+
+VermilionCityShoreSailor1Text:
+	text_asm
+	farcall SurfPikachuRumorTalk
+	jp TextScriptEnd
+
+VermilionCityShoreSailor2Text:
+	text_asm
+	farcall ShoreSailorFeetTalk
+	jp TextScriptEnd
+
+VermilionCityShoreSailor3Text:
+	text_asm
+	farcall ShoreSailorSuppliesTalk
+	jp TextScriptEnd
+
+VermilionCityShoreSailor4Text:
+	text_asm
+	farcall ShoreSailorHarborTalk
+	jp TextScriptEnd
 
 VermilionCityGambler1Text:
 	text_asm

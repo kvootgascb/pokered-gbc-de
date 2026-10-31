@@ -797,6 +797,100 @@ print(
     "PASS: new rumor NPCs, original hide/show IDs, Classic/champion gates, bounded native walking and real map dialogs"
 )
 
+# Four shore-leave sailors share the ship's saved single-visit opportunity.
+shore_talks = []
+shore_cases = [
+    (7, 13, 5, "SurfPikachuRumorTalk"),
+    (8, 7, 14, "ShoreSailorFeetTalk"),
+    (9, 25, 14, "ShoreSailorSuppliesTalk"),
+    (10, 22, 27, "ShoreSailorHarborTalk"),
+]
+for _, _, _, talk in shore_cases:
+    hook(talk, lambda _, talk=talk: shore_talks.append(talk))
+
+
+def load_shore(mode, champion, visit, initialized=1, px=13, py=6):
+    def setup():
+        p.memory[a("wGameplayModeCache")] = mode
+        p.memory[3, 0xD000] = mode
+        p.memory[a("wNumHoFTeams")] = champion
+        p.memory[3, 0xD003] = initialized
+        p.memory[3, 0xD005] = visit
+        p.memory[a("wVermilionCityCurScript")] = 0
+        # Start outside the original scripted walk away from a departed ship.
+        p.memory[a("wEventFlags") + 0x5E0 // 8] |= 0x0C
+
+    enter_npc_map(px, [84, 0, 0, 0], map_id=5, width=20, y=py, setup=setup)
+
+
+for mode, champ, visit, initialized, visible in [
+    (0, 0, 0, 1, False),
+    (0, 1, 1, 1, False),
+    (1, 0, 1, 1, False),
+    (1, 1, 0, 1, False),
+    (1, 1, 1, 1, True),
+    (1, 1, 0, 0, True),
+]:
+    load_shore(mode, champ, visit, initialized)
+    assert p.memory[a("wNumSprites")] == 10
+    assert len(active_missables()) == 4
+    for obj, _, _, _ in shore_cases:
+        index = hs_index(5, obj)
+        assert active_missables()[obj] == index
+        assert object_hidden(index) != visible
+        if not visible:
+            assert p.memory[a("wSpriteStateData1") + obj * 16 + 2] == 255
+    if visible:
+        assert p.memory[3, 0xD005] == 1
+
+for obj, x, y, talk in shore_cases:
+    load_shore(1, 1, 1, px=x, py=y + (1 if obj != 10 else -1))
+    positions = set()
+    for _ in range(45):
+        p.tick(20, False)
+        nx = p.memory[a("wSpriteStateData2") + obj * 16 + 5] - 4
+        ny = p.memory[a("wSpriteStateData2") + obj * 16 + 4] - 4
+        assert abs(nx - x) <= (0 if obj == 10 else 1) and ny == y
+        positions.add((nx, ny))
+    assert (len(positions) == 1) if obj == 10 else (len(positions) >= 2)
+    p.tick(1, True)
+    p.screen.image.save("/tmp/" + rom + "-shore-" + str(obj) + ".png")
+    before = len(shore_talks)
+    p.memory[a("hSpriteIndexOrTextID")] = obj
+    call("DisplayTextID", 900, "a")
+    assert shore_talks[before:] == [talk]
+    assert p.memory[3, 0xD005] == 1, "a conversation consumed the ship visit"
+
+load_shore(1, 1, 1)
+call("SaveSAVtoSRAM0")
+call("ConsumeAnneVisit")
+call("LoadMapHeader")
+assert all(object_hidden(hs_index(5, obj)) for obj, _, _, _ in shore_cases)
+call("LoadSAV0")
+call("LoadMapHeader")
+assert all(not object_hidden(hs_index(5, obj)) for obj, _, _, _ in shore_cases)
+call("ConsumeAnneVisit")
+call("SaveSAVtoSRAM0")
+call("LoadSAV0")
+call("LoadMapHeader")
+assert all(object_hidden(hs_index(5, obj)) for obj, _, _, _ in shore_cases)
+assert p.memory[3, 0xD005] == 0, "reload granted another visit"
+call("RegisterChampionVictory")
+call("RegisterChampionVictory")
+call("LoadMapHeader")
+assert p.memory[3, 0xD005] == 1
+assert all(not object_hidden(hs_index(5, obj)) for obj, _, _, _ in shore_cases)
+p.memory[a("wGameplayModeCache")] = 0
+call("LoadMapHeader")
+assert all(object_hidden(hs_index(5, obj)) for obj, _, _, _ in shore_cases)
+p.memory[a("wGameplayModeCache")] = 1
+call("LoadMapHeader")
+assert all(not object_hidden(hs_index(5, obj)) for obj, _, _, _ in shore_cases)
+assert len(active_missables()) == 4
+print(
+    "PASS: four shore sailors follow ship availability across departure/next champion/save/load/mode; old champions, patrols and all four dialogs"
+)
+
 # Choose each real lab ball with Simsala selected, then let the rival take his.
 for x, original, rival in [(6, 0xB0, 0xB1), (7, 0xB1, 0x99), (8, 0x99, 0xB0)]:
 

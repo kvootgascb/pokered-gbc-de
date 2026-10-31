@@ -12,6 +12,9 @@ PrepareRumorObjects::
 	jr z, .selected
 	ld hl, .cinnabar
 	cp CINNABAR_ISLAND
+	jr z, .selected
+	ld hl, .shore
+	cp VERMILION_CITY
 	ret nz
 .selected
 	push hl
@@ -53,6 +56,11 @@ PrepareRumorObjects::
 	db ROCKTUNNELPOKECENTER_RUMOR_HIKER, HS_ROCK_TUNNEL_RUMOR_HIKER, -1
 .cinnabar
 	db CINNABARISLAND_RUMOR_FISHER, HS_CINNABAR_RUMOR_FISHER, -1
+.shore
+	db VERMILIONCITY_SHORE_SAILOR1, HS_VERMILION_SHORE_SAILOR1
+	db VERMILIONCITY_SHORE_SAILOR2, HS_VERMILION_SHORE_SAILOR2
+	db VERMILIONCITY_SHORE_SAILOR3, HS_VERMILION_SHORE_SAILOR3
+	db VERMILIONCITY_SHORE_SAILOR4, HS_VERMILION_SHORE_SAILOR4, -1
 
 ; Carry = show this map's new NPCs. No new persistent state is required.
 RumorObjectsVisible:
@@ -60,6 +68,8 @@ RumorObjectsVisible:
 	and a
 	ret z
 	ld a, [wCurMap]
+	cp VERMILION_CITY
+	jr z, .shore
 	cp PALLET_TOWN
 	jr nz, .show
 	ld a, [wNumHoFTeams]
@@ -67,6 +77,20 @@ RumorObjectsVisible:
 	ret z
 .show
 	scf
+	ret
+.shore
+	ld a, [wNumHoFTeams]
+	and a
+	ret z
+	; Derive the same single opportunity as the existing harbor access. This
+	; also initializes old champion saves once, without stacking visits.
+	farcall EnsureChampionFeatures
+	ld hl, wFeatureAnneState
+	read_feature_byte
+	ld a, c
+	cp 1
+	jr z, .show
+	and a
 	ret
 
 ; D/E are the intended Y/X tile deltas. Only listed new NPCs are limited to
@@ -132,6 +156,9 @@ RumorWalkBounds:
 	db PALLET_TOWN, PALLETTOWN_RUMOR_TRAINER, 10, 17
 	db ROCK_TUNNEL_POKECENTER, ROCKTUNNELPOKECENTER_RUMOR_HIKER, 5, 8
 	db CINNABAR_ISLAND, CINNABARISLAND_RUMOR_FISHER, 13, 8
+	db VERMILION_CITY, VERMILIONCITY_SHORE_SAILOR1, 5, 13
+	db VERMILION_CITY, VERMILIONCITY_SHORE_SAILOR2, 14, 7
+	db VERMILION_CITY, VERMILIONCITY_SHORE_SAILOR3, 14, 25
 	db -1
 
 OakRumorTalk::
@@ -185,4 +212,53 @@ FossilRumorTalk::
 	para "Warum suchen die"
 	line "dann hier in"
 	cont "alten Steinen?"
+	done
+
+SurfPikachuRumorTalk::
+	ld hl, .text
+	jp PrintText
+.text
+	text "Hast du schon"
+	line "gehört?"
+	para "Vom Deck aus habe"
+	line "ich eine ganze"
+	cont "Gruppe PIKACHU"
+	cont "zum KRAFTWERK"
+	cont "schwimmen sehen!"
+	para "Ich konnte meinen"
+	line "Augen nicht"
+	cont "trauen!"
+	para "Die anderen"
+	line "glauben mir bis"
+	cont "heute kein Wort!"
+	done
+
+ShoreSailorFeetTalk::
+	ld hl, .text
+	jp PrintText
+.text
+	text "Endlich wieder"
+	line "festen Boden unter"
+	cont "den Füßen!"
+	done
+
+ShoreSailorSuppliesTalk::
+	ld hl, .text
+	jp PrintText
+.text
+	text "Vor der Abfahrt"
+	line "muss ich noch"
+	cont "Proviant besorgen."
+	para "Auf See gibt es"
+	line "keinen Laden!"
+	done
+
+ShoreSailorHarborTalk::
+	ld hl, .text
+	jp PrintText
+.text
+	text "Ein bisschen"
+	line "Landgang tut gut!"
+	para "Danach geht es"
+	line "zurück an Bord."
 	done
