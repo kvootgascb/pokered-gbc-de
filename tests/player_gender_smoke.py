@@ -803,7 +803,7 @@ shore_cases = [
     (7, 13, 5, "SurfPikachuRumorTalk"),
     (8, 7, 14, "ShoreSailorFeetTalk"),
     (9, 25, 14, "ShoreSailorSuppliesTalk"),
-    (10, 22, 27, "ShoreSailorHarborTalk"),
+    (10, 21, 14, "ShoreSailorHarborTalk"),
 ]
 for _, _, _, talk in shore_cases:
     hook(talk, lambda _, talk=talk: shore_talks.append(talk))
@@ -860,6 +860,79 @@ for obj, x, y, talk in shore_cases:
     call("DisplayTextID", 900, "a")
     assert shore_talks[before:] == [talk]
     assert p.memory[3, 0xD005] == 1, "a conversation consumed the ship visit"
+
+
+# The two-tile pier must remain passable with either lane occupied by the
+# original sailor. Freeze him there in test ROM data; do not remove any NPC.
+# This reproduces the bottleneck caused by the former fixed sailor at (22,27).
+def walk_to_tile(direction, target_x, target_y):
+    p.button_press(direction)
+    for _ in range(600):
+        p.tick(1, False)
+        if (p.memory[a("wXCoord")], p.memory[a("wYCoord")]) == (target_x, target_y):
+            p.button_release(direction)
+            for _ in range(40):
+                p.tick(1, False)
+                if not p.memory[a("wWalkCounter")]:
+                    break
+            assert (p.memory[a("wXCoord")], p.memory[a("wYCoord")]) == (
+                target_x,
+                target_y,
+            )
+            return
+    p.button_release(direction)
+    raise AssertionError(
+        (
+            "harbor route blocked",
+            direction,
+            target_x,
+            target_y,
+            p.memory[a("wXCoord")],
+            p.memory[a("wYCoord")],
+        )
+    )
+
+
+bank, obj_data = sym["VermilionCity_Object"]
+cursor = obj_data + 1
+cursor += 1 + p.memory[bank, cursor] * 4  # warps
+cursor += 1 + p.memory[bank, cursor] * 3  # signs
+original_sailor = cursor + 1 + 5 * 6  # sixth ordinary object, six bytes each
+sailor_record = list(p.memory[bank, original_sailor : original_sailor + 6])
+try:
+    for blocked_y in (26, 27):
+        p.memory[bank, original_sailor + 1] = blocked_y + 4
+        p.memory[bank, original_sailor + 2] = 22 + 4
+        p.memory[bank, original_sailor + 3] = 255  # stay in this lane
+        load_shore(1, 1, 1, px=19, py=29)
+        assert p.memory[a("wSpriteStateData2") + 6 * 16 + 4] == blocked_y + 4
+        assert not object_hidden(
+            hs_index(5, 10)
+        ), "new standing sailor must remain present"
+        walk_to_tile("up", 19, 26)
+        if blocked_y == 26:
+            walk_to_tile("right", 21, 26)
+            p.button("right", 20)
+            p.tick(30, False)
+            assert (p.memory[a("wXCoord")], p.memory[a("wYCoord")]) == (21, 26)
+            walk_to_tile("down", 21, 27)
+            walk_to_tile("right", 23, 27)
+            walk_to_tile("up", 23, 26)
+        walk_to_tile("right", 31, 26)
+        walk_to_tile("up", 31, 15)  # city plaza, beyond the narrow pier approach
+        walk_to_tile("down", 31, 26)
+        if blocked_y == 26:
+            walk_to_tile("left", 23, 26)
+            walk_to_tile("down", 23, 27)
+            walk_to_tile("left", 21, 27)
+            walk_to_tile("up", 21, 26)
+        walk_to_tile("left", 19, 26)
+        walk_to_tile("down", 19, 29)
+finally:
+    p.memory[bank, original_sailor : original_sailor + 6] = sailor_record
+print(
+    "PASS: actual harbor/city round trips with all shore sailors and either pier lane deliberately blocked"
+)
 
 load_shore(1, 1, 1)
 call("SaveSAVtoSRAM0")

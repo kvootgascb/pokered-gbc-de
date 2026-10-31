@@ -53,7 +53,7 @@ auf die Rückkehr des Schiffs; ein zusätzlicher Ankündigungsdialog ist unnöti
 | Beim Pokémon-Center | (13, 5) | Je ein Feld links/rechts | Surfer-Pikachu-Gerücht |
 | Beim Pokémon-Fanclub | (7, 14) | Je ein Feld links/rechts | Endlich wieder festen Boden unter den Füßen |
 | Beim Laden | (25, 14) | Je ein Feld links/rechts | Proviant vor der Abfahrt besorgen |
-| Am Hafen | (22, 27) | Steht mit Blick nach Süden | Landgang, danach zurück an Bord |
+| Auf dem breiten Platz vor dem Hafengebiet | (21, 14) | Steht mit Blick nach Süden | Landgang, danach zurück an Bord |
 
 Der erste Matrose erzählt:
 
@@ -66,6 +66,10 @@ Die übrigen drei führen normale Alltagsgespräche und verwenden deshalb nicht
 die Einleitung eines Gerüchts. Die ursprünglichen Stadtbewohner und Matrosen
 bleiben erhalten. Die Stadt hat damit zehn Objekte; die neuen Standorte und
 kurzen Laufwege liegen außerhalb von Türen und des Kontrollpunkts am Hafen.
+Der stehende Matrose steht ausdrücklich nicht auf dem zweifeldbreiten Steg.
+So bleibt auch dann eine Spur frei, wenn der ursprüngliche laufende Matrose
+auf dem Steg stehen bleibt. Der Weg zwischen Hafen und Stadt wird im Emulator
+in beide Richtungen mit jeweils einer absichtlich blockierten Spur geprüft.
 
 Es gibt keinen eigenen Landgang-Zähler. Alle vier verwenden dieselbe gespeicherte
 Besuchsfreigabe `wFeatureAnneState` wie das Schiff. Nach dessen ursprünglichem
