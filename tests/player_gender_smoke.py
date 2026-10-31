@@ -236,7 +236,7 @@ for gender, graphic in [
     bank, addr = sym[graphic]
     assert list(p.memory[0, 0x8000:0x8230]) == list(p.memory[bank, addr : addr + 560])
     assert p.memory[a("wPlayerGender")] == 1 - gender
-# DX branding keeps the original edition art and adds readable existing D/X glyphs.
+# DX branding matches the original edition font height, weight and baseline.
 header_name = b"POKEMON ROT DX" if rom == "pokered" else b"POKEMON BLAU DX"
 assert (root / (rom + ".gbc")).read_bytes()[0x134:0x143].rstrip(b"\0") == header_name
 original_label = (
@@ -244,11 +244,33 @@ original_label = (
     / "gfx/title"
     / ("red_version.1bpp" if rom == "pokered" else "blue_version.1bpp")
 ).read_bytes()
-font = (root / "gfx/gs/font.1bpp").read_bytes()
 assert original_label[-8:] == bytes(8), "trimming would remove visible edition pixels"
-expected_label = (
-    original_label[:-8] + bytes(8) + font[3 * 8 : 4 * 8] + font[23 * 8 : 24 * 8]
+# Compare D with the actual edition artwork, plus an equally bold five-row X.
+small_x = [
+    "......",
+    "......",
+    "......",
+    "##..##",
+    ".####.",
+    "..##..",
+    ".####.",
+    "##..##",
+]
+small_dx_rows = []
+for y in range(8):
+    d_bits = [
+        int(bool(original_label[x // 8 * 8 + y] & (1 << (7 - x % 8))))
+        for x in range(37, 42)
+    ]
+    small_dx_rows.append(
+        d_bits + [0] + [int(pixel == "#") for pixel in small_x[y]] + [0] * 4
+    )
+small_dx = bytes(
+    sum(small_dx_rows[y][tile * 8 + bit] << (7 - bit) for bit in range(8))
+    for tile in range(2)
+    for y in range(8)
 )
+expected_label = original_label[:-8] + bytes(8) + small_dx
 assert len(expected_label) == 12 * 8
 # Cold boots exercise the actual title path, including the default without a save.
 for saved, graphic in [

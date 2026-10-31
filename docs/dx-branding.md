@@ -3,7 +3,9 @@
 Die Spielnamen sind **Pokémon: Rote Edition DX** und **Pokémon: Blaue Edition DX**.
 
 Der Titelbildschirm behält den vorhandenen Schriftzug ROTE EDITION bzw.
-BLAUE EDITION und ergänzt DX aus den bestehenden D-/X-Schriftzeichen. Die
+BLAUE EDITION und ergänzt DX in derselben fetten, fünf Pixel hohen Schrift
+auf derselben Grundlinie. Das D entspricht dem D in EDITION; das X ist
+passend dazu gezeichnet, beide Buchstaben sind platzsparend gepackt. Die
 gesamte Beschriftung wird als 12 Kacheln auf Zeile 8 zentriert. Die leere
 Endkachel der ursprünglichen Editionsgrafik wird beim Laden ausgelassen;
 zwischen EDITION und DX steht genau eine normale Leer-Kachel (acht Pixel).

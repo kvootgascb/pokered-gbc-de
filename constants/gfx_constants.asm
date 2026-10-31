@@ -41,5 +41,5 @@ DEF REDRAW_ROW EQU 2
 	const TILEMAP_GAME_BOY
 	const TILEMAP_LINK_CABLE
 DEF NUM_TILEMAPS EQU const_value
-; Nine visible German edition tiles, one space, and D/X from the game font.
+; Nine visible German edition tiles, one space, and two matching small DX tiles.
 DEF TITLE_EDITION_TILES EQU 12
