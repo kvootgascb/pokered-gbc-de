@@ -17,10 +17,15 @@ Ein neuer älterer Trainer mit dem Gambler-Sprite erzählt:
 > Professor EICH war früher ein starker Trainer.
 > Neulich habe ich ihn wieder seine alten POKéBÄLLE polieren sehen ...
 
-## Wanderer bei der Felshöhle
+## Wanderer vor dem Mondberg (Route 4)
 
-Ein neuer Wanderer geht im Pokémon-Center bei der Felshöhle auf und ab,
+Ein neuer Wanderer geht im Pokémon-Center vor dem Mondberg auf Route 4 auf und ab,
 Ausgangspunkt (8, 5). Er ist unabhängig vom Champion-Sieg vorhanden.
+Gemeint ist das Center auf dem Weg von Marmoria City nach Azuria City,
+direkt vor dem Mondberg-Eingang. Am Felstunnel auf Route 10 steht dieser
+Wanderer nicht. Seine gespeicherte Hide/Show-ID bleibt beim Umzug gleich;
+bereits vorhandene Spielstände funktionieren weiter. Beim nächsten Betreten
+des Centers wird seine Sichtbarkeit aus dem Modus neu bestimmt.
 
 > Hast du schon gehört?
 > Letztes Jahr bin ich mit der M.S. ANNE gefahren.
@@ -135,3 +140,8 @@ Für den Wanderer werden Mew auf dem ersten und letzten Teamplatz, besiegtes
 Mew, andere Arten einschließlich Flegmon/Mewtu, der reine Pokédex-Eintrag,
 Box-/ungenutzte Teamdaten sowie die Rückkehr zum Gerücht nach Entfernen von
 Mew geprüft. Beide Textvarianten laufen über den echten Kartendialog.
+Ein zusätzlicher Test betritt das Center durch die tatsächliche Tür auf
+Route 4 ohne Champion-Sieg, prüft die Wiederherstellung aus einem zuvor
+gesetzten Versteckflag sowie Speichern/Laden und die ursprünglichen sechs
+NPC-Textzuordnungen. Das Route-10-Center hat wieder nur seine vier
+ursprünglichen Figuren; es bleibt kein zweiter Gerüchte-Wanderer zurück.

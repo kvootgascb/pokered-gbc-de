@@ -8,7 +8,6 @@ RockTunnelPokecenter_TextPointers:
 	dw_const RockTunnelPokecenterGentlemanText,        TEXT_ROCKTUNNELPOKECENTER_GENTLEMAN
 	dw_const RockTunnelPokecenterFisherText,           TEXT_ROCKTUNNELPOKECENTER_FISHER
 	dw_const RockTunnelPokecenterLinkReceptionistText, TEXT_ROCKTUNNELPOKECENTER_LINK_RECEPTIONIST
-	dw_const RockTunnelPokecenterRumorHikerText,       TEXT_ROCKTUNNELPOKECENTER_RUMOR_HIKER
 
 RockTunnelPokecenterNurseText:
 	script_pokecenter_nurse
@@ -23,8 +22,3 @@ RockTunnelPokecenterFisherText:
 
 RockTunnelPokecenterLinkReceptionistText:
 	script_cable_club_receptionist
-
-RockTunnelPokecenterRumorHikerText:
-	text_asm
-	farcall MewRumorTalk
-	jp TextScriptEnd

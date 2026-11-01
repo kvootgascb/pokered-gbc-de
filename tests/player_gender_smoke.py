@@ -893,7 +893,7 @@ def active_missables():
 
 rumor_cases = [
     (0, 10, 4, 17, 10, 17, 11, 0x0B, "OakRumorTalk"),
-    (0x51, 7, 5, 8, 5, 8, 6, 0x0E, "MewRumorTalk"),
+    (0x44, 7, 7, 8, 5, 8, 6, 0x0E, "MewRumorTalk"),
     (8, 10, 3, 8, 13, 8, 12, 0x2F, "FossilRumorTalk"),
 ]
 for map_id, width, obj, x, y, px, py, pic, talk in rumor_cases:
@@ -1076,7 +1076,7 @@ for members, expected in [
     ([normal_other] * 5 + [(0x15, [1, 0, 0, 0], True)], True),
     ([(0x15, [0, 0, 0, 0], False)], True),
 ]:
-    enter_npc_map(8, [84, 0, 0, 0], map_id=0x51, width=7, y=6)
+    enter_npc_map(8, [84, 0, 0, 0], map_id=0x44, width=7, y=6)
     set_reaction_party(members)
     p.memory[a("wPokedexOwned") + 18] |= 0x40  # Mew owned, even in negative cases.
     p.memory[a("wBoxCount")] = 1
@@ -1086,7 +1086,7 @@ for members, expected in [
     team_before = list(p.memory[a("wPartyDataStart") : a("wPartyDataEnd")])
     features_before = list(p.memory[3, 0xD000:0xD200])
     before = len(mew_reactions)
-    p.memory[a("hSpriteIndexOrTextID")] = 5
+    p.memory[a("hSpriteIndexOrTextID")] = 7
     call("DisplayTextID", 900, "a")
     assert len(mew_reactions) - before == int(expected)
     assert list(p.memory[a("wPartyDataStart") : a("wPartyDataEnd")]) == team_before
@@ -1095,12 +1095,53 @@ for members, expected in [
         # The same visit returns to the rumor as soon as Mew leaves the team.
         p.memory[a("wPartyCount")] = 0
         before = len(mew_reactions)
-        p.memory[a("hSpriteIndexOrTextID")] = 5
+        p.memory[a("hSpriteIndexOrTextID")] = 7
         call("DisplayTextID", 900, "a")
         assert len(mew_reactions) == before
         assert list(p.memory[3, 0xD000:0xD200]) == features_before
 print(
     "PASS: actual hiker recognizes team Mew including sixth slot/fainted; ignores other species/box/Pokedex/stale data and returns to rumor after removal"
+)
+
+
+# Enter the actual Route 4 center through its door before the first champion
+# victory, including an old hidden flag from an earlier visit/version.
+def setup_early_moon():
+    p.memory[a("wGameplayModeCache")] = 1
+    p.memory[3, 0xD000] = 1
+    p.memory[a("wNumHoFTeams")] = 0
+    p.memory[a("wRoute4CurScript")] = 0
+    p.memory[a("wMissableObjectFlags") + 0xE8 // 8] |= 1 << (0xE8 % 8)
+
+
+enter_npc_map(11, [84, 0, 0, 0], map_id=15, width=45, y=6, setup=setup_early_moon)
+p.button("up", 20)
+for _ in range(60):
+    p.tick(10, False)
+    if p.memory[a("wCurMap")] == 0x44 and p.memory[a("wNumSprites")] == 7:
+        break
+assert p.memory[a("wCurMap")] == 0x44, "Route 4 door did not enter the Mondberg center"
+p.tick(120, False)
+assert p.memory[a("wNumHoFTeams")] == 0
+assert hs_index(0x44, 7) == 0xE8, "moving the hiker changed its saved flag ID"
+assert active_missables()[7] == 0xE8
+assert not object_hidden(0xE8)
+assert [p.memory[a("wMapSpriteData") + n * 2 + 1] for n in range(6)] == list(
+    range(1, 7)
+)
+before = len(rumor_talks)
+p.memory[a("hSpriteIndexOrTextID")] = 7
+call("DisplayTextID", 900, "a")
+assert rumor_talks[before:] == ["MewRumorTalk"]
+call("SaveSAVtoSRAM0")
+call("LoadSAV0")
+call("LoadMapHeader")
+assert p.memory[a("wNumHoFTeams")] == 0 and not object_hidden(0xE8)
+enter_npc_map(8, [84, 0, 0, 0], map_id=0x51, width=7, y=6, setup=setup_early_moon)
+assert p.memory[a("wNumSprites")] == 4
+assert active_missables() == {}, "old Route 10 location retained a duplicate hiker"
+print(
+    "PASS: actual Route 4 entrance reaches Mew hiker before champion, preserves original center NPCs/save flag/save-load; no Route 10 duplicate"
 )
 
 

@@ -213,7 +213,7 @@ Alle Gerüchte werden einheitlich mit **„Hast du schon gehört?“** eingeleit
 Dafür erscheinen neue NPCs nur in Erweitert; einige laufen auf kurzen Strecken.
 
 Umgesetzt sind der ältere Trainer rechts neben Eichs Labor (nach dem ersten
-Champion-Sieg), der Wanderer im Pokémon-Center bei der Felshöhle mit dem
+Champion-Sieg), der Wanderer im Pokémon-Center vor dem Mondberg auf Route 4 mit dem
 Lastwagen-/Flegmon-Gerücht und der Angler am Ufer der Zinnoberinsel mit dem
 unbestimmten Hinweis auf lebende Fossil-Pokémon tief in einer Höhle.
 
