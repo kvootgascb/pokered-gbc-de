@@ -129,9 +129,11 @@ verfügbare/verbrauchte Schiffsbesuche, die einmalige Übernahme alter
 Champion-Spielstände, Speichern/Laden in beiden Zuständen, erneute
 Champion-Siege und Moduswechsel beim Kartenladen geprüft. Drei laufen
 sichtbar auf ihrer kurzen Strecke; der vierte bleibt stehen. Alle vier
-Kartendialoge werden ausgeführt. Die Abreiseprüfung nutzt die vorhandene
-Verbrauchsroutine des Schiffs; die komplette Abfahrtsanimation wird dabei
-nicht erneut durchgespielt. Die bisherigen Gameplay-Tests laufen mit.
+Kartendialoge werden ausgeführt. Die Matrosen-Prüfung nutzt die vorhandene
+Verbrauchsroutine des Schiffs. Zusätzlich führt die Suite inzwischen die
+vollständige Abfahrtsanimation samt automatischem Hafenausgang aus;
+Details: [postgame-features.md](postgame-features.md). Die bisherigen
+Gameplay-Tests laufen mit.
 Für die Pikachu-Reaktion werden zusätzlich der normale Dialog, andere Arten,
 Surfer auf einem anderen Teammitglied, Teamplatz sechs, Attackenplatz vier,
 0 KP/AP sowie Pokémon nur in der Box oder hinter dem Teamende geprüft.

@@ -24,6 +24,13 @@ Abfahrtsablauf. Kabinen- oder Deckwechsel verbrauchen den Besuch nicht.
 Classic verbirgt nach dem Champion-Sieg den erneuten Zugang, ohne die erweiterte
 Gelegenheit zu löschen.
 
+Die Abfahrt setzt das ursprüngliche Flag `EVENT_SS_ANNE_LEFT` nach dem
+Verbrauchen der Besuchsfreigabe mit einer ausdrücklich neu geladenen
+Event-Adresse. Der vorgeschaltete `farcall` erhält HL nicht. Ein Wiederverwenden
+des alten Zeigers setzte das Flag deshalb nicht und startete die gesamte
+Abfahrts-/Dampfsequenz im nächsten Karten-Skriptdurchlauf erneut.
+Die Korrektur verändert weder Saveformat noch Animationsdauer oder Grafik.
+
 ## Begegnungen
 
 | Pokémon | Ort | Bedingung / Rate | Level |
@@ -99,6 +106,23 @@ ist nötig. Details stehen in [save-format.md](save-format.md).
 Begegnungsregeln, Münzgrenzen, Preisprüfungen und Attackenlisten sowie das
 Speichern, Laden und Migrieren alter Spielstände. Diese automatisierten Checks
 ersetzen keinen vollständigen manuellen Durchlauf der gesamten Handlung.
+
+Die Suite führt außerdem die vollständige Abfahrt einschließlich acht
+Dampfwolken, Entfernen des Schiffs, automatischem Verlassen des Hafens und
+wieder verfügbarer Spielersteuerung aus. Sie prüft Classic/Erweitert beim
+ersten Besuch und Erweitert beim erneuten Besuch nach einem Champion-Sieg.
+Die Sequenz darf jeweils genau einmal beginnen; der Spieler muss sich danach
+in Orania wieder normal bewegen können.
+
+Ein externer Ingame-Spielstand kurz vor der Gangway auf Etage 1 kann zusätzlich
+über die echten Titel-/Fortsetzen-Menüs geprüft werden:
+
+```sh
+python tests/ss_anne_departure_smoke.py pokeblue /pfad/zum/pokeblue.sav
+```
+
+Dieser Test lädt das Save nur in den Emulator-Speicher und überprüft, dass die
+Datei unverändert bleibt. Persönliche Test-Spielstände gehören nicht ins Repository.
 
 ## Weitere Champion-Inhalte
 

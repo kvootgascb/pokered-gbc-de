@@ -38,7 +38,8 @@ VermilionDock_Script:
 
 VermilionDockSSAnneLeavesScript:
 	farcall ConsumeAnneVisit
-	SetEventForceReuseHL EVENT_SS_ANNE_LEFT
+	; The farcall clobbers HL: reload the event pointer before setting the flag.
+	SetEvent EVENT_SS_ANNE_LEFT
 	ld a, SFX_STOP_ALL_MUSIC
 	ld [wJoyIgnore], a
 	ld [wNewSoundID], a

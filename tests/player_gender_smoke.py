@@ -785,6 +785,63 @@ def enter_npc_map(
     p.memory[a("wSpritePlayerStateData1FacingDirection")] = 4  # up
 
 
+# Execute the full departure animation and automatic exit, rather than only
+# the ship-availability helpers. No user save file is needed for these cases.
+anne_departures = []
+anne_smoke = []
+anne_erasures = []
+hook("VermilionDockSSAnneLeavesScript", lambda _: anne_departures.append(True))
+hook("VermilionDock_EmitSmokePuff", lambda _: anne_smoke.append(True))
+hook("VermilionDock_EraseSSAnne", lambda _: anne_erasures.append(True))
+for mode, champion, visit in [(0, 0, 0), (1, 0, 0), (1, 1, 1)]:
+
+    def setup_departure():
+        p.memory[a("wGameplayModeCache")] = mode
+        p.memory[3, 0xD000] = mode
+        p.memory[a("wNumHoFTeams")] = champion
+        p.memory[3, 0xD003] |= 1
+        p.memory[3, 0xD005] = visit
+        p.memory[a("wLastMap")] = 5
+        flags = a("wEventFlags") + 0x5E0 // 8
+        p.memory[flags] = (p.memory[flags] | 3) & ~0x3C
+
+    enter_npc_map(26, [84, 0, 0, 0], map_id=0x5F, width=20, y=2, setup=setup_departure)
+    starts, puffs, erasures = len(anne_departures), len(anne_smoke), len(anne_erasures)
+    p.button_press("up")
+    for _ in range(300):
+        p.tick(1, False)
+        if p.memory[a("wCurMap")] != 0x5F:
+            break
+    p.button_release("up")
+    assert p.memory[a("wCurMap")] == 0x5E
+    for _ in range(4000):
+        p.tick(1, False)
+        assert len(anne_departures) - starts <= 1, "S.S. Anne departure restarted"
+        if (
+            p.memory[a("wCurMap")] == 5
+            and not p.memory[a("wJoyIgnore")]
+            and not p.memory[a("wVermilionCityCurScript")]
+            and not p.memory[a("wSimulatedJoypadStatesIndex")]
+        ):
+            break
+    else:
+        raise AssertionError(("departure failed to return control", mode, champion))
+    p.tick(120, False)
+    assert len(anne_departures) - starts == 1
+    assert len(anne_smoke) - puffs == 8 and len(anne_erasures) - erasures == 1
+    assert p.memory[a("wEventFlags") + 0x5E0 // 8] & 4
+    assert p.memory[3, 0xD005] == 0
+    before = (p.memory[a("wXCoord")], p.memory[a("wYCoord")])
+    p.button("up", 2)
+    p.tick(40, False)
+    assert p.memory[a("wCurMap")] == 5 and not p.memory[a("wJoyIgnore")]
+    assert (p.memory[a("wXCoord")], p.memory[a("wYCoord")]) != before
+    assert len(anne_departures) - starts == 1
+print(
+    "PASS: full S.S. Anne animation runs once with eight puffs and returns control; Classic/Extended first visit and Extended champion revisit"
+)
+
+
 # Route 3 at the reported positions: all trainers are unbeaten and should
 # keep their original directions, never turning to engage through scenery.
 route3_engagements = []
