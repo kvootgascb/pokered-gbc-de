@@ -16,6 +16,14 @@ Kachelprüfung. Normales Gras löst keinen Zerschneider-Dialog aus. Beim Surfen
 bleibt der normale Ausstieg per Bewegung erhalten; A aktiviert dort nicht erneut
 Surfer. Alle drei ursprünglichen Menüeinträge bleiben nutzbar.
 
+Bereits eingesammelte versteckte Items verbrauchen in Erweitert keinen weiteren
+A-Tastendruck. Dadurch wird nach dem Einsammeln wieder die normale Prüfung auf
+Bücherregale, Schilder, NPCs und Feld-VMs erreicht. Noch vorhandene Items behalten
+ihren Vorrang; ein voller Beutel darf nicht als eingesammeltes Item gelten.
+Classic behält die ursprüngliche Behandlung der versteckten Fundstelle.
+Der konkrete Fall ist der Busch mit dem versteckten Trank in Vertania bei (14,4):
+zuerst den Trank nehmen, beim nächsten A Zerschneider anbieten.
+
 Die Ausführung verwendet die ursprünglichen Routinen: Zerschneider ersetzt den
 Kartenblock, Surfer prüft weiterhin Radweg, Strömung und Kachel-Kollisionen und
 setzt den normalen Einstiegsschritt, Stärke aktiviert den normalen Schiebeablauf.
@@ -40,3 +48,6 @@ im oberen Kartenbereich und Aufrufe der Weißblende: Bei der direkten
 Interaktion dürfen weder eine Weißblende noch weiße Kartenframes auftreten.
 Der ursprüngliche Menü-Einstieg wird weiterhin separat mit seinem bisherigen
 Übergang und unverändertem Schnitteffekt geprüft.
+Für den Vertania-Busch wird zusätzlich die echte Item-Aufnahme vor dem Schnitt
+ausgeführt sowie der Fall eines bereits gesetzten Fundflags. Das Item wird
+nicht doppelt vergeben; Classic bietet weiterhin keine Kontext-VM an.

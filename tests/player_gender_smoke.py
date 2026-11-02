@@ -1760,6 +1760,67 @@ print(
     "PASS: actual A/Yes Cut with animations on/off and No leaves the world visible, removes only accepted trees and closes normally"
 )
 
+# Viridian's hidden Potion is on the cuttable tree at (14,4).
+# Take it first, then let the same A interaction reach Cut on later presses.
+coords_bank, coords_addr = sym["HiddenItemCoords"]
+potion_flag = next(
+    index
+    for index in range(128)
+    if list(
+        p.memory[coords_bank, coords_addr + index * 3 : coords_addr + index * 3 + 3]
+    )
+    == [1, 4, 14]
+)
+for mode, already_taken in [(0, False), (1, False), (1, True)]:
+    enter_npc_map(15, [15, 57, 70, 0], species=0x15, map_id=1, width=20, y=4)
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[3, 0xD000] = mode
+    p.memory[a("wObtainedBadges")] = 2
+    p.memory[a("wSpritePlayerStateData1FacingDirection")] = 8
+    p.memory[a("wNumBagItems")] = 0
+    p.memory[a("wBagItems")] = 255
+    flag_addr = a("wObtainedHiddenItemsFlags") + potion_flag // 8
+    flag_mask = 1 << (potion_flag % 8)
+    p.memory[flag_addr] &= ~flag_mask
+    if already_taken:
+        p.memory[flag_addr] |= flag_mask
+    ptr = (
+        p.memory[a("wCurrentTileBlockMapViewPointer")]
+        + 256 * p.memory[a("wCurrentTileBlockMapViewPointer") + 1]
+    )
+    tree = ptr + 54
+    old_tree = p.memory[tree]
+    before_talks = len(context_talks)
+    if not already_taken:
+        p.button("a", 2)
+        for frame in range(1200):
+            if frame and frame % 20 == 0:
+                p.button("a", 2)
+            p.tick(1, False)
+            if p.memory[flag_addr] & flag_mask and not p.memory[a("wFontLoaded")] & 1:
+                break
+        else:
+            raise AssertionError("hidden Potion was not collected")
+        assert len(context_talks) == before_talks, "Cut stole the uncollected Potion"
+        assert p.memory[tree] == old_tree
+        assert list(p.memory[a("wBagItems") : a("wBagItems") + 3]) == [0x14, 1, 255]
+    p.button("a", 2)
+    for frame in range(1200 if mode else 120):
+        if frame and frame % 20 == 0:
+            p.button("a", 2)
+        p.tick(1, False)
+        if mode and p.memory[tree] != old_tree and not p.memory[a("wFontLoaded")] & 1:
+            break
+    assert (p.memory[tree] != old_tree) == bool(mode)
+    assert len(context_talks) - before_talks == int(bool(mode))
+    assert p.memory[flag_addr] & flag_mask
+    assert p.memory[a("wNumBagItems")] == int(
+        not already_taken
+    ), "spent item was awarded twice"
+print(
+    "PASS: real Viridian Potion/tree interaction keeps item priority, lets spent items reach Cut in Extended, and preserves Classic"
+)
+
 # Actual shore interaction boards Surf in the direction being faced.
 enter_npc_map(6, [15, 57, 70, 0], species=0x15, map_id=0, width=10, y=13)
 p.memory[a("wSpritePlayerStateData1FacingDirection")] = 0

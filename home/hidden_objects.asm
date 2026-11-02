@@ -22,6 +22,9 @@ CheckForHiddenObjectOrBookshelfOrCardKeyDoor::
 	push de
 	jp hl
 .returnAddress
+	ldh a, [hDidntFindAnyHiddenObject]
+	and a
+	jr nz, .hiddenObjectNotFound
 	xor a
 	jr .done
 .hiddenObjectNotFound

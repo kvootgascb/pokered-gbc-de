@@ -9,7 +9,15 @@ HiddenItems:
 	predef FlagActionPredef
 	ld a, c
 	and a
-	ret nz
+	jr z, .notObtained
+	; In Extended, a spent item must not consume A before the field-move check.
+	ld a, [wGameplayModeCache]
+	and a
+	ret z
+	ld a, $ff
+	ldh [hDidntFindAnyHiddenObject], a
+	ret
+.notObtained
 	call EnableAutoTextBoxDrawing
 	ld a, 1
 	ld [wDoNotWaitForButtonPressAfterDisplayingText], a
