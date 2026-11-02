@@ -50,6 +50,20 @@ es anschließend eine Chance von 1:4; bei Misserfolg wechselt Mew wieder die
 Seite. Die Begegnung wird beim Erscheinen dauerhaft verbraucht. Flucht oder
 Besiegen erzeugt keinen neuen Versuch. Mew nutzt die regulären Level-30-Attacken.
 
+In Erweitert bleibt ein wildes Mew auch nach Wandler beim Fang ein Mew.
+Die ursprüngliche Art liegt bereits in `wEnemyMonSpecies2`; nur die erzwungene
+Gen-1-Zuweisung von Ditto wird für diese Kombination aus Modus und Art
+übersprungen. Der originale Wandler-Effekt und die Fangberechnung bleiben
+erhalten. Die native Fangroutine stellt Mews Art, Namen und reguläre
+Level-30-Attacken einschließlich Wandler wieder her und übernimmt es korrekt
+ins Team oder in die Box. Fangtext und Pokédex-Eintrag verwenden Mew.
+
+Ditto, andere verwandelte wilde Arten und Classic behalten ihre ursprüngliche
+Behandlung. Es gibt weder einen nachträglichen Pokémon-Austausch noch einen
+neuen Save-Zustand. Die Ausnahme gilt beim Fang; sie verändert keine bereits
+als Ditto gespeicherten Pokémon. Mews verbrauchtes Lastwagen-Ereignis wird
+dadurch nicht zurückgesetzt.
+
 ## Spielhalle
 
 - Münzkauf: weiterhin 50 für 1000, zusätzlich 500 für 10000.
@@ -106,6 +120,12 @@ ist nötig. Details stehen in [save-format.md](save-format.md).
 Begegnungsregeln, Münzgrenzen, Preisprüfungen und Attackenlisten sowie das
 Speichern, Laden und Migrieren alter Spielstände. Diese automatisierten Checks
 ersetzen keinen vollständigen manuellen Durchlauf der gesamten Handlung.
+
+Mews Fangprüfung führt zuerst den tatsächlichen Wandler-Effekt gegen Mewtu
+aus und fängt anschließend mit der echten Ball-Routine. Sie prüft Team und
+Box, Fangtext, Standard-Spitznamen, Pokédex, Level, Attacken/AP, DVs, KP und
+Status sowie den weiterhin verbrauchten Begegnungszustand. Gegenproben decken
+unverwandeltes Mew, Classic, Ditto und eine andere verwandelte Art ab.
 
 Die Suite führt außerdem die vollständige Abfahrt einschließlich acht
 Dampfwolken, Entfernen des Schiffs, automatischem Verlassen des Hafens und

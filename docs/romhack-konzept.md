@@ -14,6 +14,12 @@ und keine neue Hauptgeschichte als Bestandteil dieses Konzepts.
 bekannten Kampfeigenheiten und Fehler. Moderne Typen, Fähigkeiten und eine
 neue physisch/spezielle Schadensaufteilung sind nicht vorgesehen.
 
+Gezielte Ausnahme für die neue Mew-Begegnung in Erweitert: Beim Fang eines
+verwandelten Mew bleibt dessen ursprüngliche Art erhalten, statt es durch
+die ursprüngliche Fang-Annahme zu Ditto zu machen. Wandler selbst, die
+Fangberechnung sowie die Behandlung anderer Arten und Classic bleiben erhalten.
+Details: [postgame-features.md](postgame-features.md).
+
 **Die Pokémon-Movesets beziehungsweise Attacken-Lernlisten stammen jetzt aus
 Pokémon Gelb – in Classic und Erweitert gleichermaßen.** Das ist eine
 bewusste Ausnahme von der Rot-/Blau-Originaltreue in Classic und verändert die

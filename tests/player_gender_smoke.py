@@ -514,6 +514,130 @@ print(
     "PASS: temporary starter editor generates level-5 Yellow moves/PP in both modes without changing story; load/new-game reset"
 )
 
+# Transform must not turn Extended Mew into a captured Ditto. Execute the
+# real Transform effect, then the real ball/text/Pokedex/party-or-box paths.
+catch_messages = []
+
+
+def record_catch_message(_):
+    if (
+        p.register_file.HL == a("ItemUseBallText05")
+        and p.memory[a("hLoadedROMBank")] == sym["ItemUseBallText05"][0]
+    ):
+        catch_messages.append(
+            list(p.memory[a("wEnemyMonNick") : a("wEnemyMonNick") + 11])
+        )
+
+
+hook("PrintText", record_catch_message)
+for mode, source, transformed, boxed, expected in [
+    (1, 0x15, True, False, 0x15),
+    (1, 0x15, True, True, 0x15),
+    (1, 0x15, False, False, 0x15),
+    (0, 0x15, True, False, 0x4C),  # Classic's original assumption remains.
+    (1, 0x4C, True, False, 0x4C),  # Ditto still becomes Ditto.
+    (1, 0x97, True, False, 0x4C),  # Other Transform/Mirror Move quirks remain.
+]:
+    restore()
+    p.memory[a("wCurMap")] = 0x5E
+    p.memory[a("wGameplayModeCache")] = mode
+    p.memory[3, 0xD000] = mode
+    p.memory[3, 0xD006] = 3
+    p.memory[a("wPartyCount")] = 0
+    p.memory[a("wIsInBattle")] = 0
+    for species in [0x83] + ([0x54] * 5 if boxed else []):
+        p.memory[a("wMonDataLocation")] = 0x10
+        p.memory[a("wcf91")] = species
+        p.memory[a("wCurEnemyLVL")] = 43
+        call("_AddPartyMon")
+    p.memory[a("wPartyMon1DVs") : a("wPartyMon1DVs") + 2] = [0x12, 0x34]
+    p.memory[a("wWhichPokemon")] = 0
+    p.memory[a("wPlayerMonNumber")] = 0
+    p.memory[a("wBattleMonSpecies2")] = 0x83
+    call("LoadBattleMonFromParty")
+    p.memory[a("wIsInBattle")] = 1
+    p.memory[a("wBattleType")] = 0
+    p.memory[a("wEnemyBattleStatus1") : a("wEnemyBattleStatus3") + 1] = [0, 0, 0]
+    p.memory[a("wPlayerBattleStatus1") : a("wPlayerBattleStatus3") + 1] = [0, 0, 0]
+    p.memory[a("wEnemyMonSpecies2")] = source
+    p.memory[a("wcf91")] = source
+    p.memory[a("wCurEnemyLVL")] = 30
+    call("LoadEnemyMonData")
+    original_moves = list(p.memory[a("wEnemyMonMoves") : a("wEnemyMonMoves") + 4])
+    original_pp = list(p.memory[a("wEnemyMonPP") : a("wEnemyMonPP") + 4])
+    p.memory[a("wEnemyMonDVs") : a("wEnemyMonDVs") + 2] = [0xAB, 0xCD]
+    p.memory[a("wEnemyMonHP") : a("wEnemyMonHP") + 2] = [0, 17]
+    p.memory[a("wEnemyMonStatus")] = 0x40
+    if transformed:
+        p.memory[a("wOptions")] |= 0x80
+        p.memory[a("hWhoseTurn")] = 1
+        p.memory[a("wEnemyMoveNum")] = 144
+        p.memory[a("wEnemySelectedMove")] = 144
+        p.memory[0xFF40] = 0xE3
+        call("TransformEffect_", 2400, "b")
+        assert p.memory[a("wEnemyBattleStatus3")] & 8
+        assert p.memory[a("wEnemyMonSpecies")] == 0x83
+        assert p.memory[a("wEnemyMonSpecies2")] == source
+        assert list(
+            p.memory[
+                a("wTransformedEnemyMonOriginalDVs") : a(
+                    "wTransformedEnemyMonOriginalDVs"
+                )
+                + 2
+            ]
+        ) == [0xAB, 0xCD]
+    p.memory[a("wPokedexOwned") : a("wPokedexOwned") + 19] = [255] * 19
+    p.memory[a("wPokedexOwned") + 18] &= ~0x40  # Mew not yet owned.
+    p.memory[a("wPokedexOwned") + 16] &= ~8  # Ditto not yet owned.
+    p.memory[a("wBoxCount")] = 0
+    p.memory[a("wBoxSpecies")] = 255
+    p.memory[a("wNumBagItems")] = 1
+    p.memory[a("wBagItems") : a("wBagItems") + 3] = [1, 2, 255]
+    p.memory[a("wWhichPokemon")] = 0
+    p.memory[a("wcf91")] = 1
+    p.memory[0xFF40] = 0xE3
+    messages_before = len(catch_messages)
+    call("ItemUseBall", 2400, "b")
+    assert len(catch_messages) == messages_before + 1
+    names_bank, names_addr = sym["MonsterNames"]
+    default_name = list(
+        p.memory[
+            names_bank, names_addr + (expected - 1) * 10 : names_addr + expected * 10
+        ]
+    ) + [0x50]
+    assert catch_messages[-1] == default_name, "catch text used the wrong species name"
+    prefix = "wBoxMon1" if boxed else "wPartyMon2"
+    assert p.memory[a(prefix + "Species")] == expected
+    assert p.memory[a(prefix + ("BoxLevel" if boxed else "Level"))] == 30
+    assert list(p.memory[a(prefix + "DVs") : a(prefix + "DVs") + 2]) == [0xAB, 0xCD]
+    assert list(p.memory[a(prefix + "HP") : a(prefix + "HP") + 2]) == [0, 17]
+    assert p.memory[a(prefix + "Status")] == 0x40
+    assert p.memory[a("wCapturedMonSpecies")] == expected
+    assert bool(p.memory[a("wPokedexOwned") + 18] & 0x40) == (expected == 0x15)
+    assert bool(p.memory[a("wPokedexOwned") + 16] & 8) == (expected == 0x4C)
+    if expected == 0x15:
+        assert (
+            list(p.memory[a(prefix + "Moves") : a(prefix + "Moves") + 4])
+            == original_moves
+        ), (
+            mode,
+            source,
+            transformed,
+            boxed,
+            original_moves,
+            list(p.memory[a(prefix + "Moves") : a(prefix + "Moves") + 4]),
+        )
+        assert 144 in original_moves
+        assert list(p.memory[a(prefix + "PP") : a(prefix + "PP") + 4]) == original_pp
+    nick_base = a("wBoxMonNicks") if boxed else a("wPartyMonNicks") + 11
+    assert list(p.memory[nick_base : nick_base + 11]) == default_name
+    assert p.memory[3, 0xD006] == 3, "capture reset the consumed truck encounter"
+    assert p.memory[a("wPartyCount")] == (6 if boxed else 2)
+    assert p.memory[a("wBoxCount")] == int(boxed)
+print(
+    "PASS: native Transform/capture preserves Extended Mew name/species/level/moves/DVs/HP/status/Pokedex in party and box; Classic/Ditto/other quirks unchanged"
+)
+
 # Actual Master Ball captures fill the box; only the filling transfer warns.
 box_reminders = []
 hook("RemindAboutFullBox.warn", lambda _: box_reminders.append(True))

@@ -474,6 +474,15 @@ ItemUseBall:
 	ld hl, wEnemyBattleStatus3
 	bit TRANSFORMED, [hl]
 	jr z, .notTransformed
+	; Extended's wild Mew can legitimately know Transform. Its original
+	; species is still in wEnemyMonSpecies2; keep it for the native reload.
+	ld a, [wGameplayModeCache]
+	and a
+	jr z, .transformedDitto
+	ld a, [wEnemyMonSpecies2]
+	cp MEW
+	jr z, .skip6
+.transformedDitto
 	ld a, DITTO
 	ld [wEnemyMonSpecies2], a
 	jr .skip6
