@@ -1711,26 +1711,54 @@ call("CheckContextFieldMove")
 assert not p.register_file.F & 0x10, "Surf was offered without a team move"
 print("PASS: context VM mode/badge/tile/team requirements and second-party selection")
 
-# Actual A -> confirmation -> native Cut removes a real Route 2 tree block.
+# Context Cut must not reuse the party-menu fade while accepting the prompt.
 context_talks = []
+cut_whiteouts = []
 hook("ContextFieldMoveDialogue", lambda _: context_talks.append(True))
-enter_npc_map(5, [15, 57, 70, 0], species=0x15, map_id=13, width=10, y=11)
-p.memory[a("wObtainedBadges")] = 2
-ptr = (
-    p.memory[a("wCurrentTileBlockMapViewPointer")]
-    + 256 * p.memory[a("wCurrentTileBlockMapViewPointer") + 1]
+hook("GBPalWhiteOut", lambda _: cut_whiteouts.append(True))
+for prefs, accept in [(0, True), (2, True), (0, False)]:
+    enter_npc_map(5, [15, 57, 70, 0], species=0x15, map_id=13, width=10, y=11)
+    p.memory[a("wObtainedBadges")] = 2
+    p.memory[3, 0xD001] = prefs
+    ptr = (
+        p.memory[a("wCurrentTileBlockMapViewPointer")]
+        + 256 * p.memory[a("wCurrentTileBlockMapViewPointer") + 1]
+    )
+    cut_block = ptr + 2 * 16 + 2
+    before_block = p.memory[cut_block]
+    before_talks, before_whiteouts = len(context_talks), len(cut_whiteouts)
+    white_frames = []
+    p.button("a", 2)
+    for frame in range(1600):
+        if frame and frame % 20 == 0:
+            p.button("a" if accept else "b", 2)
+        p.tick(1, True)
+        extrema = p.screen.image.crop((0, 0, 160, 96)).getextrema()
+        if all(lo >= 248 for lo, hi in extrema[:3]):
+            white_frames.append(frame)
+        if (
+            len(context_talks) > before_talks
+            and not p.memory[a("wFontLoaded")] & 1
+            and (not accept or p.memory[cut_block] != before_block)
+        ):
+            break
+    else:
+        raise AssertionError("context Cut did not close normally")
+    assert len(context_talks) == before_talks + 1
+    assert (p.memory[cut_block] != before_block) == accept
+    assert (
+        len(cut_whiteouts) == before_whiteouts
+    ), "context Cut flashed the menu whiteout"
+    assert not white_frames, (
+        "context Cut rendered white world frames",
+        prefs,
+        white_frames,
+    )
+    p.tick(80, False)
+    assert not p.memory[a("wFontLoaded")] & 1
+print(
+    "PASS: actual A/Yes Cut with animations on/off and No leaves the world visible, removes only accepted trees and closes normally"
 )
-cut_block = ptr + 2 * 16 + 2
-before_block = p.memory[cut_block]
-shortcut_tap("a")
-for _ in range(100):
-    shortcut_tap("a")
-    if p.memory[cut_block] != before_block:
-        break
-assert context_talks, "A did not offer Cut"
-assert p.memory[cut_block] != before_block, "native Cut did not replace the tree block"
-p.tick(80, False)
-assert not p.memory[a("wFontLoaded")] & 1
 
 # Actual shore interaction boards Surf in the direction being faced.
 enter_npc_map(6, [15, 57, 70, 0], species=0x15, map_id=0, width=10, y=13)
@@ -1815,7 +1843,11 @@ for mode, prefs in [(0, 2), (1, 2), (1, 0)]:
     old = p.memory[block]
     before = len(cut_animations)
     p.memory[0xFF40] = 0xE3
+    menu_whiteouts = len(cut_whiteouts)
     call("UsedCut", 1200, "a")
+    assert (
+        len(cut_whiteouts) == menu_whiteouts + 1
+    ), "native party-menu Cut lost its original transition"
     assert p.memory[block] != old
     assert len(cut_animations) - before == (0 if prefs & 2 else 1)
     p.memory[a("wd732")] = 8  # Fly warp; neither Teleport nor dungeon warp.

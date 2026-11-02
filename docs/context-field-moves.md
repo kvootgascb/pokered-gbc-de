@@ -22,8 +22,21 @@ setzt den normalen Einstiegsschritt, Stärke aktiviert den normalen Schiebeablau
 Stärke gilt weiterhin nur bis zum natürlichen Zurücksetzen beim Kartenwechsel.
 Classic erhält keine zusätzlichen Angebote. Es sind keine neuen Save-Felder nötig.
 
+Beim direkten Ansprechen eines Buschs wird nach Ja die Karte ohne Weißblende
+wiederhergestellt. Dieser Weg steigt direkt in den gemeinsamen Schnittablauf
+ein: Der Kartenblock, der Einsatztext und die optionale Schnittanimation
+bleiben erhalten. Der ursprüngliche Einstieg über das Pokémon-Menü behält
+seinen bisherigen Ausblend-/Grafik-Wiederherstellungsablauf; er wird für die
+direkte A-Interaktion nicht mehr unnötig wiederverwendet.
+
 `tests/player_gender_smoke.py` prüft Modus, Orden, Kachel und Attackenbesitz,
 einschließlich eines passenden Pokémon an zweiter Teamposition. Auf echten
 Karten wird ein Busch auf Route 2 entfernt, in Alabastia Surfer benutzt und auf
 den Seeschauminseln Stärke aktiviert und ein Fels geschoben. Weitere Checks
 prüfen den Vorrang von Schild/NPC sowie Ablehnung und gesperrte Stärke-Nutzung.
+Für Zerschneider läuft die echte A-/Ja-Interaktion mit VM-Animationen an und
+aus sowie die Ablehnung mit Nein. Die Prüfung erfasst jeden gerenderten Frame
+im oberen Kartenbereich und Aufrufe der Weißblende: Bei der direkten
+Interaktion dürfen weder eine Weißblende noch weiße Kartenframes auftreten.
+Der ursprüngliche Menü-Einstieg wird weiterhin separat mit seinem bisherigen
+Übergang und unverändertem Schnitteffekt geprüft.

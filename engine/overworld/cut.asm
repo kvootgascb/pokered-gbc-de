@@ -42,6 +42,8 @@ UsedCut:
 	call Delay3
 	call LoadGBPal
 	call LoadCurrentMapView
+; Context Cut already has the map graphics loaded and enters here directly.
+FinishCut::
 	call SaveScreenTilesToBuffer2
 	call Delay3
 	xor a

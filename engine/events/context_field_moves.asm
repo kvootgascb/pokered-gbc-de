@@ -149,7 +149,17 @@ ContextFieldMoveDialogue::
 	predef PrintStrengthTxt
 	ret
 .cut
-	predef UsedCut
+	; Unlike the party-menu entry, the A dialogue never replaced map graphics.
+	; Restore its textbox without the native menu whiteout/reload transition.
+	ld a, [wTileInFrontOfPlayer]
+	ld [wCutTile], a
+	ld a, 1
+	ld [wActionResultOrTookBattleTurn], a
+	ld hl, wd730
+	set 6, [hl]
+	call LoadScreenTilesFromBuffer2
+	call LoadCurrentMapView
+	farcall FinishCut
 	ret
 .surf
 	farcall IsSurfingAllowed
