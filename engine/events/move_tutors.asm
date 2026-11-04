@@ -91,12 +91,12 @@ MoveDeleterTalk::
 	cont "vergessen?"
 	prompt
 .question
-	text "Welche Attacke soll"
-	line "es vergessen?"
+	text "Welche Attacke"
+	line "vergessen?"
 	prompt
 .confirm
-	text "Diese Attacke"
-	line "Wirklich löschen?"
+	text "Attacke wirklich"
+	line "vergessen?"
 	prompt
 .forgotten
 	text "Die Attacke wurde"
@@ -265,8 +265,8 @@ MoveReminderTalk::
 	cont "Attacke erinnern?"
 	prompt
 .choose
-	text "Welche Attacke soll"
-	line "es wieder lernen?"
+	text "Welche Attacke"
+	line "wieder lernen?"
 	prompt
 .noMoves
 	text "Es erinnert sich"
