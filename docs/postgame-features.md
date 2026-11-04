@@ -100,7 +100,8 @@ Details stehen in [yellow-learnsets.md](yellow-learnsets.md).
 
 Der rechte Assistent in Eichs Labor bietet in Erweitert nach der Starterwahl
 einen kostenlosen Linkkabel-Test an. Nach Bestätigung wählt der Spieler ein
-Team-Pokémon aus und bekommt es sofort zurück. Kadabra, Maschock, Georok und
+Team-Pokémon aus. Die originale Tauschanimation zeigt den Hin- und Rückweg
+durch das Linkkabel; anschließend ist es wieder im Team. Kadabra, Maschock, Georok und
 Alpollo entwickeln sich über die ursprüngliche Tauschentwicklungsroutine.
 Andere Arten werden unverändert zurückgegeben; insbesondere werden keine
 Level- oder Steinentwicklungen ausgelöst. Ein zweites Gerät ist nicht nötig.
@@ -115,7 +116,10 @@ persistenten Zwischenzustand und keine Änderung am Saveformat.
 
 Die Emulator-Tests prüfen alle vier Entwicklungen, unveränderte Pokémon-Daten,
 ein nicht entwickelbares Pokémon, die Classic-Sperre sowie den echten Dialog
-mit Teamauswahl, Entwicklung und Rückkehr ins Labor.
+mit Teamauswahl, beiden Animationsrichtungen, Entwicklung und Rückkehr ins
+Labor. Dabei werden Tileset-Grafik, LCD-/Fensterposition und Sprites vollständig
+wiederhergestellt. Die Dialogzeilen passen in den Textkasten; Nein und B in
+der Teamauswahl schließen ohne weiteren Tastendruck.
 
 ## Speicher und Prüfung
 

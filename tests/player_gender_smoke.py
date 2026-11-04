@@ -1678,20 +1678,91 @@ print(
     "PASS: all four trade evolutions preserve Pokemon data; non-evolving/Classic cases unchanged"
 )
 
-# Real lab scientist dialogue, party choice, evolution and return to map.
-trade_done = []
+# Full local trade-back: real NPC, both cable directions, all trade evolutions,
+# unchanged ownership/team data and a completely restored lab after returning.
+trade_done, trade_outgoing, trade_returning, trade_party_ready = [], [], [], []
 hook("TradeBackTrainerTalk.done", lambda _: trade_done.append(True))
-enter_npc_map(8, [93, 0, 0, 0], species=0x26, map_id=0x28, width=5, y=11)
-for _ in range(160):
-    p.button("a", 2)
-    p.tick(20, False)
-    if trade_done:
-        break
-assert trade_done, "trade-back NPC did not return from its dialogue"
-assert p.memory[a("wPartyMon1")] == 0x95
-assert p.memory[a("wLinkState")] == 0
-assert p.memory[a("wGameplayModeCache")] == 1
-print("PASS: actual lab NPC selects a Pokemon, evolves it and returns it locally")
+hook("Trade_AnimLeftToRight", lambda _: trade_outgoing.append(True))
+hook("Trade_AnimRightToLeft", lambda _: trade_returning.append(True))
+hook("HandlePartyMenuInput", lambda _: trade_party_ready.append(True))
+
+
+def tick_trade(frames=1, render=False):
+    p.tick(frames, render)
+    while p.memory[0xFF70] & 7 not in (0, 1):
+        p.tick(1, render)
+
+
+for source, target in [(0x26, 0x95), (0x29, 0x7E), (0x27, 0x31),
+                       (0x93, 0x0E), (0x54, 0x54)]:
+    enter_npc_map(8, [93, 0, 0, 0], species=source, map_id=0x28, width=5, y=11)
+    tick_trade(1)
+    tileset = bytes(p.memory[0, 0x9000:0x9600])
+    lcd, wx = p.memory[0xFF40], p.memory[0xFF4B]
+    ot = list(p.memory[a("wPartyMon1OTID"):a("wPartyMon1OTID") + 2])
+    nickname = list(p.memory[a("wPartyMonNicks"):a("wPartyMonNicks") + 11])
+    moves = list(p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4])
+    before_done, before_out, before_return = len(trade_done), len(trade_outgoing), len(trade_returning)
+    for _ in range(400):
+        p.button("a", 2)
+        tick_trade(20)
+        if len(trade_done) > before_done:
+            break
+    assert len(trade_done) > before_done, (source, "trade dialogue never returned", hex(p.register_file.PC), p.memory[a("hLoadedROMBank")], len(trade_outgoing), len(trade_returning), hex(p.register_file.SP))
+    for _ in range(30):
+        p.button("b", 2)
+        tick_trade(20)
+        if not p.memory[a("wFontLoaded")] & 1:
+            break
+    tick_trade(6, True)
+    assert len(trade_outgoing) == before_out + 1
+    assert len(trade_returning) == before_return + 1
+    assert p.memory[a("wPartyCount")] == 1
+    assert p.memory[a("wPartyMon1Species")] == target
+    assert list(p.memory[a("wPartyMon1OTID"):a("wPartyMon1OTID") + 2]) == ot
+    assert list(p.memory[a("wPartyMonNicks"):a("wPartyMonNicks") + 11]) == nickname
+    assert list(p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4]) == moves
+    actual_tiles = bytes(p.memory[0, 0x9000:0x9600])
+    # The native overworld animates flower ($03) and water ($14) tiles.
+    assert all(actual_tiles[i] == tileset[i] for i in range(0x600)
+               if i // 16 not in (0x03, 0x14)), "laboratory graphics not restored"
+    assert p.memory[0xFF40] == lcd and p.memory[0xFF4B] == wx
+    assert p.memory[0xFF4A] == 0x90 and not p.memory[a("wFontLoaded")] & 1
+    assert p.memory[a("wUpdateSpritesEnabled")] == 1
+    assert p.memory[a("wLinkState")] == 0 and p.memory[a("wGameplayModeCache")] == 1
+    p.screen.image.save("/tmp/" + rom + "-trade-back-lab-" + str(source) + ".png")
+
+# Decline the offer or cancel the party menu with one B, without animation.
+for party_cancel in (False, True):
+    enter_npc_map(8, [93, 0, 0, 0], species=0x26, map_id=0x28, width=5, y=11)
+    before_party, before_out = len(trade_party_ready), len(trade_outgoing)
+    if party_cancel:
+        for frame in range(1600):
+            if frame % 20 == 0:
+                p.button("a", 2)
+            tick_trade()
+            if len(trade_party_ready) > before_party:
+                break
+        assert len(trade_party_ready) > before_party
+        p.button_release("a")
+        tick_trade(12)
+        p.button("b", 2)
+        tick_trade(120)
+    else:
+        # Open the NPC, then decline its offer with B.
+        p.button("a", 2)
+        tick_trade(30)
+        for _ in range(100):
+            p.button("b", 2)
+            tick_trade(20)
+            if not p.memory[a("wFontLoaded")] & 1:
+                break
+    assert len(trade_outgoing) == before_out
+    assert p.memory[a("wPartyMon1Species")] == 0x26
+    assert not p.memory[a("wFontLoaded")] & 1
+for label in ("TradeBackTrainerTalk.done", "Trade_AnimLeftToRight", "Trade_AnimRightToLeft", "HandlePartyMenuInput"):
+    p.hook_deregister(*sym[label])
+print("PASS: real trade-back NPC animates both directions, evolves four species, preserves ownership and restores lab graphics; cancel is safe")
 
 # Teach through the original TM/HM item dialogue and party menu.
 for mode in [0, 1]:
