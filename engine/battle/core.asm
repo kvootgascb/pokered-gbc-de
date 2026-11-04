@@ -52,6 +52,7 @@ SlidePlayerAndEnemySilhouettesOnScreen:
 	xor a
 	ldh [hTileAnimations], a
 	ldh [hSCY], a
+	ldh [rSCY], a ; LCD starts before VBlank can apply the shadow scroll registers
 	dec a
 	ld [wUpdateSpritesEnabled], a
 	;call Delay3
@@ -63,6 +64,7 @@ SlidePlayerAndEnemySilhouettesOnScreen:
 	ld c, $90
 	ld a, c
 	ldh [hSCX], a
+	ldh [rSCX], a ; use the battle scroll position from the very first visible line
 	;call DelayFrame
 	nop
 	nop
