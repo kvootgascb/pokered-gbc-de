@@ -23,6 +23,11 @@ Werten, Spieler-OT und Pokédex-Eintrag. ORIGINAL erhält das normale Verhalten.
 Das Feature verändert keine Kampfregeln und ersetzt keine bereits vorhandenen
 Teammitglieder.
 
+Beim Erhalt eines im Geheimmenü gewählten Starters werden einmalig 99
+Sonderbonbons zum vorhandenen PC-Inventar hinzugefügt. Der anfängliche Trank
+bleibt erhalten, falls er noch im PC liegt; ein bereits abgeholter Trank
+wird nicht neu angelegt. ORIGINAL erhält diesen Bonus nicht.
+
 Die Voreinstellung verwendet genau ein Byte außerhalb aller gespeicherten
 Datenblöcke. Sie wird bei der Übergabe verbraucht sowie bei New Game und jedem
 Ladeversuch gelöscht. Sie wird nicht in SRAM geschrieben; Format, Version und
@@ -41,3 +46,5 @@ Die Emulator-Suite `tests/player_gender_smoke.py` prüft in Rot und Blau:
 - Menübedienung, Namensanzeige, Umlauf zwischen ORIGINAL und Mew,
   A ohne Schließen, Seitenwechsel und Erreichbarkeit von Zurück.
 - Verwerfen der Voreinstellung beim Laden und beim neuen Spiel.
+- Einmalig 99 Sonderbonbons im PC, mit vorhandenem oder bereits abgeholtem
+  Trank, anderen Items, bestehenden Sonderbonbons sowie Speichern/Laden.

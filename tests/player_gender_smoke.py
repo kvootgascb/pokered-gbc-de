@@ -500,6 +500,41 @@ for map_id, got, choice in [
     p.memory[a("wcf91")] = 0xB1
     call("GiveEditedStarter")
     assert p.memory[a("wPartyMon1Species")] == 0xB1
+# The edited-starter bonus appends to the real PC inventory, independently of
+# whether the initial Potion has already been withdrawn. It is awarded once.
+for mode in (0, 1):
+    for pc_items in ([], [(20, 1)], [(4, 3), (20, 1)], [(40, 17)]):
+        restore()
+        p.memory[a("wCurMap")] = 0x28
+        p.memory[a("wEventFlags") + 4] &= ~4
+        p.memory[a("wGameplayModeCache")] = mode
+        p.memory[a("wPartyCount")] = 0
+        p.memory[a("wMonDataLocation")] = 0x10
+        p.memory[a("wCurEnemyLVL")] = 5
+        p.memory[a("wStarterEditorChoice")] = 65
+        p.memory[a("wcf91")] = 0xB1
+        p.memory[a("wItemQuantity")] = 7
+        p.memory[a("wNumBoxItems")] = len(pc_items)
+        items = [byte for item, qty in pc_items for byte in (item, qty)] + [255]
+        p.memory[a("wBoxItems"):a("wBoxItems") + len(items)] = items
+        call("GiveEditedStarter")
+        assert p.memory[a("wPartyMon1Species")] == 0x95
+        assert p.memory[a("wcf91")] == 0x95 and p.memory[a("wItemQuantity")] == 7
+        expected = pc_items + [(40, 99)]
+        # Native inventory rules split overflowing existing stacks.
+        if pc_items == [(40, 17)]:
+            expected = [(40, 99), (40, 17)]
+        stored = [byte for item, qty in expected for byte in (item, qty)] + [255]
+        assert p.memory[a("wNumBoxItems")] == len(expected)
+        assert list(p.memory[a("wBoxItems"):a("wBoxItems") + len(stored)]) == stored
+        p.memory[a("wEventFlags") + 4] |= 4
+        call("GiveEditedStarter")
+        assert list(p.memory[a("wBoxItems"):a("wBoxItems") + len(stored)]) == stored
+        call("SaveSAVtoSRAM0")
+        call("LoadSAV0")
+        assert list(p.memory[a("wBoxItems"):a("wBoxItems") + len(stored)]) == stored
+print("PASS: edited starter deposits 99 Rare Candies once; PC Potion/withdrawal/other stacks and save/load preserved")
+
 # Loading clears the unused choice but preserves an already received replacement.
 restore()
 p.memory[a("wStarterEditorChoice")] = 65
@@ -1502,6 +1537,8 @@ for x, original, rival in [(6, 0xB0, 0xB1), (7, 0xB1, 0x99), (8, 0x99, 0xB0)]:
         p.memory[a("wEventFlags") + 4] = 3  # Followed Oak and invited to choose.
         p.memory[a("wMissableObjectFlags") + 5] &= ~0x78  # Three balls + Oak.
         p.memory[a("wStarterEditorChoice")] = 65
+        p.memory[a("wNumBoxItems")] = 0 if x == 7 else 1
+        p.memory[a("wBoxItems"):a("wBoxItems") + 3] = [255, 0, 0] if x == 7 else [20, 1, 255]
 
     enter_npc_map(x, [0, 0, 0, 0], map_id=0x28, width=5, y=4, setup=setup_starter_lab)
     # Accept the ball; decline only the subsequent optional nickname.
@@ -1513,6 +1550,8 @@ for x, original, rival in [(6, 0xB0, 0xB1), (7, 0xB1, 0x99), (8, 0x99, 0xB0)]:
     assert p.memory[a("wPartyCount")] == 1, "real ball did not give a starter"
     assert p.memory[a("wPartyMon1Species")] == 0x95
     assert p.memory[a("wPartyMon1Level")] == 5
+    pc_expected = [40, 99, 255] if x == 7 else [20, 1, 40, 99, 255]
+    assert list(p.memory[a("wBoxItems"):a("wBoxItems") + len(pc_expected)]) == pc_expected
     assert p.memory[a("wPlayerStarter")] == original
     assert p.memory[a("wRivalStarter")] == rival
     assert p.memory[a("wEventFlags") + 4] & 4

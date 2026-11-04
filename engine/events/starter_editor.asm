@@ -88,8 +88,27 @@ GiveEditedStarter::
 	farcall PokedexToIndex
 	ld a, [wd11e]
 	ld [wcf91], a
+	call AddPartyMon
+	jr nc, .done
+	; Append to the existing PC inventory: never recreate a withdrawn Potion.
+	ld a, [wcf91]
+	push af
+	ld a, [wItemQuantity]
+	push af
+	ld a, RARE_CANDY
+	ld [wcf91], a
+	ld a, 99
+	ld [wItemQuantity], a
+	ld hl, wNumBoxItems
+	call AddItemToInventory
+	pop af
+	ld [wItemQuantity], a
+	pop af
+	ld [wcf91], a
+	jr .done
 .give
 	call AddPartyMon
+.done
 	xor a
 	ld [wStarterEditorChoice], a
 	ret
