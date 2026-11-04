@@ -2211,7 +2211,8 @@ print(
 )
 
 
-# Ship merchant: each exact price, repeat purchases, insufficient money and capacity.
+# Native shop pricing: special purchase prices are scoped to the ship shop;
+# ordinary shops, non-stock items and selling retain their original prices.
 def set_money(value):
     p.memory[a("wPlayerMoney") : a("wPlayerMoney") + 3] = list(
         bytes.fromhex(f"{value:06d}")
@@ -2224,64 +2225,26 @@ def money_value():
     )
 
 
-for choice, item, price in [
-    (0, 0x4F, 20000),
-    (1, 0x51, 3000),
-    (2, 0x52, 5000),
-    (3, 0x53, 10000),
-    (4, 0x0A, 5000),
-    (5, 0x36, 10000),
-]:
-    restore()
-    p.memory[a("wGameplayModeCache")] = 1
-    p.memory[a("wNumHoFTeams")] = 1
-    p.memory[a("wNumBagItems") : a("wNumBagItems") + 2] = [0, 255]
-    p.memory[a("wTutorCandidate")] = choice
-    set_money(price - 1)
-    call("BuyShipMerchantItem")
-    assert p.memory[a("wPostgameAction")] == 2
-    assert money_value() == price - 1 and p.memory[a("wNumBagItems")] == 0
-    set_money(price)
-    call("BuyShipMerchantItem")
-    assert p.memory[a("wPostgameAction")] == 1
-    assert money_value() == 0
-    assert list(p.memory[a("wBagItems") : a("wBagItems") + 2]) == [item, 1]
-    set_money(price * 2)
-    call("BuyShipMerchantItem")
-    call("BuyShipMerchantItem")
-    assert p.memory[a("wBagItems") + 1] == 3 and money_value() == 0
+ship_stock = [(0x4F, 20000), (0x51, 3000), (0x52, 5000),
+              (0x53, 10000), (0x0A, 5000), (0x36, 10000)]
 restore()
-p.memory[a("wGameplayModeCache")] = 1
-p.memory[a("wNumHoFTeams")] = 1
-p.memory[a("wTutorCandidate")] = 0
-p.memory[a("wNumBagItems")] = 30
-for slot in range(30):
-    p.memory[a("wBagItems") + slot * 2 : a("wBagItems") + slot * 2 + 2] = [slot + 1, 1]
-p.memory[a("wBagItems") + 60] = 255
-set_money(20000)
-call("BuyShipMerchantItem")
-assert p.memory[a("wPostgameAction")] == 3 and money_value() == 20000
-p.memory[a("wBagItems") : a("wBagItems") + 2] = [0x4F, 99]
-call("BuyShipMerchantItem")
-assert p.memory[a("wPostgameAction")] == 3 and money_value() == 20000
-p.memory[a("wBagItems") + 1] = 98
-call("BuyShipMerchantItem")
-assert p.memory[a("wBagItems") + 1] == 99 and money_value() == 0
-for mode, champion in [(0, 1), (1, 0)]:
-    p.memory[a("wGameplayModeCache")] = mode
-    p.memory[a("wNumHoFTeams")] = champion
-    set_money(20000)
-    call("BuyShipMerchantItem")
-    assert p.memory[a("wPostgameAction")] == 4 and money_value() == 20000
-print(
-    "PASS: ship merchant prices, unlimited stock, bag/stack limits and champion/Classic gates"
-)
+price_table = a("ItemPrices")
+p.memory[a("wItemPrices"):a("wItemPrices") + 2] = [price_table & 255, price_table >> 8]
+for active, menu in [(0, 2), (1, 2), (1, 3), (0, 3)]:
+    p.memory[a("wShipMerchantActive")] = active
+    p.memory[a("wListMenuID")] = menu
+    for item, price in ship_stock + [(20, 300)]:
+        p.memory[a("wcf91")] = item
+        call("GetItemPrice")
+        expected = price if active and menu == 2 else {0x36: 4000, 20: 300}.get(item, 0)
+        actual = list(p.memory[a("hItemPrice"):a("hItemPrice") + 3])
+        assert actual == list(bytes.fromhex(f"{expected:06d}")), (active, menu, item, actual)
+print("PASS: native ship purchase prices; original selling/other-shop prices unchanged")
 
 # Enter each new service through actual NPC interaction and hold its menu
 # open. Map sprites must stay out of both shadow OAM and hardware OAM; after
 # B/cancellation the original map and normal sprite updates must return.
 for service, label, map_id, x, y, moves in [
-    ("ship-shop", "ShipMerchantTalk.menu", 0x63, 10, 11, [84, 0, 0, 0]),
     ("coin-shop", "ExpandedCoinShop.shop", 0x87, 5, 8, [84, 0, 0, 0]),
     ("move-deleter", "MoveSelectionMenu", 0x63, 8, 6, [84, 39, 98, 85]),
     ("move-reminder", "DisplayListMenuID", 0x63, 10, 6, [84, 0, 0, 0]),
@@ -2317,29 +2280,6 @@ for service, label, map_id, x, y, moves in [
             for pos in p.memory[base_addr:base_addr + 160:4]
         ), (service, "map sprites overlap menu", hex(base_addr))
     p.screen.image.save("/tmp/" + rom + "-" + service + ".png")
-    if service == "ship-shop":
-        # The added seventh row (Back) must remain inside the border.
-        assert p.memory[a("wMaxMenuItem")] == 6
-        assert p.memory[a("wTileMap") + 16 * 20] == 0x7D  # bottom-left border
-        for _ in range(5):
-            shortcut_tap("down")
-        assert p.memory[a("wCurrentMenuItem")] == 5
-        for _ in range(80):
-            shortcut_tap("a")
-            if p.memory[a("wNumBagItems")] == 2:
-                break
-        assert list(p.memory[a("wBagItems") + 2:a("wBagItems") + 4]) == [0x36, 1]
-        assert money_value() == 40000
-        for _ in range(80):
-            shortcut_tap("a")
-            if len(service_menus) >= 2:
-                break
-        p.tick(12, True)
-        assert p.memory[a("wCurrentMenuItem")] == 5
-        assert p.memory[a("wUpdateSpritesEnabled")] != 1
-        shortcut_tap("down")
-        assert p.memory[a("wCurrentMenuItem")] == 6
-        shortcut_tap("a")  # Back, not a seventh stock entry
     for _ in range(40):
         shortcut_tap("b")
         if not p.memory[a("wFontLoaded")] & 1:
@@ -2351,24 +2291,164 @@ for service, label, map_id, x, y, moves in [
     assert p.memory[a("hWY")] == 0x90, service
     p.hook_deregister(*sym[label])
     p.hook_deregister(*sym["HandleMenuInput_"])
-print("PASS: real ship/coin/deleter/reminder menus hide map sprites and restore them on exit")
+print("PASS: real coin/deleter/reminder menus hide map sprites and restore them on exit")
 
-# A real NPC transaction on deck, plus visibility at the natural refresh point.
-merchant_menus = []
-hook("ShipMerchantTalk.menu", lambda _: merchant_menus.append(True))
-enter_npc_map(10, [84, 0, 0, 0], map_id=0x63, width=10, y=11)
-p.memory[a("wNumBagItems") : a("wNumBagItems") + 2] = [0, 255]
-set_money(20000)
-for _ in range(80):
-    shortcut_tap("a")
-    if p.memory[a("wNumBagItems")] == 1:
-        break
-assert merchant_menus, "new merchant NPC cannot be reached"
-assert list(p.memory[a("wBagItems") : a("wBagItems") + 2]) == [0x4F, 1]
-assert money_value() == 0
-for _ in range(25):
-    shortcut_tap("b")
-assert not p.memory[a("wFontLoaded")] & 1
+# Reuse the actual mart dialogue, scrollable priced list, quantity screen,
+# confirmation and checkout, entered by talking to the real merchant NPC.
+native_inputs, native_lists, native_quantities, native_checkouts = [], [], [], []
+native_quantity_polls = [0]
+hook("HandleMenuInput_", lambda _: native_inputs.append(True))
+hook("DisplayPokemartDialogue_.buyMenuLoop", lambda _: native_lists.append(len(native_inputs)))
+hook("DisplayChooseQuantityMenu", lambda _: native_quantities.append(True))
+hook("DisplayChooseQuantityMenu.waitForKeyPressLoop",
+     lambda _: native_quantity_polls.__setitem__(0, native_quantity_polls[0] + 1))
+hook("DisplayPokemartDialogue_.buyItem", lambda _: native_checkouts.append(True))
+
+
+def tick_native(frames=1, render=False):
+    if frames:
+        p.tick(frames, render)
+    # A frame snapshot can stop inside the CGB VBlank palette hook with
+    # WRAM bank 2 selected. Inspect/write game state only after it returns.
+    while p.memory[0xFF70] & 7 not in (0, 1):
+        p.tick(1, render)
+
+
+def native_tap(button):
+    p.button(button, 2)
+    tick_native(20)
+
+
+def wait_native(condition, button=None):
+    for frame in range(1800):
+        if button and frame % 20 == 0:
+            p.button(button, 2)
+        tick_native()
+        if condition():
+            if button:
+                p.button_release(button)
+            tick_native(6)
+            return
+    raise AssertionError(("native shop timed out", hex(p.register_file.PC)))
+
+
+def open_ship_shop(money, bag=None):
+    enter_npc_map(10, [84, 0, 0, 0], map_id=0x63, width=10, y=11)
+    tick_native(0)
+    if bag is None:
+        bag = []
+    p.memory[a("wNumBagItems")] = len(bag)
+    contents = [byte for item, count in bag for byte in (item, count)] + [255]
+    p.memory[a("wBagItems"):a("wBagItems") + len(contents)] = contents
+    set_money(money)
+    before = len(native_lists)
+    wait_native(lambda: len(native_lists) > before, "a")
+    wait_native(lambda: len(native_inputs) > native_lists[-1])
+    tick_native(6, True)
+    assert p.memory[a("wShipMerchantActive")] == 1
+    assert p.memory[a("wUpdateSpritesEnabled")] != 1
+    assert money_value() == money, ("opening shop changed money", money, money_value())
+    assert p.memory[a("wListCount")] == 6
+    for base_addr in (a("wShadowOAM"), 0xFE00):
+        assert all(pos == 0 or pos >= 160 for pos in p.memory[base_addr:base_addr + 160:4])
+
+
+def choose_ship_quantity(index, quantity=1):
+    initial_money = money_value()
+    for _ in range(index):
+        native_tap("down")
+    assert p.memory[a("wListScrollOffset")] + p.memory[a("wCurrentMenuItem")] == index
+    before = len(native_quantities)
+    polls = native_quantity_polls[0]
+    wait_native(lambda: len(native_quantities) > before, "a")
+    wait_native(lambda: native_quantity_polls[0] > polls)
+    assert p.memory[a("wItemQuantity")] == 1
+    for amount in range(2, quantity + 1):
+        quantity_tap("up", amount)
+    assert money_value() == initial_money, ("quantity changed money", index, initial_money, money_value())
+    expected = quantity * ship_stock[index][1]
+    actual = list(p.memory[a("hMoney"):a("hMoney") + 3])
+    assert actual == list(bytes.fromhex(f"{expected:06d}")), (index, quantity, actual)
+
+
+def quantity_tap(button, expected):
+    p.button(button, 2)
+    wait_native(lambda: p.memory[a("wItemQuantity")] == expected)
+    # Quantity changes before the price/text redraw. Wait for the following
+    # input poll so the next tap cannot be swallowed by that redraw.
+    polls = native_quantity_polls[0]
+    wait_native(lambda: native_quantity_polls[0] > polls)
+
+
+def close_ship_shop():
+    for _ in range(90):
+        native_tap("b")
+        if not p.memory[a("wFontLoaded")] & 1:
+            break
+    tick_native(6, True)
+    assert not p.memory[a("wFontLoaded")] & 1
+    assert p.memory[a("wShipMerchantActive")] == 0
+    assert p.memory[a("wUpdateSpritesEnabled")] == 1
+    assert p.memory[a("hWY")] == 0x90
+    assert any(0 < pos < 160 for pos in p.memory[0xFE00:0xFEA0:4])
+
+
+# Every stock price is charged by the real checkout, including exact payment.
+for index, (item, price) in enumerate(ship_stock):
+    quantity = 2 if index == 0 else 3 if index == 5 else 1
+    open_ship_shop(price * quantity)
+    if index == 0:
+        p.screen.image.save("/tmp/" + rom + "-ship-shop.png")
+    choose_ship_quantity(index, quantity)
+    if index == 0:
+        assert p.memory[a("wMaxItemQuantity")] == 49
+        # The cap prevents a price wrapping above the six-digit money limit.
+        quantity_tap("down", 1)  # 2 -> 1
+        quantity_tap("down", 49)  # 1 -> 49
+        assert p.memory[a("wItemQuantity")] == 49
+        assert list(p.memory[a("hMoney"):a("hMoney") + 3]) == [0x98, 0, 0]
+        quantity_tap("up", 1)
+        quantity_tap("up", 2)
+    if index == 5:
+        tick_native(1, True)
+        p.screen.image.save("/tmp/" + rom + "-ship-quantity.png")
+    before = len(native_checkouts)
+    wait_native(lambda: len(native_checkouts) > before, "a")
+    wait_native(lambda: p.memory[a("wNumBagItems")] == 1)
+    assert list(p.memory[a("wBagItems"):a("wBagItems") + 2]) == [item, quantity]
+    assert money_value() == 0
+    close_ship_shop()
+
+# Cancel at the quantity and confirmation screens without paying or adding.
+for cancel_confirmation in (False, True):
+    open_ship_shop(50000)
+    choose_ship_quantity(5, 2)
+    before = len(native_lists)
+    if cancel_confirmation:
+        native_tap("a")  # accept quantity; B then dismisses the quote/declines
+    wait_native(lambda: len(native_lists) > before, "b")
+    assert p.memory[a("wNumBagItems")] == 0 and money_value() == 50000, (cancel_confirmation, p.memory[a("wNumBagItems")], money_value())
+    close_ship_shop()
+
+# Standard native checkout must also reject insufficient funds and full bags/stacks.
+for money, bag in [(9999, []), (10000, [(i, 1) for i in range(1, 31)]),
+                   (10000, [(0x36, 99)] + [(i, 1) for i in range(1, 30)])]:
+    open_ship_shop(money, bag)
+    choose_ship_quantity(5)
+    before = len(native_checkouts)
+    wait_native(lambda: len(native_checkouts) > before, "a")
+    tick_native(20)
+    assert money_value() == money and p.memory[a("wNumBagItems")] == len(bag), (money, len(bag), money_value(), p.memory[a("wNumBagItems")], p.memory[a("wItemQuantity")], list(p.memory[a("hMoney"):a("hMoney") + 3]))
+    if bag and bag[0] == (0x36, 99):
+        assert p.memory[a("wBagItems") + 1] == 99
+    close_ship_shop()
+
+for label in ("HandleMenuInput_", "DisplayPokemartDialogue_.buyMenuLoop",
+              "DisplayChooseQuantityMenu", "DisplayChooseQuantityMenu.waitForKeyPressLoop",
+              "DisplayPokemartDialogue_.buyItem"):
+    p.hook_deregister(*sym[label])
+print("PASS: real native ship store layout, all six prices, quantities, cancel, funds/capacity and exit")
+
 for mode, champion, hidden in [(0, 1, True), (1, 0, True), (1, 1, False)]:
     p.memory[a("wGameplayModeCache")] = mode
     p.memory[a("wNumHoFTeams")] = champion

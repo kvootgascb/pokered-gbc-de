@@ -1,6 +1,8 @@
 GetItemPrice::
 ; Stores item's price as BCD at hItemPrice (3 bytes)
 ; Input: [wcf91] = item id
+	farcall GetShipMerchantPrice
+	ret c
 	ldh a, [hLoadedROMBank]
 	push af
 	ld a, [wListMenuID]

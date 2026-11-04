@@ -151,6 +151,16 @@ DisplayPokemartDialogue_::
 	jr c, .returnToMainPokemartMenu ; if the player closed the menu
 	ld a, 99
 	ld [wMaxItemQuantity], a
+	; 50 AP-Plus would exceed the six-digit money/total-price format.
+	ld a, [wShipMerchantActive]
+	and a
+	jr z, .quantityLimitSet
+	ld a, [wcf91]
+	cp PP_UP
+	jr nz, .quantityLimitSet
+	ld a, 49
+	ld [wMaxItemQuantity], a
+.quantityLimitSet
 	xor a
 	ldh [hHalveItemPrices], a ; don't halve item prices when buying
 	call DisplayChooseQuantityMenu

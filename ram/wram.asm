@@ -2364,3 +2364,9 @@ wStack:: db
 ; Outside every saved block. Reset on New Game and all save-load attempts.
 SECTION "Temporary Starter Editor State", WRAM0
 wStarterEditorChoice:: db ; Pokédex number 1..151, zero = original starter
+
+
+SECTION "Ship Merchant Context", WRAM0
+
+; Transient price context; cleared when the shop closes. Outside save data.
+wShipMerchantActive:: db
