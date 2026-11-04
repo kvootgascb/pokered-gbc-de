@@ -37,6 +37,12 @@ RepeatLastRepel::
 	push af
 	ld a, c
 	ld [wWhichPokemon], a
+	; The overworld can overwrite the shared name buffer after the first use.
+	; Prepare the item-use text just as the bag menu does.
+	ld a, [wcf91]
+	ld [wd11e], a
+	call GetItemName
+	call CopyToStringBuffer
 	call UseItem
 	pop af
 	ld [wWhichPokemon], a

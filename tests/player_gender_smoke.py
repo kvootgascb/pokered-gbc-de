@@ -1852,6 +1852,53 @@ for item, steps in [(0x1E, 100), (0x38, 200), (0x39, 250)]:
     assert p.memory[a("wBagItems") + 1] == 2
     assert p.memory[a("wRepelRemainingSteps")] == 0
 
+# Repel reuse must rebuild the item-use text, even after unrelated name/text
+# routines have overwritten the shared buffer (pickup, Pokemon name, dialogue).
+def buffered_text(name):
+    start = a(name)
+    data = list(p.memory[start:start + 64])
+    return data[:data.index(0x50) + 1]
+
+
+repel_use_names = []
+hook("PrintItemUseTextAndRemoveItem",
+     lambda _: repel_use_names.append(buffered_text("wStringBuffer")))
+for item, steps in [(0x1E, 100), (0x38, 200), (0x39, 250)]:
+    for overwritten_by in ("pickup", "pokemon", "dialogue"):
+        restore()
+        p.memory[a("wGameplayModeCache")] = 1
+        p.memory[3, 0xD000] = 1
+        p.memory[3, 0xD00F] = item
+        p.memory[a("wNumBagItems"):a("wNumBagItems") + 6] = [
+            2, 20, 5, item, 2, 255
+        ]
+        p.memory[a("wd11e")] = item
+        call("GetItemName")
+        expected_name = buffered_text("wcd6d")
+        if overwritten_by == "pickup":
+            # Real pickup-style item name loading (Potion).
+            p.memory[a("wd11e")] = 20
+            call("GetItemName")
+        else:
+            # A Pokemon name must not appear in the item-use message either.
+            p.memory[a("wd11e")] = 0xB4  # Charizard / GLURAK
+            call("GetMonName")
+        call("CopyToStringBuffer")
+        if overwritten_by == "dialogue":
+            p.memory[a("wStringBuffer"):a("wStringBuffer") + 4] = [0x80, 0xE8, 0xE8, 0x50]
+        assert buffered_text("wStringBuffer") != expected_name
+        p.memory[a("wcf91")] = 20  # pickup also leaves an unrelated item ID
+        p.memory[a("wWhichPokemon")] = 7
+        repel_use_names.clear()
+        call("RepeatLastRepel", 1200, "a")
+        assert repel_use_names == [expected_name], (item, overwritten_by, repel_use_names)
+        assert p.memory[a("wRepelRemainingSteps")] == steps
+        assert p.memory[a("wBagItems") + 1] == 5
+        assert p.memory[a("wBagItems") + 3] == 1
+        assert p.memory[a("wWhichPokemon")] == 7
+p.hook_deregister(*sym["PrintItemUseTextAndRemoveItem"])
+print("PASS: all three repeat-repel messages reload their own names after pickup/Pokemon/dialogue text")
+
 # Trigger the real last-step handler, its standard expiry text and Yes prompt.
 enter_npc_map(8, [84, 0, 0, 0], map_id=12, width=10, y=6)
 p.memory[a("wNumBagItems") : a("wNumBagItems") + 4] = [1, 0x1E, 2, 255]
