@@ -3,6 +3,18 @@ PrizeDifferentMenuPtrs:
 	dw PrizeMenuMon2Entries, PrizeMenuMon2Cost
 	dw PrizeMenuTMsEntries,  PrizeMenuTMsCost
 
+ExtendedPrizeMenuMon1Ptrs:
+	dw ExtendedPrizeMenuMon1Entries, ExtendedPrizeMenuMon1Cost
+
+ExtendedPrizeMenuMon1Entries:
+	db EEVEE, HITMONLEE, HITMONCHAN, "@"
+
+ExtendedPrizeMenuMon1Cost:
+	bcd2 2500
+	bcd2 4600
+	bcd2 4600
+	db "@"
+
 NoThanksText:
 	db "TSCHÜSS!@"
 

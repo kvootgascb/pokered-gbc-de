@@ -67,11 +67,13 @@ dadurch nicht zurückgesetzt.
 ## Spielhalle
 
 - Münzkauf: weiterhin 50 für 1000, zusätzlich 500 für 10000.
-- Zusätzlicher Preishändler im Preisgebäude: Evoli für 2500 Münzen,
-  Kicklee und Nockchan für jeweils 4600, alle auf Level 25.
+- Erstes reguläres Preisfenster in Erweitert: Evoli für 2500 Münzen,
+  Kicklee und Nockchan für jeweils 4600, alle auf Level 25. Classic behält
+  seine ursprünglichen Angebote; der NPC behält seinen ursprünglichen Dialog.
 - Die zusätzlichen Preise orientieren sich an den Blau-Preisstufen.
-- Volles Team, fehlendes Geld oder zu wenig Platz im Münzkorb verbrauchen
-  weder Münzen noch Geld. Für Pokémon-Preise muss ein Teamplatz frei sein.
+- Fehlendes Geld oder zu wenig Platz im Münzkorb verbrauchen
+  weder Münzen noch Geld. Pokémon-Preise nutzen die reguläre Vergabe an Team
+  oder PC-Box; sind beide voll, werden keine Münzen abgezogen.
 
 ## Kostenlose Attacken-Helfer
 

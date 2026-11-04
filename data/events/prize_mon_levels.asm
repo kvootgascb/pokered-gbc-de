@@ -1,4 +1,8 @@
 PrizeMonLevelDictionary:
+	db EEVEE,     25
+	db HITMONLEE, 25
+	db HITMONCHAN, 25
+
 IF DEF(_RED)
 	db ABRA,      9
 	db CLEFAIRY,  8

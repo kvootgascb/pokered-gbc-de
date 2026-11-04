@@ -156,7 +156,7 @@ def call(n, limit=180, auto_button=None):
     # can be checked reliably, regardless of the routine's frame alignment.
     for frame in range(limit):
         if auto_button and frame % 20 == 0:
-            p.button(auto_button, 2)
+            p.button(auto_button() if callable(auto_button) else auto_button, 2)
         p.tick(1, False)
         if p.register_file.PC in (0x109, 0x10A):
             return
@@ -798,20 +798,83 @@ assert p.memory[a("wPostgameAction")] == 2
 assert list(p.memory[a("wPlayerCoins") : a("wPlayerCoins") + 2]) == [0x99, 0x99]
 print("PASS: 500-coin purchase costs 10000, with no overflow or payment on a full case")
 
-restore()
-p.memory[a("wPartyCount")] = 5
-p.memory[a("wPlayerCoins") : a("wPlayerCoins") + 2] = [0x25, 0]
-p.memory[a("wPostgameAction")] = 0
-call("ValidateExtraPrizePurchase")
-assert p.memory[a("wPostgameAction")] == 0
-p.memory[a("wPostgameAction")] = 1
-call("ValidateExtraPrizePurchase")
-assert p.memory[a("wPostgameAction")] == 4
-p.memory[a("wPartyCount")] = 6
-p.memory[a("wPostgameAction")] = 0
-call("ValidateExtraPrizePurchase")
-assert p.memory[a("wPostgameAction")] == 5
-print("PASS: extra prize prices and full-party checks")
+# All three regular prize windows use their real menu, level and coin routines.
+classic_first = (
+    ([0x94, 0x04, 0xA8], [180, 500, 1200], [9, 8, 17])
+    if rom == "pokered"
+    else ([0x94, 0x04, 0xA7], [120, 750, 1200], [6, 12, 17])
+)
+second = (
+    ([0x58, 0x1A, 0xAA], [2800, 5500, 9999], [18, 25, 26])
+    if rom == "pokered"
+    else ([0x1D, 0x58, 0xAA], [2500, 4600, 6500], [20, 24, 18])
+)
+
+
+def coin_bytes(value):
+    digits = f"{value:04d}"
+    return [int(digits[:2], 16), int(digits[2:], 16)]
+
+
+for mode in (0, 1):
+    for window in range(3):
+        restore()
+        p.memory[a("wGameplayModeCache")] = mode
+        p.memory[3, 0xD000] = mode
+        p.memory[a("hSpriteIndexOrTextID")] = 3 + window
+        call("GetPrizeMenuId")
+        if window == 0:
+            species, costs, levels = (
+                ([0x66, 0x2B, 0x2C], [2500, 4600, 4600], [25, 25, 25])
+                if mode else classic_first
+            )
+        elif window == 1:
+            species, costs, levels = second
+        else:
+            species, costs, levels = [0xDF, 0xD7, 0xFA], [3300, 5500, 7700], None
+        assert p.memory[a("wWhichPrizeWindow")] == window
+        assert list(p.memory[a("wPrize1"):a("wPrize1") + 3]) == species
+        assert list(p.memory[a("wPrize1Price"):a("wPrize1Price") + 6]) == [
+            byte for cost in costs for byte in coin_bytes(cost)
+        ]
+        for index, cost in enumerate(costs):
+            p.memory[a("wWhichPrize")] = index
+            call("LoadCoinsToSubtract")
+            assert list(p.memory[a("hCoins"):a("hCoins") + 2]) == coin_bytes(cost)
+            for available in (cost - 1, cost):
+                p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = coin_bytes(available)
+                call("HasEnoughCoins")
+                assert bool(p.register_file.F & 0x10) == (available < cost)
+            if levels:
+                p.memory[a("wcf91")] = species[index]
+                call("GetPrizeMonLevel")
+                assert p.memory[a("wCurEnemyLVL")] == levels[index]
+print("PASS: regular prize windows, Classic/Extended species, prices, levels and coin checks")
+
+# Finish the optional nickname screen with its normal START shortcut.
+prize_naming = []
+hook("DisplayNamingScreen", lambda _: prize_naming.append(True))
+for index, species in enumerate((0x66, 0x2B, 0x2C)):
+    restore()
+    prize_naming.clear()
+    p.memory[a("wGameplayModeCache")] = 1
+    p.memory[3, 0xD000] = 1
+    p.memory[a("hSpriteIndexOrTextID")] = 3
+    call("GetPrizeMenuId")
+    p.memory[a("wCurrentMenuItem")] = index
+    p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = [0x99, 0x99]
+    p.memory[a("wPartyCount")] = 0
+    p.memory[a("wJoyIgnore")] = 0
+    call("HandlePrizeChoice", limit=600,
+         auto_button=lambda: "start" if prize_naming else "a")
+    assert p.memory[a("wPartyCount")] == 1
+    assert p.memory[a("wPartyMon1Species")] == species
+    assert p.memory[a("wPartyMon1Level")] == 25
+    assert list(p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2]) == coin_bytes(
+        9999 - (2500 if index == 0 else 4600)
+    )
+p.hook_deregister(*sym["DisplayNamingScreen"])
+print("PASS: Evoli, Kicklee and Nockchan purchased through the original prize handler")
 
 restore()
 p.memory[a("wTutorPartyIndex")] = 0

@@ -69,13 +69,12 @@ for path in (ROOT / "data/maps/objects").glob("*.asm"):
 # or fossil no longer prevents completing the other evolutionary branches.
 special_sources = {
     "engine/events/oak_battle.asm": ["BULBASAUR", "CHARMANDER", "SQUIRTLE"],
-    "engine/events/extra_prizes.asm": ["EEVEE", "HITMONLEE", "HITMONCHAN"],
     "engine/events/rare_encounters.asm": ["OMANYTE", "KABUTO"],
     "engine/events/mew_truck.asm": ["MEW"],
     "scripts/SilphCo7F.asm": ["LAPRAS"],
     "scripts/Route12.asm": ["SNORLAX"],
     "engine/events/cinnabar_lab.asm": ["AERODACTYL"],
-    "data/events/prizes.asm": ["PORYGON"],
+    "data/events/prizes.asm": ["PORYGON", "EEVEE", "HITMONLEE", "HITMONCHAN"],
 }
 for filename, species_names in special_sources.items():
     text = (ROOT / filename).read_text()

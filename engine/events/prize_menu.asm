@@ -72,6 +72,14 @@ GetPrizeMenuId:
 	ld d, 0
 	ld e, a
 	ld hl, PrizeDifferentMenuPtrs
+	ld a, [wGameplayModeCache]
+	and a
+	jr z, .loadMenu
+	ld a, [wWhichPrizeWindow]
+	and a
+	jr nz, .loadMenu
+	ld hl, ExtendedPrizeMenuMon1Ptrs
+.loadMenu
 	add hl, de
 	ld a, [hli]
 	ld d, [hl]

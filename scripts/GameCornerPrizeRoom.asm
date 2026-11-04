@@ -14,13 +14,6 @@ GameCornerPrizeRoomBaldingGuyText:
 	text_end
 
 GameCornerPrizeRoomGamblerText:
-	text_asm
-	farcall ExtraPokemonPrizeShop
-	jp c, TextScriptEnd
-	ld hl, .original
-	call PrintText
-	jp TextScriptEnd
-.original
 	text_far _GameCornerPrizeRoomGamblerText
 	text_end
 
