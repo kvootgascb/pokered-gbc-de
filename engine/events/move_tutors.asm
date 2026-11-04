@@ -74,10 +74,7 @@ MoveDeleterTalk::
 	ld a, [wPlayerMoveListIndex]
 	ld [wTutorCandidate], a
 	ld hl, .confirm
-	call PrintText
-	call YesNoChoice
-	ld a, [wCurrentMenuItem]
-	and a
+	call ConfirmTutorService
 	ret nz
 	call DeleteTutorMove
 	ld hl, .forgotten
@@ -112,7 +109,9 @@ ConfirmTutorService:
 	call YesNoChoice
 	ld a, [wCurrentMenuItem]
 	and a
-	ret
+	ret z
+	; The No/B choice already dismissed this dialogue; do not wait again.
+	jp DisableWaitingAfterTextDisplay
 
 TutorChampionWelcome:
 	ld a, [wGameplayModeCache]

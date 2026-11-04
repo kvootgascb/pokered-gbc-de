@@ -1528,35 +1528,46 @@ print(
     "PASS: all three actual lab balls give Simsala, preserve original rival/story choices and save the received Pokemon"
 )
 
-# The twins ask for consent before opening any Pokemon/attack selection.
-tutor_offers, tutor_parties = [], []
+# Declining is a single choice: no second A/B is needed to close the text.
+tutor_offers, tutor_parties, tutor_yes_no = [], [], []
 hook("ConfirmTutorService", lambda _: tutor_offers.append(True))
 hook("SelectTutorPokemon", lambda _: tutor_parties.append(True))
-for tutor_x in (8, 10):
-    enter_npc_map(tutor_x, [57, 84, 0, 0])
-    assert p.memory[a("wSpriteStateData1") + 6 * 16] == p.memory[a("wSpriteStateData1") + 7 * 16]
-    offers_before, parties_before = len(tutor_offers), len(tutor_parties)
-    for frame in range(900):
-        if frame % 20 == 0:
+hook("YesNoChoice", lambda _: tutor_yes_no.append(True))
+for tutor_x in (8, 9):
+    for cancel_key in ("no", "b"):
+        enter_npc_map(tutor_x, [57, 84, 0, 0])
+        assert p.memory[a("wSpriteStateData1") + 6 * 16] == p.memory[a("wSpriteStateData1") + 7 * 16]
+        positions = a("wSpriteStateData2")
+        assert p.memory[positions + 7 * 16 + 5] == p.memory[positions + 6 * 16 + 5] + 1
+        assert p.memory[positions + 7 * 16 + 4] == p.memory[positions + 6 * 16 + 4]
+        offers_before, parties_before = len(tutor_offers), len(tutor_parties)
+        choices_before = len(tutor_yes_no)
+        for frame in range(1200):
+            if frame % 20 == 0:
+                p.button("a", 2)
+            p.tick(1, False)
+            if len(tutor_yes_no) > choices_before:
+                break
+        assert len(tutor_offers) > offers_before and len(tutor_yes_no) > choices_before
+        p.button_release("a")
+        p.tick(30, False)
+        if cancel_key == "no":
+            p.button("down", 2)
+            p.tick(20, False)
+            assert p.memory[a("wCurrentMenuItem")] == 1
             p.button("a", 2)
-        p.tick(1, False)
-        if len(tutor_offers) > offers_before:
-            break
-    assert len(tutor_offers) > offers_before
-    p.button_release("a")
-    for _ in range(90):
-        p.button("b", 2)
-        p.tick(20, False)
-        if not p.memory[a("wFontLoaded")] & 1:
-            break
-    assert not p.memory[a("wFontLoaded")] & 1
-    assert len(tutor_parties) == parties_before, "declining opened party selection"
-    assert list(p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4]) == [57, 84, 0, 0]
-p.hook_deregister(*sym["ConfirmTutorService"])
-p.hook_deregister(*sym["SelectTutorPokemon"])
-print("PASS: twin sprites match; both services can be declined before Pokemon selection")
+        else:
+            p.button("b", 2)
+        p.tick(120, False)  # no additional input after the choice
+        assert not p.memory[a("wFontLoaded")] & 1, (tutor_x, cancel_key)
+        assert p.memory[a("hWY")] == 0x90
+        assert len(tutor_parties) == parties_before, "declining opened party selection"
+        assert list(p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4]) == [57, 84, 0, 0]
+for label in ("ConfirmTutorService", "SelectTutorPokemon", "YesNoChoice"):
+    p.hook_deregister(*sym[label])
+print("PASS: twins stand side by side; No and B close each service without another keypress")
 
-enter_npc_map(10, [84, 0, 0, 0])
+enter_npc_map(9, [84, 0, 0, 0])
 for _ in range(120):
     p.button("a", 2)
     p.tick(20, False)
@@ -2275,7 +2286,7 @@ print("PASS: native ship purchase prices; original selling/other-shop prices unc
 for service, label, map_id, x, y, moves in [
     ("coin-shop", "ExpandedCoinShop.shop", 0x87, 5, 8, [84, 0, 0, 0]),
     ("move-deleter", "MoveSelectionMenu", 0x63, 8, 6, [84, 39, 98, 85]),
-    ("move-reminder", "DisplayListMenuID", 0x63, 10, 6, [84, 0, 0, 0]),
+    ("move-reminder", "DisplayListMenuID", 0x63, 9, 6, [84, 0, 0, 0]),
 ]:
     service_menus = []
     service_ready = []
