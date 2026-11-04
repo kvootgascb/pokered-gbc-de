@@ -4,6 +4,20 @@ ExpandedCoinShop::
 	ld a, [wGameplayModeCache]
 	and a
 	ret z
+	ld a, [wUpdateSpritesEnabled]
+	push af
+	call .shop
+	pop af
+	ld [wUpdateSpritesEnabled], a
+	scf
+	ret
+.shop
+	ld hl, wd730
+	set 6, [hl] ; menu entries are not scrolling dialogue
+	xor a
+	ldh [hUILayoutFlags], a
+	ld [wUpdateSpritesEnabled], a
+	call HideSprites
 	call ClearScreen
 	hlcoord 0, 0
 	lb bc, 8, 18
@@ -14,6 +28,8 @@ ExpandedCoinShop::
 	hlcoord 3, 3
 	ld de, .choices
 	call PlaceString
+	ld hl, wd730
+	res 6, [hl]
 	xor a
 	ldh [hUILayoutFlags], a
 	ld [wCurrentMenuItem], a

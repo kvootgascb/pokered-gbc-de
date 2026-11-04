@@ -2230,6 +2230,7 @@ for choice, item, price in [
     (2, 0x52, 5000),
     (3, 0x53, 10000),
     (4, 0x0A, 5000),
+    (5, 0x36, 10000),
 ]:
     restore()
     p.memory[a("wGameplayModeCache")] = 1
@@ -2275,6 +2276,82 @@ for mode, champion in [(0, 1), (1, 0)]:
 print(
     "PASS: ship merchant prices, unlimited stock, bag/stack limits and champion/Classic gates"
 )
+
+# Enter each new service through actual NPC interaction and hold its menu
+# open. Map sprites must stay out of both shadow OAM and hardware OAM; after
+# B/cancellation the original map and normal sprite updates must return.
+for service, label, map_id, x, y, moves in [
+    ("ship-shop", "ShipMerchantTalk.menu", 0x63, 10, 11, [84, 0, 0, 0]),
+    ("coin-shop", "ExpandedCoinShop.shop", 0x87, 5, 8, [84, 0, 0, 0]),
+    ("move-deleter", "MoveSelectionMenu", 0x63, 8, 6, [84, 39, 98, 85]),
+    ("move-reminder", "DisplayListMenuID", 0x63, 10, 6, [84, 0, 0, 0]),
+]:
+    service_menus = []
+    service_ready = []
+    hook(label, lambda _: service_menus.append(True))
+    hook("HandleMenuInput_",
+         lambda _: service_ready.append(True) if service_menus else None)
+    enter_npc_map(x, moves, map_id=map_id, width=10, y=y)
+    p.memory[a("wNumBagItems"):a("wNumBagItems") + 4] = [1, 0x45, 1, 255]
+    p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = [0, 0]
+    set_money(50000)
+    for frame in range(900):
+        if frame % 20 == 0:
+            p.button("a", 2)
+        p.tick(1, False)
+        if service_menus:
+            break
+    assert service_menus, (service, "NPC menu never opened")
+    p.button_release("a")
+    for _ in range(900):
+        p.tick(1, False)
+        if service_ready:
+            break
+    assert service_ready, (service, "menu never accepted input")
+    p.tick(12, True)
+    assert p.memory[a("wFontLoaded")] & 1, service
+    assert p.memory[a("wUpdateSpritesEnabled")] != 1, service
+    for base_addr in (a("wShadowOAM"), 0xFE00):
+        assert all(
+            pos == 0 or pos >= 160
+            for pos in p.memory[base_addr:base_addr + 160:4]
+        ), (service, "map sprites overlap menu", hex(base_addr))
+    p.screen.image.save("/tmp/" + rom + "-" + service + ".png")
+    if service == "ship-shop":
+        # The added seventh row (Back) must remain inside the border.
+        assert p.memory[a("wMaxMenuItem")] == 6
+        assert p.memory[a("wTileMap") + 16 * 20] == 0x7D  # bottom-left border
+        for _ in range(5):
+            shortcut_tap("down")
+        assert p.memory[a("wCurrentMenuItem")] == 5
+        for _ in range(80):
+            shortcut_tap("a")
+            if p.memory[a("wNumBagItems")] == 2:
+                break
+        assert list(p.memory[a("wBagItems") + 2:a("wBagItems") + 4]) == [0x36, 1]
+        assert money_value() == 40000
+        for _ in range(80):
+            shortcut_tap("a")
+            if len(service_menus) >= 2:
+                break
+        p.tick(12, True)
+        assert p.memory[a("wCurrentMenuItem")] == 5
+        assert p.memory[a("wUpdateSpritesEnabled")] != 1
+        shortcut_tap("down")
+        assert p.memory[a("wCurrentMenuItem")] == 6
+        shortcut_tap("a")  # Back, not a seventh stock entry
+    for _ in range(40):
+        shortcut_tap("b")
+        if not p.memory[a("wFontLoaded")] & 1:
+            break
+    p.tick(6, True)
+    assert not p.memory[a("wFontLoaded")] & 1, (service, "dialogue did not close")
+    assert p.memory[a("wUpdateSpritesEnabled")] == 1, service
+    assert any(0 < pos < 160 for pos in p.memory[0xFE00:0xFEA0:4]), service
+    assert p.memory[a("hWY")] == 0x90, service
+    p.hook_deregister(*sym[label])
+    p.hook_deregister(*sym["HandleMenuInput_"])
+print("PASS: real ship/coin/deleter/reminder menus hide map sprites and restore them on exit")
 
 # A real NPC transaction on deck, plus visibility at the natural refresh point.
 merchant_menus = []

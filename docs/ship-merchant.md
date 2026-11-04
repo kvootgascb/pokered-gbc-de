@@ -14,6 +14,7 @@ Der Händler bringt seltene Vorräte von seinen Reisen mit. Sein Angebot:
 | Elixier | 5000 |
 | Top-Elixier | 10000 |
 | Mondstein | 5000 |
+| Top-Beleber | 10000 |
 
 Der Vorrat ist unbegrenzt. Pro bestätigtem Kauf wird ein Exemplar hinzugefügt;
 danach bleibt die Auswahl für weitere Käufe erhalten. B oder ZURÜCK beendet
@@ -26,6 +27,8 @@ Es gibt keine zusätzlichen Kaufzähler oder Änderungen am Saveformat.
 
 Die Emulator-Tests prüfen alle Preise, exakte Zahlung, fehlendes Geld,
 wiederholte Käufe, volle Beutel und Stapel, beide Freischaltbedingungen und
-einen echten NPC-Kauf samt Bestätigung auf dem Deck. Die Dienstdialog-Tests
+echte NPC-Käufe samt Bestätigung auf dem Deck, einschließlich Top-Beleber.
+Die Menüs werden mit ausgeblendeten Karten-Sprites und korrekter Rückkehr
+zur Karte geprüft. Die Dienstdialog-Tests
 markieren die ursprünglichen Decktrainer als bereits besiegt, damit dort keine
 unabhängigen ersten Trainerkämpfe die Prüfung unterbrechen.

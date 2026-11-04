@@ -296,8 +296,9 @@ Teams, Dialogkonzept, Speicherregeln und Testumfang:
 
 Der zusätzliche Händler erscheint in Erweitert nach dem ersten Top-Vier-Sieg
 auf dem Deck wie die beiden Attacken-Helfer. Er verkauft bei jedem erneuten
-Besuch AP-Plus (20000), Top-Äther (3000), Elixier (5000), Top-Elixier (10000)
-und Mondstein (5000). Der Vorrat ist unbegrenzt; jeder Kauf wird bestätigt.
+Besuch AP-Plus (20000), Top-Äther (3000), Elixier (5000), Top-Elixier (10000),
+Mondstein (5000) und Top-Beleber (10000). Der Vorrat ist unbegrenzt; jeder Kauf
+wird bestätigt.
 Andere Entwicklungssteine bleiben im ursprünglichen Kaufhaus erhältlich.
 Itemwirkungen und normale Ladenpreise bleiben unverändert.
 Details und Testumfang: [ship-merchant.md](ship-merchant.md).

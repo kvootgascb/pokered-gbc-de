@@ -35,6 +35,13 @@ RefreshMoveTutorObjects::
 	ret
 
 MoveDeleterTalk::
+	ld a, [wUpdateSpritesEnabled]
+	push af
+	call .talk
+	pop af
+	ld [wUpdateSpritesEnabled], a
+	ret
+.talk
 	call TutorChampionWelcome
 	ret c
 	call SelectTutorPokemon
@@ -130,6 +137,10 @@ SelectTutorPokemon:
 	push af
 	call GBPalWhiteOutWithDelay3
 	call RestoreScreenTilesAndReloadTilePatterns
+	; The party menu restores map sprites. Keep them off the tutor's menus.
+	xor a
+	ld [wUpdateSpritesEnabled], a
+	call HideSprites
 	call LoadGBPal
 	pop af
 	ret c
@@ -181,6 +192,13 @@ ShiftTutorMoveSlots:
 	ret
 
 MoveReminderTalk::
+	ld a, [wUpdateSpritesEnabled]
+	push af
+	call .talk
+	pop af
+	ld [wUpdateSpritesEnabled], a
+	ret
+.talk
 	call TutorChampionWelcome
 	ret c
 	call SelectTutorPokemon

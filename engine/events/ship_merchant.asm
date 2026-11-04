@@ -1,6 +1,13 @@
 SECTION "Champion Ship Merchant", ROMX
 
 ShipMerchantTalk::
+	ld a, [wUpdateSpritesEnabled]
+	push af
+	call .talk
+	pop af
+	ld [wUpdateSpritesEnabled], a
+	ret
+.talk
 	call ShipMerchantAvailable
 	jp nc, .unavailable
 	ld hl, .welcome
@@ -8,9 +15,15 @@ ShipMerchantTalk::
 	xor a
 	ld [wTutorCandidate], a
 .menu
+	ld hl, wd730
+	set 6, [hl] ; draw the menu immediately, without dialogue letter delays
+	xor a
+	ldh [hUILayoutFlags], a
+	ld [wUpdateSpritesEnabled], a
+	call HideSprites
 	call ClearScreen
 	hlcoord 0, 0
-	lb bc, 14, 18
+	lb bc, 15, 18
 	call TextBoxBorder
 	hlcoord 1, 1
 	ld de, .title
@@ -25,6 +38,8 @@ ShipMerchantTalk::
 	ld de, wPlayerMoney
 	ld c, MONEY_SIGN | 3
 	call PrintBCDNumber
+	ld hl, wd730
+	res 6, [hl]
 	xor a
 	ldh [hUILayoutFlags], a
 	ld [wLastMenuItem], a
@@ -36,7 +51,7 @@ ShipMerchantTalk::
 	ld [wTopMenuItemY], a
 	ld a, 1
 	ld [wTopMenuItemX], a
-	ld a, 5
+	ld a, NUM_SHIP_MERCHANT_ITEMS
 	ld [wMaxMenuItem], a
 	ld a, A_BUTTON | B_BUTTON
 	ld [wMenuWatchedKeys], a
@@ -44,7 +59,7 @@ ShipMerchantTalk::
 	and B_BUTTON
 	ret nz
 	ld a, [wCurrentMenuItem]
-	cp 5
+	cp NUM_SHIP_MERCHANT_ITEMS
 	ret z
 	ld [wTutorCandidate], a
 	call PlaceUnfilledArrowMenuCursor
@@ -53,7 +68,7 @@ ShipMerchantTalk::
 	call YesNoChoice
 	ld a, [wCurrentMenuItem]
 	and a
-	jr nz, .menu
+	jp nz, .menu
 	call BuyShipMerchantItem
 	ld a, [wPostgameAction]
 	ld hl, .success
@@ -85,6 +100,7 @@ ShipMerchantTalk::
 	next "ELIXIER      5000"
 	next "TOP-ELIXIER 10000"
 	next "MONDSTEIN    5000"
+	next "TOP-BELEBER 10000"
 	next "ZURÜCK@"
 .moneyLabel
 	db "GELD@"
@@ -124,7 +140,7 @@ BuyShipMerchantItem::
 	call ShipMerchantAvailable
 	jr nc, .locked
 	ld a, [wTutorCandidate]
-	cp 5
+	cp NUM_SHIP_MERCHANT_ITEMS
 	jr nc, .locked
 	call LoadShipMerchantCost
 	call HasEnoughMoney
@@ -179,3 +195,7 @@ ShipMerchantStock::
 	bcd3 10000
 	db MOON_STONE
 	bcd3 5000
+	db MAX_REVIVE
+	bcd3 10000
+.end
+DEF NUM_SHIP_MERCHANT_ITEMS EQU (ShipMerchantStock.end - ShipMerchantStock) / 4
