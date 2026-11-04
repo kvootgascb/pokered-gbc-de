@@ -27,6 +27,12 @@ TradeBackTrainerTalk::
 	jr c, .done
 	ld a, [wTutorPartyIndex]
 	ld [wWhichPokemon], a
+	; Flower/water updates share VRAM with the traded mon's front picture.
+	; Resume them only after the overworld graphics have been restored.
+	ldh a, [hTileAnimations]
+	push af
+	xor a
+	ldh [hTileAnimations], a
 	; Trading changes the LCD layout/window position as well as tile graphics.
 	ldh a, [hSCX]
 	push af
@@ -55,6 +61,8 @@ TradeBackTrainerTalk::
 	; The native in-game trade reloads tilesets and encounters after evolution.
 	farcall InGameTrade_RestoreScreen
 	farcall RedrawMapView
+	pop af
+	ldh [hTileAnimations], a
 	ld hl, .returned
 	call PrintText
 .done

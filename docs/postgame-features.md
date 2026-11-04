@@ -117,8 +117,10 @@ persistenten Zwischenzustand und keine Änderung am Saveformat.
 Die Emulator-Tests prüfen alle vier Entwicklungen, unveränderte Pokémon-Daten,
 ein nicht entwickelbares Pokémon, die Classic-Sperre sowie den echten Dialog
 mit Teamauswahl, beiden Animationsrichtungen, Entwicklung und Rückkehr ins
-Labor. Dabei werden Tileset-Grafik, LCD-/Fensterposition und Sprites vollständig
-wiederhergestellt. Die Dialogzeilen passen in den Textkasten; Nein und B in
+Labor. Blumen- und Wasseranimationen der Karte pausieren während Tausch und
+Entwicklung, damit sie keine Pokémon-Grafik überschreiben. Sie werden erst nach
+der Wiederherstellung von Tileset-Grafik, LCD-/Fensterposition und Sprites
+fortgesetzt. Die Dialogzeilen passen in den Textkasten; Nein und B in
 der Teamauswahl schließen ohne weiteren Tastendruck.
 
 ## Speicher und Prüfung

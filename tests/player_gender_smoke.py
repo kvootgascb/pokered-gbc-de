@@ -1686,6 +1686,18 @@ hook("Trade_AnimLeftToRight", lambda _: trade_outgoing.append(True))
 hook("Trade_AnimRightToLeft", lambda _: trade_returning.append(True))
 hook("HandlePartyMenuInput", lambda _: trade_party_ready.append(True))
 
+trade_graphics_active, trade_tile_checks = [False], []
+hook("PlayLocalTradeBackAnimation", lambda _: trade_graphics_active.__setitem__(0, True))
+hook("InGameTrade_RestoreScreen", lambda _: trade_graphics_active.__setitem__(0, False))
+
+
+def check_trade_tile_animation(_):
+    if trade_graphics_active[0]:
+        trade_tile_checks.append(p.memory[a("hTileAnimations")])
+
+
+hook("UpdateMovingBgTiles", check_trade_tile_animation)
+
 
 def tick_trade(frames=1, render=False):
     p.tick(frames, render)
@@ -1698,6 +1710,8 @@ for source, target in [(0x26, 0x95), (0x29, 0x7E), (0x27, 0x31),
     enter_npc_map(8, [93, 0, 0, 0], species=source, map_id=0x28, width=5, y=11)
     tick_trade(1)
     tileset = bytes(p.memory[0, 0x9000:0x9600])
+    tile_animation_before = p.memory[a("hTileAnimations")]
+    tile_checks_before = len(trade_tile_checks)
     lcd, wx = p.memory[0xFF40], p.memory[0xFF4B]
     ot = list(p.memory[a("wPartyMon1OTID"):a("wPartyMon1OTID") + 2])
     nickname = list(p.memory[a("wPartyMonNicks"):a("wPartyMonNicks") + 11])
@@ -1715,6 +1729,9 @@ for source, target in [(0x26, 0x95), (0x29, 0x7E), (0x27, 0x31),
         if not p.memory[a("wFontLoaded")] & 1:
             break
     tick_trade(6, True)
+    assert len(trade_tile_checks) > tile_checks_before + 100
+    assert not any(trade_tile_checks[tile_checks_before:]), "overworld flower/water animation overwrote trade graphics"
+    assert p.memory[a("hTileAnimations")] == tile_animation_before
     assert len(trade_outgoing) == before_out + 1
     assert len(trade_returning) == before_return + 1
     assert p.memory[a("wPartyCount")] == 1
@@ -1760,7 +1777,8 @@ for party_cancel in (False, True):
     assert len(trade_outgoing) == before_out
     assert p.memory[a("wPartyMon1Species")] == 0x26
     assert not p.memory[a("wFontLoaded")] & 1
-for label in ("TradeBackTrainerTalk.done", "Trade_AnimLeftToRight", "Trade_AnimRightToLeft", "HandlePartyMenuInput"):
+for label in ("TradeBackTrainerTalk.done", "Trade_AnimLeftToRight", "Trade_AnimRightToLeft", "HandlePartyMenuInput",
+              "PlayLocalTradeBackAnimation", "InGameTrade_RestoreScreen", "UpdateMovingBgTiles"):
     p.hook_deregister(*sym[label])
 print("PASS: real trade-back NPC animates both directions, evolves four species, preserves ownership and restores lab graphics; cancel is safe")
 
