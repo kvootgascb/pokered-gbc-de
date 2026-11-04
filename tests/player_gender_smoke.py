@@ -2297,6 +2297,7 @@ print("PASS: real coin/deleter/reminder menus hide map sprites and restore them 
 # confirmation and checkout, entered by talking to the real merchant NPC.
 native_inputs, native_lists, native_quantities, native_checkouts = [], [], [], []
 native_quantity_polls = [0]
+price_redraw_frames = None
 hook("HandleMenuInput_", lambda _: native_inputs.append(True))
 hook("DisplayPokemartDialogue_.buyMenuLoop", lambda _: native_lists.append(len(native_inputs)))
 hook("DisplayChooseQuantityMenu", lambda _: native_quantities.append(True))
@@ -2306,12 +2307,20 @@ hook("DisplayPokemartDialogue_.buyItem", lambda _: native_checkouts.append(True)
 
 
 def tick_native(frames=1, render=False):
+    def step(count):
+        if price_redraw_frames is None:
+            p.tick(count, render)
+        else:
+            for _ in range(count):
+                p.tick(1, True)
+                price_redraw_frames.append(price_pixels())
+
     if frames:
-        p.tick(frames, render)
+        step(frames)
     # A frame snapshot can stop inside the CGB VBlank palette hook with
     # WRAM bank 2 selected. Inspect/write game state only after it returns.
     while p.memory[0xFF70] & 7 not in (0, 1):
-        p.tick(1, render)
+        step(1)
 
 
 def native_tap(button):
@@ -2371,13 +2380,31 @@ def choose_ship_quantity(index, quantity=1):
     assert actual == list(bytes.fromhex(f"{expected:06d}")), (index, quantity, actual)
 
 
+def price_pixels():
+    # Only the seven price tiles: quantity/cursor/text animation is outside.
+    return p.screen.ndarray[80:88, 96:152].tobytes()
+
+
 def quantity_tap(button, expected):
+    global price_redraw_frames
+    tick_native(4, True)
+    previous = price_pixels()
+    price_redraw_frames = []
     p.button(button, 2)
     wait_native(lambda: p.memory[a("wItemQuantity")] == expected)
     # Quantity changes before the price/text redraw. Wait for the following
     # input poll so the next tap cannot be swallowed by that redraw.
     polls = native_quantity_polls[0]
     wait_native(lambda: native_quantity_polls[0] > polls)
+    tick_native(4, True)
+    updated = price_pixels()
+    frames = price_redraw_frames
+    price_redraw_frames = None
+    assert previous != updated, "quantity update did not change the rendered price"
+    assert all(frame in (previous, updated) for frame in frames), (
+        "price redraw exposed blank/partial digits", p.memory[a("wShipMerchantActive")],
+        expected, len(set(frames))
+    )
 
 
 def close_ship_shop():
@@ -2392,6 +2419,23 @@ def close_ship_shop():
     assert p.memory[a("hWY")] == 0x90
     assert any(0 < pos < 160 for pos in p.memory[0xFE00:0xFEA0:4])
 
+
+# Compare against the actual department-store clerk (outside text_asm).
+enter_npc_map(5, [84, 0, 0, 0], map_id=0x7D, width=10, y=5)
+tick_native(0)
+p.memory[a("wSpritePlayerStateData1FacingDirection")] = 0  # down, across counter
+set_money(50000)
+before = len(native_lists)
+wait_native(lambda: len(native_lists) > before, "a")
+wait_native(lambda: len(native_inputs) > native_lists[-1])
+assert p.memory[a("wShipMerchantActive")] == 0
+polls, before = native_quantity_polls[0], len(native_quantities)
+wait_native(lambda: len(native_quantities) > before, "a")
+wait_native(lambda: native_quantity_polls[0] > polls)
+quantity_tap("up", 2)  # Poke Doll: 1000 -> 2000, no partial price frames
+quantity_tap("down", 1)
+close_ship_shop()
+print("PASS: department-store price redraw shows only complete old/new prices")
 
 # Every stock price is charged by the real checkout, including exact payment.
 for index, (item, price) in enumerate(ship_stock):
@@ -2447,7 +2491,7 @@ for label in ("HandleMenuInput_", "DisplayPokemartDialogue_.buyMenuLoop",
               "DisplayChooseQuantityMenu", "DisplayChooseQuantityMenu.waitForKeyPressLoop",
               "DisplayPokemartDialogue_.buyItem"):
     p.hook_deregister(*sym[label])
-print("PASS: real native ship store layout, all six prices, quantities, cancel, funds/capacity and exit")
+print("PASS: real native ship store layout, complete price frames, all six prices, quantities, cancel, funds/capacity and exit")
 
 for mode, champion, hidden in [(0, 1, True), (1, 0, True), (1, 1, False)]:
     p.memory[a("wGameplayModeCache")] = mode

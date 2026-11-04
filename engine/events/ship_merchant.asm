@@ -22,7 +22,15 @@ ShipMerchantTalk::
 	call HideSprites
 	ld a, 1
 	ld [wShipMerchantActive], a
+	; Unlike script_mart, this shop runs inside a text_asm command. Suspend
+	; its outer letter delay so quantity/price redraws are not typed out.
+	ld a, [wLetterPrintingDelayFlags]
+	push af
+	res 1, a
+	ld [wLetterPrintingDelayFlags], a
 	farcall DisplayPokemartDialogue_
+	pop af
+	ld [wLetterPrintingDelayFlags], a
 	xor a
 	ld [wShipMerchantActive], a
 	ret
