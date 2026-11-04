@@ -162,7 +162,12 @@ SelectTutorPokemon:
 	call nc, ClearScreen
 	call LoadGBPal
 	pop af
-	ret c
+	jr nc, .selected
+	; B already cancelled the party menu. Dismiss the enclosing NPC text too.
+	call DisableWaitingAfterTextDisplay
+	scf
+	ret
+.selected
 	ld a, [wWhichPokemon]
 	ld [wTutorPartyIndex], a
 	and a

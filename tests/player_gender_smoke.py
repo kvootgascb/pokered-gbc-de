@@ -1529,18 +1529,20 @@ print(
 )
 
 # Declining is a single choice: no second A/B is needed to close the text.
-tutor_offers, tutor_parties, tutor_yes_no = [], [], []
+tutor_offers, tutor_parties, tutor_yes_no, tutor_party_ready = [], [], [], []
 hook("ConfirmTutorService", lambda _: tutor_offers.append(True))
 hook("SelectTutorPokemon", lambda _: tutor_parties.append(True))
 hook("YesNoChoice", lambda _: tutor_yes_no.append(True))
+hook("HandlePartyMenuInput", lambda _: tutor_party_ready.append(True))
 for tutor_x in (8, 9):
-    for cancel_key in ("no", "b"):
+    for cancel_key in ("no", "b", "party-b"):
         enter_npc_map(tutor_x, [57, 84, 0, 0])
         assert p.memory[a("wSpriteStateData1") + 6 * 16] == p.memory[a("wSpriteStateData1") + 7 * 16]
         positions = a("wSpriteStateData2")
         assert p.memory[positions + 7 * 16 + 5] == p.memory[positions + 6 * 16 + 5] + 1
         assert p.memory[positions + 7 * 16 + 4] == p.memory[positions + 6 * 16 + 4]
         offers_before, parties_before = len(tutor_offers), len(tutor_parties)
+        ready_before = len(tutor_party_ready)
         choices_before = len(tutor_yes_no)
         for frame in range(1200):
             if frame % 20 == 0:
@@ -1551,7 +1553,16 @@ for tutor_x in (8, 9):
         assert len(tutor_offers) > offers_before and len(tutor_yes_no) > choices_before
         p.button_release("a")
         p.tick(30, False)
-        if cancel_key == "no":
+        if cancel_key == "party-b":
+            p.button("a", 2)  # accept the service, then wait for the party menu
+            for _ in range(900):
+                p.tick(1, False)
+                if len(tutor_party_ready) > ready_before:
+                    break
+            assert len(tutor_party_ready) > ready_before
+            p.tick(12, False)
+            p.button("b", 2)
+        elif cancel_key == "no":
             p.button("down", 2)
             p.tick(20, False)
             assert p.memory[a("wCurrentMenuItem")] == 1
@@ -1561,11 +1572,12 @@ for tutor_x in (8, 9):
         p.tick(120, False)  # no additional input after the choice
         assert not p.memory[a("wFontLoaded")] & 1, (tutor_x, cancel_key)
         assert p.memory[a("hWY")] == 0x90
-        assert len(tutor_parties) == parties_before, "declining opened party selection"
+        assert len(tutor_parties) == parties_before + (cancel_key == "party-b")
+        assert p.memory[a("wUpdateSpritesEnabled")] == 1
         assert list(p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4]) == [57, 84, 0, 0]
-for label in ("ConfirmTutorService", "SelectTutorPokemon", "YesNoChoice"):
+for label in ("ConfirmTutorService", "SelectTutorPokemon", "YesNoChoice", "HandlePartyMenuInput"):
     p.hook_deregister(*sym[label])
-print("PASS: twins stand side by side; No and B close each service without another keypress")
+print("PASS: adjacent twins; No, B and party-selection B close both services without another keypress")
 
 enter_npc_map(9, [84, 0, 0, 0])
 for _ in range(120):
