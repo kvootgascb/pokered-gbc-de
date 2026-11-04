@@ -1528,6 +1528,34 @@ print(
     "PASS: all three actual lab balls give Simsala, preserve original rival/story choices and save the received Pokemon"
 )
 
+# The twins ask for consent before opening any Pokemon/attack selection.
+tutor_offers, tutor_parties = [], []
+hook("ConfirmTutorService", lambda _: tutor_offers.append(True))
+hook("SelectTutorPokemon", lambda _: tutor_parties.append(True))
+for tutor_x in (8, 10):
+    enter_npc_map(tutor_x, [57, 84, 0, 0])
+    assert p.memory[a("wSpriteStateData1") + 6 * 16] == p.memory[a("wSpriteStateData1") + 7 * 16]
+    offers_before, parties_before = len(tutor_offers), len(tutor_parties)
+    for frame in range(900):
+        if frame % 20 == 0:
+            p.button("a", 2)
+        p.tick(1, False)
+        if len(tutor_offers) > offers_before:
+            break
+    assert len(tutor_offers) > offers_before
+    p.button_release("a")
+    for _ in range(90):
+        p.button("b", 2)
+        p.tick(20, False)
+        if not p.memory[a("wFontLoaded")] & 1:
+            break
+    assert not p.memory[a("wFontLoaded")] & 1
+    assert len(tutor_parties) == parties_before, "declining opened party selection"
+    assert list(p.memory[a("wPartyMon1Moves"):a("wPartyMon1Moves") + 4]) == [57, 84, 0, 0]
+p.hook_deregister(*sym["ConfirmTutorService"])
+p.hook_deregister(*sym["SelectTutorPokemon"])
+print("PASS: twin sprites match; both services can be declined before Pokemon selection")
+
 enter_npc_map(10, [84, 0, 0, 0])
 for _ in range(120):
     p.button("a", 2)
@@ -2280,6 +2308,9 @@ for service, label, map_id, x, y, moves in [
             for pos in p.memory[base_addr:base_addr + 160:4]
         ), (service, "map sprites overlap menu", hex(base_addr))
     p.screen.image.save("/tmp/" + rom + "-" + service + ".png")
+    if service.startswith("move-"):
+        background = p.screen.ndarray[0:16, 128:160, :3]
+        assert background.min() > 240, (service, "map remnants behind move menu")
     for _ in range(40):
         shortcut_tap("b")
         if not p.memory[a("wFontLoaded")] & 1:

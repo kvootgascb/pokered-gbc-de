@@ -44,6 +44,9 @@ MoveDeleterTalk::
 .talk
 	call TutorChampionWelcome
 	ret c
+	ld hl, .offer
+	call ConfirmTutorService
+	ret nz
 	call SelectTutorPokemon
 	ret c
 	call GetTutorPartyMoves
@@ -82,6 +85,11 @@ MoveDeleterTalk::
 .lastMove
 	ld hl, .last
 	jp PrintText
+.offer
+	text "Soll ein #MON"
+	line "eine Attacke"
+	cont "vergessen?"
+	prompt
 .question
 	text "Welche Attacke soll"
 	line "es vergessen?"
@@ -98,6 +106,13 @@ MoveDeleterTalk::
 	text "Die letzte Attacke"
 	line "darf es behalten!"
 	done
+
+ConfirmTutorService:
+	call PrintText
+	call YesNoChoice
+	ld a, [wCurrentMenuItem]
+	and a
+	ret
 
 TutorChampionWelcome:
 	ld a, [wGameplayModeCache]
@@ -116,7 +131,8 @@ TutorChampionWelcome:
 	scf
 	ret
 .welcome
-	text "Wir kamen, um den"
+	text "Wir sind Zwillinge"
+	para "Wir kamen, um den"
 	line "neuen CHAMPION"
 	cont "kennenzulernen."
 	para "Und nun bist Du"
@@ -141,6 +157,10 @@ SelectTutorPokemon:
 	xor a
 	ld [wUpdateSpritesEnabled], a
 	call HideSprites
+	; A successful selection opens a dedicated move menu, not a partial map.
+	pop af
+	push af
+	call nc, ClearScreen
 	call LoadGBPal
 	pop af
 	ret c
@@ -201,6 +221,9 @@ MoveReminderTalk::
 .talk
 	call TutorChampionWelcome
 	ret c
+	ld hl, .offer
+	call ConfirmTutorService
+	ret nz
 	call SelectTutorPokemon
 	ret c
 	call BuildTutorMoveList
@@ -236,6 +259,11 @@ MoveReminderTalk::
 .none
 	ld hl, .noMoves
 	jp PrintText
+.offer
+	text "Soll ein #MON"
+	line "sich an eine"
+	cont "Attacke erinnern?"
+	prompt
 .choose
 	text "Welche Attacke soll"
 	line "es wieder lernen?"

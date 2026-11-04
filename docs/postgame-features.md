@@ -79,7 +79,10 @@ dadurch nicht zurückgesetzt.
 
 Zwei neue Gäste stehen nach dem ersten Top-Vier-Sieg auf dem Deck der M.S. Anne.
 Sie kamen, um den neuen Champion kennenzulernen, und helfen ihm mit ihren
-besonderen Begabungen. Beide Dienste sind kostenlos.
+besonderen Begabungen. Sie stellen sich als Zwillinge vor und verwenden
+denselben Sprite. Beide Dienste sind kostenlos. Vor der Pokémon-Auswahl wird
+der gewünschte Dienst mit Ja/Nein bestätigt. Die Attackenauswahl nutzt einen
+sauberen Menühintergrund; beim Verlassen kehrt die Karte zurück.
 
 Der Verlerner entfernt auch VMs, aber nie die letzte verbliebene Attacke.
 Die AP und AP-Plus-Daten der übrigen Attacken bleiben erhalten.
