@@ -2,7 +2,9 @@
 
 In Erweitert folgt auf die normale Ablaufmeldung eine Ja/Nein-Frage, wenn
 ein weiteres Exemplar derselben Schutzart im Beutel liegt. Zuerst bestätigt
-der Spieler die Ablaufmeldung mit A/B. Danach erscheint die zweizeilige Frage
+der Spieler die Ablaufmeldung mit A/B. Der normale blinkende Weiter-Pfeil
+unten rechts und der Bestätigungston entsprechen den anderen Dialogen.
+Danach erscheint die zweizeilige Frage
 „Gleiche Schutzart erneut verwenden?“ mit direkter Ja/Nein-Auswahl, ohne
 weiteren Bestätigungsdruck oder Text-Scroll. Bei Ja wird genau
 ein Exemplar verwendet, bei Nein bleibt der Beutel unverändert. Nein oder B

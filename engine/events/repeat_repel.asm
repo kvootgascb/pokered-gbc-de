@@ -14,8 +14,10 @@ OfferRepeatRepel::
 	ret z
 	call FindLastRepelInBag
 	ret nc
-	; Acknowledge the expiry first, just as when no replacement is available.
-	call WaitForTextScrollButtonPress
+	; Use the standard continuation prompt: blinking arrow, A/B and sound.
+	; Keep the already printed expiry message until the player continues.
+	ld hl, .continue
+	call PrintText_NoCreatingTextBox
 	ld hl, .question
 	call PrintText
 	call YesNoChoice
@@ -28,6 +30,9 @@ OfferRepeatRepel::
 	call RepeatLastRepel
 	and a
 	ret
+.continue
+	text_promptbutton
+	text_end
 .question
 	text "Gleiche Schutzart"
 	line "erneut verwenden?"

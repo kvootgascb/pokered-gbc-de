@@ -2149,7 +2149,11 @@ for item in (0x1E, 0x38, 0x39):
             if len(repel_expiry_pages) > expiry_before:
                 break
         assert len(repel_expiry_pages) > expiry_before
-        p.tick(180, False)
+        arrow_states = set()
+        for _ in range(180):
+            p.tick(1, False)
+            arrow_states.add(p.memory[a("wTileMap") + 16 * 20 + 18])
+        assert arrow_states == {0x7F, 0xEE}, ("expiry continuation arrow did not blink", arrow_states)
         assert len(repel_questions) == before
         assert repel_page() == repel_expiry_pages[-1], "expiry message advanced without acknowledgement"
         p.button("a", 2)  # exactly one press acknowledges expiry
@@ -2160,6 +2164,7 @@ for item in (0x1E, 0x38, 0x39):
         assert len(repel_questions) > before, "question waited for another confirmation"
         p.button_release("a")
         p.tick(30, False)
+        assert p.memory[a("wTileMap") + 16 * 20 + 18] == 0x7F, "continuation arrow remained on the Yes/No question"
         if decline == "no":
             p.button("down", 2)
             p.tick(20, False)
