@@ -285,15 +285,31 @@ for y in range(8):
         for x in range(37, 42)
     ]
     small_dx_rows.append(
-        d_bits + [0] + [int(pixel == "#") for pixel in small_x[y]] + [0] * 4
+        [0] * (6 if rom == "pokered" else 2)
+        + d_bits + [0] + [int(pixel == "#") for pixel in small_x[y]]
+        + [0] * (6 if rom == "pokered" else 10)
     )
 small_dx = bytes(
     sum(small_dx_rows[y][tile * 8 + bit] << (7 - bit) for bit in range(8))
-    for tile in range(2)
+    for tile in range(3)
     for y in range(8)
 )
-expected_label = original_label[:-8] + bytes(8) + small_dx
+expected_label = original_label[:-8] + small_dx
 assert len(expected_label) == 12 * 8
+# Compare visible word gaps, independently of tile boundaries/padding.
+ink_columns = [x for x in range(96) if any(
+    expected_label[x // 8 * 8 + y] & (128 >> (x % 8)) for y in range(8)
+)]
+letter_runs = []
+for x in ink_columns:
+    if not letter_runs or x > letter_runs[-1][-1] + 1:
+        letter_runs.append([x])
+    else:
+        letter_runs[-1].append(x)
+word_end = 3 if rom == "pokered" else 4
+edition_gap = letter_runs[word_end + 1][0] - letter_runs[word_end][-1] - 1
+dx_gap = letter_runs[-2][0] - letter_runs[-3][-1] - 1
+assert dx_gap == edition_gap, (rom, edition_gap, dx_gap)
 # Cold boots exercise the actual title path, including the default without a save.
 for saved, graphic in [
     (title_save, "GreenPlayerCharacterTitleGraphics"),

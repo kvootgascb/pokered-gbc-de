@@ -7,15 +7,21 @@ ENDC
 IF DEF(_BLUE)
 	INCBIN "gfx/title/blue_version.1bpp", 0, 9 * 8 ; omit empty trailing tile
 ENDC
-	; Match the edition lettering's bold five-pixel height and baseline.
-	ds 8, 0 ; one ordinary space before DX
+	; EDITION ends at pixel 69. Its last tile already has two blank columns.
+	; Add six more for RED (8-pixel word gap), two for BLUE (4-pixel gap).
 Version_DX_GFX:
-	; Packed D (identical to EDITION's D), one pixel gap, then X.
-	; Both letters occupy rows 3..7, as the original edition name does.
-	db 0, 0, 0, %11110011, %11001001, %11001000, %11001001, %11110011
-	db 0, 0, 0, %00110000, %11100000, %11000000, %11100000, %00110000
+	; Same five-pixel-high D/X lettering and one-pixel letter gap as before.
+IF DEF(_RED)
+	db 0, 0, 0, %00000011, %00000011, %00000011, %00000011, %00000011
+	db 0, 0, 0, %11001100, %00100111, %00100011, %00100111, %11001100
+	db 0, 0, 0, %11000000, %10000000, %00000000, %10000000, %11000000
+ELSE
+	db 0, 0, 0, %00111100, %00110010, %00110010, %00110010, %00111100
+	db 0, 0, 0, %11001100, %01111000, %00110000, %01111000, %11001100
+	ds 8, 0
+ENDC
 Version_GFXEnd:
-	ASSERT Version_GFXEnd - Version_DX_GFX == 2 * 8
+	ASSERT Version_GFXEnd - Version_DX_GFX == 3 * 8
 	ASSERT (Version_GFXEnd - Version_GFX) % 8 == 0
 	ASSERT (Version_GFXEnd - Version_GFX) / 8 == TITLE_EDITION_TILES
 	ASSERT (Version_GFXEnd - Version_GFX) / 8 <= SCREEN_WIDTH
