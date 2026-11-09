@@ -2107,6 +2107,50 @@ print(
     "PASS: real repel expiry/reuse, all three durations, save/load, No, empty bag and Classic"
 )
 
+# Follow the real expiry -> question -> close path, with exactly one No/B.
+repel_questions = []
+hook("YesNoChoice", lambda _: repel_questions.append(True))
+for item in (0x1E, 0x38, 0x39):
+    for decline in ("no", "b"):
+        enter_npc_map(8, [84, 0, 0, 0], map_id=12, width=10, y=6)
+        p.memory[a("wNumBagItems"):a("wNumBagItems") + 4] = [1, item, 2, 255]
+        p.memory[3, 0xD00F] = item
+        p.memory[a("wRepelRemainingSteps")] = 1
+        bank, pc = sym["TryDoWildEncounter"]
+        for offset, byte in enumerate((0xFB, 0xCD, pc & 255, pc >> 8,
+                                       0xF3, 0x3E, 0x91, 0xE0, 0x40, 0x18, 0xFE)):
+            p.memory[0, 0x100 + offset] = byte
+        p.memory[0xFF70] = 0
+        p.memory[0x2000] = bank
+        p.memory[a("hLoadedROMBank")] = bank
+        p.register_file.SP = a("wStack")
+        p.register_file.PC = 0x100
+        before = len(repel_questions)
+        for frame in range(1200):
+            if frame % 20 == 0:
+                p.button("a", 2)
+            p.tick(1, False)
+            if len(repel_questions) > before:
+                break
+        assert len(repel_questions) > before
+        p.button_release("a")
+        p.tick(30, False)
+        if decline == "no":
+            p.button("down", 2)
+            p.tick(20, False)
+            assert p.memory[a("wCurrentMenuItem")] == 1
+            p.button("a", 2)
+        else:
+            p.button("b", 2)
+        p.tick(120, True)  # no further input may be needed
+        assert p.register_file.PC in (0x109, 0x10A), (item, decline, "expiry still waits for input")
+        assert not p.memory[a("wFontLoaded")] & 1
+        assert p.memory[0xFF4A] == 0x90
+        assert p.memory[a("wRepelRemainingSteps")] == 0
+        assert list(p.memory[a("wBagItems"):a("wBagItems") + 3]) == [item, 2, 255]
+p.hook_deregister(*sym["YesNoChoice"])
+print("PASS: all three repel expiry prompts close with one No/B, without consuming another item")
+
 # Context VM requirements and party scan, including a move on the second mon.
 restore()
 p.memory[a("wPartyCount")] = 2

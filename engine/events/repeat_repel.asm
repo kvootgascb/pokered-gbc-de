@@ -8,6 +8,7 @@ RememberRepelType::
 	ret
 
 OfferRepeatRepel::
+; Carry is set only when No/B has already dismissed the expiry dialogue.
 	ld a, [wGameplayModeCache]
 	and a
 	ret z
@@ -18,8 +19,13 @@ OfferRepeatRepel::
 	call YesNoChoice
 	ld a, [wCurrentMenuItem]
 	and a
-	ret nz
-	jp RepeatLastRepel
+	jr z, .repeat
+	scf
+	ret
+.repeat
+	call RepeatLastRepel
+	and a
+	ret
 .question
 	text "Noch ein Exemplar"
 	line "derselben Art"

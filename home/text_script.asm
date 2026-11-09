@@ -139,6 +139,18 @@ CloseTextDisplay::
 	ld [MBC1RomBank], a
 	jp UpdateSprites
 
+; Near the shared exits so short jumps fit the tightly packed home bank.
+DisplayRepelWoreOffText::
+	ld hl, RepelWoreOffText
+	call PrintText
+	farcall OfferRepeatRepel
+	jr c, HoldTextDisplayOpen ; No/B already acknowledged the expiry dialogue
+	jr AfterDisplayingTextID
+
+RepelWoreOffText::
+	text_far _RepelWoreOffText
+	text_end
+
 DisplayPokemartDialogue::
 	push hl
 	ld hl, PokemartGreetingText
@@ -215,14 +227,4 @@ DisplayPlayerBlackedOutText::
 
 PlayerBlackedOutText::
 	text_far _PlayerBlackedOutText
-	text_end
-
-DisplayRepelWoreOffText::
-	ld hl, RepelWoreOffText
-	call PrintText
-	farcall OfferRepeatRepel
-	jp AfterDisplayingTextID
-
-RepelWoreOffText::
-	text_far _RepelWoreOffText
 	text_end

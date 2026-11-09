@@ -2,7 +2,9 @@
 
 In Erweitert folgt auf die normale Ablaufmeldung eine Ja/Nein-Frage, wenn
 ein weiteres Exemplar derselben Schutzart im Beutel liegt. Bei Ja wird genau
-ein Exemplar verwendet, bei Nein bleibt der Beutel unverändert.
+ein Exemplar verwendet, bei Nein bleibt der Beutel unverändert. Nein oder B
+schließt die Nachfrage sofort; die Ablaufmeldung muss nicht zusätzlich
+weggeklickt werden.
 
 - Schutz: 100 Schritte.
 - Superschutz: 200 Schritte.
@@ -22,4 +24,5 @@ Ab dem nächsten normalen Einsatz ist die Art bekannt.
 Die Emulator-Tests prüfen alle drei Dauern, die Entnahme aus dem richtigen
 Beutelplatz, Speichern/Laden, Ablehnung, fehlenden Vorrat und Classic. Außerdem
 wird der ursprüngliche letzte-Schritt-Handler mit Ablaufmeldung, Ja/Nein-Menü
-und anschließendem erneuten Einsatz vollständig ausgeführt.
+und anschließendem erneuten Einsatz vollständig ausgeführt. Für jede Schutzart
+wird auch geprüft, dass einmal Nein oder B ohne weitere Eingabe schließt.
