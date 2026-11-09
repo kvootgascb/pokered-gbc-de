@@ -14,6 +14,8 @@ OfferRepeatRepel::
 	ret z
 	call FindLastRepelInBag
 	ret nc
+	; Acknowledge the expiry first, just as when no replacement is available.
+	call WaitForTextScrollButtonPress
 	ld hl, .question
 	call PrintText
 	call YesNoChoice
@@ -27,10 +29,9 @@ OfferRepeatRepel::
 	and a
 	ret
 .question
-	text "Noch ein Exemplar"
-	line "derselben Art"
-	cont "benutzen?"
-	prompt
+	text "Gleiche Schutzart"
+	line "erneut verwenden?"
+	done
 
 ; Re-find the actual bag position rather than using an old party/menu index.
 RepeatLastRepel::

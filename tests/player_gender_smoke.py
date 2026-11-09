@@ -2117,7 +2117,16 @@ print(
 )
 
 # Follow the real expiry -> question -> close path, with exactly one No/B.
-repel_questions = []
+repel_questions, repel_expiry_pages = [], []
+
+
+def repel_page():
+    tilemap = a("wTileMap")
+    return (bytes(p.memory[tilemap + 14 * 20 + 1:tilemap + 14 * 20 + 18]) +
+            bytes(p.memory[tilemap + 16 * 20 + 1:tilemap + 16 * 20 + 18]))
+
+
+hook("OfferRepeatRepel", lambda _: repel_expiry_pages.append(repel_page()))
 hook("YesNoChoice", lambda _: repel_questions.append(True))
 for item in (0x1E, 0x38, 0x39):
     for decline in ("no", "b"):
@@ -2134,14 +2143,21 @@ for item in (0x1E, 0x38, 0x39):
         p.memory[a("hLoadedROMBank")] = bank
         p.register_file.SP = a("wStack")
         p.register_file.PC = 0x100
-        before = len(repel_questions)
-        for frame in range(1200):
-            if frame % 20 == 0:
-                p.button("a", 2)
-            p.tick(1, False)
+        before, expiry_before = len(repel_questions), len(repel_expiry_pages)
+        for _ in range(1200):
+            p.tick(1, False)  # expiry must wait without automatically scrolling
+            if len(repel_expiry_pages) > expiry_before:
+                break
+        assert len(repel_expiry_pages) > expiry_before
+        p.tick(180, False)
+        assert len(repel_questions) == before
+        assert repel_page() == repel_expiry_pages[-1], "expiry message advanced without acknowledgement"
+        p.button("a", 2)  # exactly one press acknowledges expiry
+        for _ in range(1200):
+            p.tick(1, False)  # no further press may be needed to show Yes/No
             if len(repel_questions) > before:
                 break
-        assert len(repel_questions) > before
+        assert len(repel_questions) > before, "question waited for another confirmation"
         p.button_release("a")
         p.tick(30, False)
         if decline == "no":
@@ -2158,7 +2174,8 @@ for item in (0x1E, 0x38, 0x39):
         assert p.memory[a("wRepelRemainingSteps")] == 0
         assert list(p.memory[a("wBagItems"):a("wBagItems") + 3]) == [item, 2, 255]
 p.hook_deregister(*sym["YesNoChoice"])
-print("PASS: all three repel expiry prompts close with one No/B, without consuming another item")
+p.hook_deregister(*sym["OfferRepeatRepel"])
+print("PASS: repel expiry waits for acknowledgement, then shows Yes/No automatically; all three types close with one No/B")
 
 # Context VM requirements and party scan, including a move on the second mon.
 restore()
