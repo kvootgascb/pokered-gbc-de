@@ -194,8 +194,8 @@ MewRumorTalk::
 	line "Schatten damals"
 	cont "aus!"
 	para "Aber ein FLEGMON"
-	line "ist das jedenfalls"
-	cont "nicht."
+	line "ist das"
+	cont "jedenfalls nicht."
 	done
 .text
 	text "Hast du schon"
@@ -206,13 +206,14 @@ MewRumorTalk::
 	cont "gefahren."
 	para "Beim Einsteigen"
 	line "sah ich einen"
-	cont "Schatten unter dem"
-	cont "Lastwagen huschen."
+	cont "Schatten unter"
+	cont "dem Lastwagen"
+	cont "huschen."
 	para "Keine Ahnung, was"
 	line "das war. Von der"
-	cont "Farbe her hätte es"
-	cont "ein FLEGMON sein"
-	cont "können ..."
+	cont "Farbe her hätte"
+	cont "es ein FLEGMON"
+	cont "sein können ..."
 	done
 
 FossilRumorTalk::
