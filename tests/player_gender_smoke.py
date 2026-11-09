@@ -296,6 +296,14 @@ small_dx = bytes(
 )
 expected_label = original_label[:-8] + small_dx
 assert len(expected_label) == 12 * 8
+# Center the visible lettering, retaining the already verified glyphs/gaps.
+label_rows = [[(expected_label[x // 8 * 8 + y] >> (7 - x % 8)) & 1
+               for x in range(96)] for y in range(8)]
+visible_width = max(x for x in range(96) if any(row[x] for row in label_rows)) + 1
+left_padding = (96 - visible_width) // 2
+label_rows = [[0] * left_padding + row[:96 - left_padding] for row in label_rows]
+expected_label = bytes(sum(label_rows[y][tile * 8 + bit] << (7 - bit) for bit in range(8))
+                       for tile in range(12) for y in range(8))
 # Compare visible word gaps, independently of tile boundaries/padding.
 ink_columns = [x for x in range(96) if any(
     expected_label[x // 8 * 8 + y] & (128 >> (x % 8)) for y in range(8)
@@ -310,6 +318,7 @@ word_end = 3 if rom == "pokered" else 4
 edition_gap = letter_runs[word_end + 1][0] - letter_runs[word_end][-1] - 1
 dx_gap = letter_runs[-2][0] - letter_runs[-3][-1] - 1
 assert dx_gap == edition_gap, (rom, edition_gap, dx_gap)
+assert ink_columns[0] == 95 - ink_columns[-1], "title ink is not centered"
 # Cold boots exercise the actual title path, including the default without a save.
 for saved, graphic in [
     (title_save, "GreenPlayerCharacterTitleGraphics"),

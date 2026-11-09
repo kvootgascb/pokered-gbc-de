@@ -2,6 +2,8 @@
 
 These instructions explain how to set up the tools required to build **pokered-gbc**, including [**rgbds**](https://github.com/gbdev/rgbds), which assembles the source files into a ROM.
 
+Python 3 is also required to generate the centered edition title graphics; no extra Python packages are needed.
+
 If you run into trouble, ask for help on IRC or Discord (see [README.md](README.md)).
 
 

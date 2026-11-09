@@ -154,6 +154,9 @@ pokeblue_vc_opt    = -Cjv -n 0 -k 01 -l 0x33 -m 0x13 -r 03 -t "POKEMON BLAU DX"
 
 ### Misc file-specific graphics rules
 
+gfx/title/%_dx.1bpp: gfx/title/%_version.1bpp tools/title_edition.py
+	python3 tools/title_edition.py $< $@
+
 gfx/battle/move_anim_0.2bpp: tools/gfx += --trim-whitespace
 gfx/battle/move_anim_1.2bpp: tools/gfx += --trim-whitespace
 
