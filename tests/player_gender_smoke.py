@@ -2650,6 +2650,111 @@ def money_value():
     )
 
 
+# Open the coin seller normally. Its compact menu must preserve the map,
+# hide an unaffordable bulk offer, map reordered rows to the right purchase,
+# and close with exactly one Back/B or one result acknowledgement.
+coin_menus, coin_results = [], []
+hook("HandleMenuInput_", lambda _: coin_menus.append(True))
+hook("ExpandedCoinShop.print", lambda _: coin_results.append(p.memory[a("wPostgameAction")]))
+
+
+def coin_tick(frames=1, render=False):
+    p.tick(frames, render)
+    while p.memory[0xFF70] & 7 not in (0, 1):
+        p.tick(1, render)
+
+
+def coin_wait(condition):
+    for _ in range(1200):
+        coin_tick()
+        if condition():
+            return
+    raise AssertionError(("coin menu stalled", hex(p.register_file.PC)))
+
+
+def open_coin_menu(money, coins=0, case=True):
+    enter_npc_map(5, [84, 0, 0, 0], map_id=0x87, width=10, y=8)
+    set_money(money)
+    p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = coin_bytes(coins)
+    p.memory[a("wNumBagItems")] = int(case)
+    p.memory[a("wBagItems"):a("wBagItems") + 3] = [0x45, 1, 255] if case else [255, 0, 0]
+    middle = bytes(p.memory[a("wTileMap") + 9 * 20:a("wTileMap") + 12 * 20])
+    before = len(coin_menus)
+    p.button("a", 2)
+    coin_wait(lambda: len(coin_menus) > before)
+    coin_tick(30, True)
+    maximum = 2 if money >= 10000 else 1
+    assert p.memory[a("wMaxMenuItem")] == maximum
+    assert p.memory[a("wCurrentMenuItem")] == 0
+    tm = a("wTileMap")
+    amount = [0xFB, 0xF6, 0xF6] if maximum == 2 else [0xFB, 0xF6]
+    assert list(p.memory[tm + 2 * 20 + 2:tm + 2 * 20 + 2 + len(amount)]) == amount
+    assert p.memory[tm + 3 * 20 + 3] == 0xF0, "price lacks PokeDollar sign"
+    assert bytes(p.memory[tm + 9 * 20:tm + 12 * 20]) == middle, "coin menu erased the map"
+    assert any(tile != 0x7F for tile in middle)
+    if money in (9999, 10000):
+        p.screen.image.save("/tmp/" + rom + "-coin-menu-" + str(money) + ".png")
+    return maximum
+
+
+for money in (0, 999, 1000, 9999, 10000, 10001, 50000):
+    for cancel in ("b", "back"):
+        maximum = open_coin_menu(money)
+        if cancel == "back":
+            for _ in range(maximum):
+                p.button("down", 2)
+                coin_tick(20)
+            assert p.memory[a("wCurrentMenuItem")] == maximum
+        p.button("b" if cancel == "b" else "a", 2)
+        coin_tick(120, True)
+        assert not p.memory[a("wFontLoaded")] & 1, (money, cancel, "extra close press")
+        assert p.memory[a("wUpdateSpritesEnabled")] == 1 and p.memory[a("hWY")] == 144
+        assert money_value() == money
+        assert list(p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2]) == [0, 0]
+
+# money, coins, coin case, selected row, result, remaining money, final coins
+for money, coins, case, row, result, balance, total in (
+    (10000, 0, True, 0, 2, 0, 500),
+    (10000, 0, True, 1, 2, 9000, 50),
+    (9999, 0, True, 0, 2, 8999, 50),
+    (999, 0, True, 0, 3, 999, 0),
+    (10000, 9500, True, 0, 4, 10000, 9500),
+    (10000, 9499, True, 0, 2, 0, 9999),
+    (9999, 9950, True, 0, 4, 9999, 9950),
+    (10000, 0, False, 0, 5, 10000, 0),
+):
+    open_coin_menu(money, coins, case)
+    for _ in range(row):
+        p.button("down", 2)
+        coin_tick(20)
+    before = len(coin_results)
+    p.button("a", 2)
+    coin_wait(lambda: len(coin_results) > before)
+    coin_tick(180, True)
+    assert coin_results[-1] == result
+    assert money_value() == balance
+    assert list(p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2]) == coin_bytes(total)
+    p.button("b", 2)  # one press acknowledges the result and closes
+    coin_tick(120)
+    assert not p.memory[a("wFontLoaded")] & 1
+
+# Affordability is an opening-time snapshot, but checkout still validates funds.
+open_coin_menu(10000)
+set_money(9999)
+assert p.memory[a("wMaxMenuItem")] == 2
+before = len(coin_results)
+p.button("a", 2)
+coin_wait(lambda: len(coin_results) > before)
+coin_tick(180)
+assert coin_results[-1] == 3 and money_value() == 9999
+assert list(p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2]) == [0, 0]
+p.button("b", 2)
+coin_tick(120)
+assert not p.memory[a("wFontLoaded")] & 1
+p.hook_deregister(*sym["HandleMenuInput_"])
+p.hook_deregister(*sym["ExpandedCoinShop.print"])
+print("PASS: compact coin menu, 10000 threshold/order, both bundles, limits/errors, snapshot and one-press Back/B/result close")
+
 ship_stock = [(0x4F, 20000), (0x51, 3000), (0x52, 5000),
               (0x53, 10000), (0x0A, 5000), (0x36, 10000)]
 restore()

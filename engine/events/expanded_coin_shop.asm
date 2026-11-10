@@ -12,21 +12,48 @@ ExpandedCoinShop::
 	scf
 	ret
 .shop
-	ld hl, wd730
-	set 6, [hl] ; menu entries are not scrolling dialogue
 	xor a
 	ldh [hUILayoutFlags], a
 	ld [wUpdateSpritesEnabled], a
 	call HideSprites
-	call ClearScreen
+	; Snapshot affordability once when opening the dialogue. Menu index 0
+	; is the large bundle only when it is offered; purchase actions stay 0/1.
+	ld a, 1
+	ld [wPostgameAction], a
+	call BuyExpandedCoins.setMoney
+	call HasEnoughMoney
+	ld a, 1 ; small bundle + Back
+	jr c, .optionsReady
+	inc a ; large bundle + small bundle + Back
+.optionsReady
+	push af
+	ld hl, .question
+	call PrintText
+	callfar GameCornerDrawCoinBox
+	pop af
+	ld [wMaxMenuItem], a
+	add a
+	add 3
+	ld b, a ; five/seven interior rows, matching two-row bundle entries
+	ld c, 9
 	hlcoord 0, 0
-	lb bc, 8, 18
 	call TextBoxBorder
+	ld hl, wd730
+	set 6, [hl]
 	hlcoord 1, 1
 	ld de, .title
 	call PlaceString
-	hlcoord 3, 3
-	ld de, .choices
+	ld a, [wMaxMenuItem]
+	cp 2
+	ld de, .smallChoices
+	jr nz, .drawChoices
+	ld de, .largeChoices
+.drawChoices
+	; Amount, price below it; cursor advances two rows like a normal mart.
+	ldh a, [hUILayoutFlags]
+	set 2, a
+	ldh [hUILayoutFlags], a
+	hlcoord 2, 2
 	call PlaceString
 	ld hl, wd730
 	res 6, [hl]
@@ -36,21 +63,29 @@ ExpandedCoinShop::
 	ld [wLastMenuItem], a
 	ld [wMenuWatchMovingOutOfBounds], a
 	ld [wMenuJoypadPollCount], a
-	ld a, 3
-	ld [wTopMenuItemY], a
 	ld a, 2
+	ld [wTopMenuItemY], a
+	ld a, 1
 	ld [wTopMenuItemX], a
-	ld [wMaxMenuItem], a
 	ld a, A_BUTTON | B_BUTTON
 	ld [wMenuWatchedKeys], a
 	call HandleMenuInput
 	and B_BUTTON
-	jr nz, .handled
+	jr nz, .cancel
 	ld a, [wCurrentMenuItem]
+	ld hl, wMaxMenuItem
+	cp [hl]
+	jr z, .cancel
+	ld a, [hl]
 	cp 2
-	jr z, .handled
+	ld a, 0
+	jr nz, .buy
+	ld a, [wCurrentMenuItem]
+	xor 1 ; first row = 500, second row = 50
+.buy
 	ld [wPostgameAction], a
 	call BuyExpandedCoins
+	callfar GameCornerDrawCoinBox
 	ld a, [wPostgameAction]
 	ld hl, .success
 	cp 2
@@ -64,15 +99,28 @@ ExpandedCoinShop::
 	ld hl, .case
 .print
 	call PrintText
-.handled
+	scf
+	ret
+.cancel
+	call DisableWaitingAfterTextDisplay
 	scf
 	ret
 .title
-	db "MÜNZEN / GELD@"
-.choices
-	db "50 FÜR 1000"
-	next "500 FÜR 10000"
+	db "KAUF@"
+.largeChoices
+	db "500"
+	next " ¥10000"
+	next "50"
+	next " ¥1000"
 	next "ZURÜCK@"
+.smallChoices
+	db "50"
+	next " ¥1000"
+	next "ZURÜCK@"
+.question
+	text "Wie viele Münzen"
+	line "möchtest Du?"
+	done
 .success
 	text "Hier sind die"
 	line "gekauften Münzen!"

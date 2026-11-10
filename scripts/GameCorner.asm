@@ -483,7 +483,7 @@ GameCornerOopsForgotCoinCaseText:
 	text_far _GameCornerOopsForgotCoinCaseText
 	text_end
 
-GameCornerDrawCoinBox:
+GameCornerDrawCoinBox::
 	ld hl, wd730
 	set 6, [hl]
 	hlcoord 11, 0

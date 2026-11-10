@@ -76,7 +76,13 @@ dadurch nicht zurückgesetzt.
 
 ## Spielhalle
 
-- Münzkauf: weiterhin 50 für 1000, zusätzlich 500 für 10000.
+- Münzkauf in Erweitert: 50 Münzen für ¥1000. Wenn beim Öffnen mindestens
+  ¥10000 vorhanden sind, stehen 500 Münzen für ¥10000 an erster Stelle,
+  danach 50 Münzen und Zurück. Sonst wird das große Paket ausgeblendet.
+  Das kompakte Kaufmenü zeigt Geld und Münzen über der Spielhallenansicht;
+  nach dem Kauf werden beide Werte aktualisiert. Zurück oder B schließt
+  sofort, die Kauf- oder Fehlermeldung wird einmal mit A/B bestätigt.
+  Classic behält den ursprünglichen Münzkauf.
 - Erstes reguläres Preisfenster in Erweitert: Evoli für 2500 Münzen,
   Kicklee und Nockchan für jeweils 4600, alle auf Level 25. Classic behält
   seine ursprünglichen Angebote; der NPC behält seinen ursprünglichen Dialog.
