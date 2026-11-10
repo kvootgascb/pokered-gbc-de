@@ -99,7 +99,8 @@ SlidePlayerAndEnemySilhouettesOnScreen:
 	predef CopyUncompressedPicToTilemap
 	xor a
 	ldh [hWY], a
-	ldh [rWY], a
+; Reveal the battle window in VBlank. Writing WY here, around line 100,
+; makes VBA-M start window row 0 below the scene for one frame.
 	inc a
 	ldh [hAutoBGTransferEnabled], a
 	call Delay3
