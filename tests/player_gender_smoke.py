@@ -1115,6 +1115,53 @@ for frame in range(1800):
 assert p.memory[a("wPartyCount")] == 2 and p.memory[3, 0xD00E] == 0
 assert not p.memory[a("wFontLoaded")] & 1, "Oak gift dialogue did not close"
 assert p.memory[a("wPartyMon2Species")] == 0x99
+# The real map script resumes after victory without talking to Oak again.
+oak_gifts = []
+hook("GiveOakReward", lambda _: oak_gifts.append(True))
+for full in (False, True):
+    oak_setup(full=full)
+    p.memory[3, 0xD004] = 0  # accepting the fight consumed the opportunity
+    wins = int.from_bytes(bytes(p.memory[3, 0xD00A:0xD00C]), "little")
+    gifts, pages = len(oak_gifts), len(oak_pages)
+    p.memory[a("wBattleResult")] = 0
+    p.memory[a("wOaksLabCurScript")] = 19
+    oak_wait(lambda: len(oak_gifts) == gifts + 1)  # no A to initiate dialogue
+    oak_wait(lambda: len(oak_pages) > pages)
+    assert p.memory[a("wOaksLabCurScript")] == 18
+    pending = p.memory[3, 0xD00E]
+    assert pending in (0x99, 0xB0, 0xB1)
+    for frame in range(1800):
+        if frame % 20 == 0:
+            p.button("b", 2)
+        p.tick(1, False)
+        if not p.memory[a("wFontLoaded")] & 1:
+            break
+    assert not p.memory[a("wFontLoaded")] & 1
+    assert p.memory[a("wPartyCount")] == (6 if full else 2)
+    assert p.memory[3, 0xD00E] == (pending if full else 0)
+    if not full:
+        assert p.memory[a("wPartyMon2Species")] == pending
+        assert p.memory[a("wPartyMon2Level")] == 5
+    p.tick(180, False)
+    assert len(oak_gifts) == gifts + 1, "post-battle gift repeated"
+    assert int.from_bytes(bytes(p.memory[3, 0xD00A:0xD00C]), "little") == wins + 1
+
+# Losing or aborting cannot open the gift dialogue or grant a Pokemon.
+for result, battle_state in ((1, 0), (0, 0xFF)):
+    oak_setup()
+    p.memory[3, 0xD004] = 0
+    gifts = len(oak_gifts)
+    p.memory[a("wBattleResult")] = result
+    p.memory[a("wIsInBattle")] = battle_state
+    p.memory[a("wOaksLabCurScript")] = 19
+    p.tick(240, False)
+    assert p.memory[a("wOaksLabCurScript")] == 18
+    assert len(oak_gifts) == gifts and p.memory[3, 0xD00E] == 0
+    assert p.memory[a("wPartyCount")] == 1
+    assert not p.memory[a("wFontLoaded")] & 1
+p.hook_deregister(*sym["GiveOakReward"])
+print("PASS: Oak victory automatically starts gift/full-team dialogue once; loss/abort grants nothing")
+
 # Render both results with the native trainer-name prefix. Use the native
 # pointer setter: these pointers store the high byte first.
 for result in (0, 1):

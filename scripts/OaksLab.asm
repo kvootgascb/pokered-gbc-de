@@ -1244,7 +1244,17 @@ OaksLabScientistText:
 	text_end
 
 OaksLabPostgameBattleScript:
-	farcall ResolveOakPostgameBattle
 	ld a, SCRIPT_OAKSLAB_NOOP
 	ld [wOaksLabCurScript], a
-	ret
+	ld a, [wIsInBattle]
+	cp $ff
+	ret z
+	ld a, [wBattleResult]
+	and a
+	ret nz
+	farcall ResolveOakPostgameBattle
+	; Continue through Oak's normal gift dialogue, including the full-team
+	; message. Reset the map script first so the reward is resolved only once.
+	ld a, TEXT_OAKSLAB_OAK1
+	ldh [hSpriteIndexOrTextID], a
+	jp DisplayTextID

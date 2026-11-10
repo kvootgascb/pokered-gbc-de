@@ -14,8 +14,10 @@ beim ersten erweiterten Besuch ebenfalls einmal diese Gelegenheiten.
 Eich bietet im Labor einen nostalgischen Kampf an. Er verwendet seine bereits
 vorhandenen Teams auf Level 66–70, passend zum ursprünglich gewählten Starter.
 Die Kampfgelegenheit wird beim Annehmen verbraucht, auch bei einer Niederlage.
-Nach einem Sieg hält er einen zufälligen Starter auf Level 5 bereit; alle drei
-sind gleich wahrscheinlich. Mit vollem Team bleibt das Geschenk zur Abholung
+Nach einem Sieg setzt Eich automatisch mit dem Geschenkdialog fort und
+übergibt einen zufälligen Starter auf Level 5; alle drei sind gleich
+wahrscheinlich. Mit vollem Team weist er direkt auf den fehlenden Platz hin;
+das Geschenk bleibt zur späteren Abholung
 gespeichert. Solange es wartet, gibt es keinen weiteren Eich-Kampf, auch nach
 einem weiteren Top-Vier-Sieg. Nach der Abholung ist ein neuer Sieg nötig.
 
