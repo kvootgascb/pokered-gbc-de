@@ -2653,7 +2653,7 @@ def money_value():
 # Open the coin seller normally. Its compact menu must preserve the map,
 # hide an unaffordable bulk offer, map reordered rows to the right purchase,
 # retain the original greeting/farewell and acknowledge each page once.
-coin_menus, coin_results, coin_pages = [], [], []
+coin_menus, coin_results, coin_pages, coin_scene = [], [], [], []
 
 
 def coin_page(_):
@@ -2682,17 +2682,28 @@ def coin_wait(condition):
     raise AssertionError(("coin menu stalled", hex(p.register_file.PC)))
 
 
+def assert_coin_dialog_figures():
+    assert p.memory[a("wUpdateSpritesEnabled")] == 1
+    for base_addr in (a("wShadowOAM"), 0xFE00):
+        positions = list(p.memory[base_addr:base_addr + 160:4])
+        assert any(0 < y < 160 for y in positions[:4]), "player hidden during coin dialogue"
+        assert any(0 < y < 160 for y in positions[4:]), "NPCs hidden during coin dialogue"
+    assert bytes(p.memory[a("wTileMap"):a("wTileMap") + 12 * 20]) == coin_scene[0], "purchase windows remained over map dialogue"
+
+
 def open_coin_menu(money, coins=0, case=True):
     enter_npc_map(5, [84, 0, 0, 0], map_id=0x87, width=10, y=8)
     set_money(money)
     p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2] = coin_bytes(coins)
     p.memory[a("wNumBagItems")] = int(case)
     p.memory[a("wBagItems"):a("wBagItems") + 3] = [0x45, 1, 255] if case else [255, 0, 0]
+    coin_scene[:] = [bytes(p.memory[a("wTileMap"):a("wTileMap") + 12 * 20])]
     middle = bytes(p.memory[a("wTileMap") + 9 * 20:a("wTileMap") + 12 * 20])
     before, pages = len(coin_menus), len(coin_pages)
     p.button("a", 2)
     coin_wait(lambda: len(coin_pages) == pages + 1)
     coin_tick(90, True)
+    assert_coin_dialog_figures()
     assert len(coin_menus) == before, "greeting skipped its page acknowledgement"
     if money == 10000:
         p.screen.image.save("/tmp/" + rom + "-coin-welcome.png")
@@ -2702,6 +2713,9 @@ def open_coin_menu(money, coins=0, case=True):
     coin_wait(lambda: len(coin_menus) > before)  # no extra press after the question
     assert len(coin_pages) == pages + 2
     coin_tick(30, True)
+    assert p.memory[a("wUpdateSpritesEnabled")] != 1
+    for base_addr in (a("wShadowOAM"), 0xFE00):
+        assert all(y == 0 or y >= 160 for y in p.memory[base_addr:base_addr + 160:4]), "map sprites overlap purchase windows"
     maximum = 2 if money >= 10000 else 1
     assert p.memory[a("wMaxMenuItem")] == maximum
     assert p.memory[a("wCurrentMenuItem")] == 0
@@ -2729,8 +2743,10 @@ for money in (0, 999, 1000, 9999, 10000, 10001, 50000):
         coin_wait(lambda: len(coin_pages) == pages + 1)
         coin_tick(30, True)
         assert p.memory[a("wFontLoaded")] & 1, "farewell was skipped"
+        assert_coin_dialog_figures()
         p.button("b", 2)  # show the last original farewell line
         coin_tick(180, True)
+        assert_coin_dialog_figures()
         assert len(coin_pages) == pages + 1
         assert p.memory[a("wFontLoaded")] & 1
         if money == 10000:
@@ -2761,6 +2777,7 @@ for money, coins, case, row, result, balance, total in (
     p.button("a", 2)
     coin_wait(lambda: len(coin_results) > before)
     coin_tick(180, True)
+    assert_coin_dialog_figures()
     assert coin_results[-1] == result
     if result == 2:
         tm = a("wTileMap")
@@ -2791,7 +2808,7 @@ assert not p.memory[a("wFontLoaded")] & 1
 p.hook_deregister(*sym["HandleMenuInput_"])
 p.hook_deregister(*sym["ExpandedCoinShop.print"])
 p.hook_deregister(*sym["ManualTextScroll"])
-print("PASS: compact coin menu, 10000 threshold/order, both bundles, limits/errors, snapshot, original greeting/farewell and single page acknowledgements")
+print("PASS: compact coin menu, 10000 threshold/order, both bundles, limits/errors, snapshot, visible dialogue figures, original greeting/farewell and single page acknowledgements")
 
 ship_stock = [(0x4F, 20000), (0x51, 3000), (0x52, 5000),
               (0x53, 10000), (0x0A, 5000), (0x36, 10000)]

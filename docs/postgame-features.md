@@ -79,8 +79,11 @@ dadurch nicht zurückgesetzt.
 - Münzkauf in Erweitert: 50 Münzen für ¥1000. Wenn beim Öffnen mindestens
   ¥10000 vorhanden sind, stehen 500 Münzen für ¥10000 an erster Stelle,
   danach 50 Münzen und Zurück. Sonst wird das große Paket ausgeblendet.
-  Das kompakte Kaufmenü zeigt Geld und Münzen über der Spielhallenansicht;
-  nach dem Kauf werden beide Werte aktualisiert. Die Begrüßung
+  Das kompakte Kaufmenü zeigt Geld und Münzen über der Spielhallenansicht.
+  Spieler und NPCs bleiben während der Begrüßung sichtbar. Nur im Kaufmenü
+  werden sie ausgeblendet, damit sie die Fenster nicht überdecken; vor
+  Dankes-, Fehler- und Abschiedstext werden Karte und Figuren wiederhergestellt.
+  Die Begrüßung
   „Willkommen in der ROCKET SPIELHALLE!“ bleibt erhalten; nach der Frage
   erscheint die Auswahl ohne zusätzliche Bestätigung. Zurück oder B führt
   zum ursprünglichen Abschied „Nein? Dann komm vorbei, wenn Du spielen

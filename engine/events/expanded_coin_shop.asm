@@ -14,8 +14,7 @@ ExpandedCoinShop::
 .shop
 	xor a
 	ldh [hUILayoutFlags], a
-	ld [wUpdateSpritesEnabled], a
-	call HideSprites
+	call SaveScreenTilesToBuffer2
 	; Snapshot affordability once when opening the dialogue. Menu index 0
 	; is the large bundle only when it is offered; purchase actions stay 0/1.
 	ld a, 1
@@ -29,6 +28,10 @@ ExpandedCoinShop::
 	push af
 	ld hl, .question
 	call PrintText
+	; Hide map sprites only while the purchase windows cover their positions.
+	xor a
+	ld [wUpdateSpritesEnabled], a
+	call HideSprites
 	callfar GameCornerDrawCoinBox
 	pop af
 	ld [wMaxMenuItem], a
@@ -85,7 +88,6 @@ ExpandedCoinShop::
 .buy
 	ld [wPostgameAction], a
 	call BuyExpandedCoins
-	callfar GameCornerDrawCoinBox
 	ld a, [wPostgameAction]
 	ld hl, .success
 	cp 2
@@ -98,6 +100,15 @@ ExpandedCoinShop::
 	jr z, .print
 	ld hl, .case
 .print
+	; Return to the ordinary map dialogue before showing thanks/errors/bye.
+	; Transfer the restored map before drawing sprites over it.
+	push hl
+	call LoadScreenTilesFromBuffer2
+	call Delay3
+	ld a, 1
+	ld [wUpdateSpritesEnabled], a
+	call UpdateSprites
+	pop hl
 	call PrintText
 	scf
 	ret
