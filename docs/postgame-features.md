@@ -80,8 +80,13 @@ dadurch nicht zurückgesetzt.
   ¥10000 vorhanden sind, stehen 500 Münzen für ¥10000 an erster Stelle,
   danach 50 Münzen und Zurück. Sonst wird das große Paket ausgeblendet.
   Das kompakte Kaufmenü zeigt Geld und Münzen über der Spielhallenansicht;
-  nach dem Kauf werden beide Werte aktualisiert. Zurück oder B schließt
-  sofort, die Kauf- oder Fehlermeldung wird einmal mit A/B bestätigt.
+  nach dem Kauf werden beide Werte aktualisiert. Die Begrüßung
+  „Willkommen in der ROCKET SPIELHALLE!“ bleibt erhalten; nach der Frage
+  erscheint die Auswahl ohne zusätzliche Bestätigung. Zurück oder B führt
+  zum ursprünglichen Abschied „Nein? Dann komm vorbei, wenn Du spielen
+  möchtest!“. Nach einem Kauf bedankt sich der Verkäufer ohne Mengenangabe:
+  „Danke! Hier sind Deine Münzen!“. Jede Textseite wird normal mit A/B
+  bestätigt; zum Abschluss ist kein zusätzlicher Tastendruck nötig.
   Classic behält den ursprünglichen Münzkauf.
 - Erstes reguläres Preisfenster in Erweitert: Evoli für 2500 Münzen,
   Kicklee und Nockchan für jeweils 4600, alle auf Level 25. Classic behält

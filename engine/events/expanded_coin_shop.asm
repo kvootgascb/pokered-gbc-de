@@ -102,9 +102,8 @@ ExpandedCoinShop::
 	scf
 	ret
 .cancel
-	call DisableWaitingAfterTextDisplay
-	scf
-	ret
+	ld hl, .farewell
+	jr .print
 .title
 	db "KAUF@"
 .largeChoices
@@ -118,13 +117,19 @@ ExpandedCoinShop::
 	next " ¥1000"
 	next "ZURÜCK@"
 .question
-	text "Wie viele Münzen"
-	line "möchtest Du?"
+	text "Willkommen"
+	line "in der ROCKET"
+	cont "SPIELHALLE!"
+	para "Benötigst Du"
+	line "Spiel-Münzen?"
 	done
 .success
-	text "Hier sind die"
-	line "gekauften Münzen!"
+	text "Danke! Hier sind"
+	line "Deine Münzen!"
 	done
+.farewell
+	text_far _GameCornerClerk1PleaseComePlaySometimeText
+	text_end
 .money
 	text "Das Geld reicht"
 	line "leider nicht aus."

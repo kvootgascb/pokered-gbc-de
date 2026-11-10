@@ -2652,8 +2652,18 @@ def money_value():
 
 # Open the coin seller normally. Its compact menu must preserve the map,
 # hide an unaffordable bulk offer, map reordered rows to the right purchase,
-# and close with exactly one Back/B or one result acknowledgement.
-coin_menus, coin_results = [], []
+# retain the original greeting/farewell and acknowledge each page once.
+coin_menus, coin_results, coin_pages = [], [], []
+
+
+def coin_page(_):
+    tm = a("wTileMap")
+    assert all(p.memory[tm + y * 20 + x] == 0x7C
+               for y in range(13, 17) for x in (0, 19)), "coin dialogue crossed border"
+    coin_pages.append(True)
+
+
+hook("ManualTextScroll", coin_page)
 hook("HandleMenuInput_", lambda _: coin_menus.append(True))
 hook("ExpandedCoinShop.print", lambda _: coin_results.append(p.memory[a("wPostgameAction")]))
 
@@ -2679,9 +2689,18 @@ def open_coin_menu(money, coins=0, case=True):
     p.memory[a("wNumBagItems")] = int(case)
     p.memory[a("wBagItems"):a("wBagItems") + 3] = [0x45, 1, 255] if case else [255, 0, 0]
     middle = bytes(p.memory[a("wTileMap") + 9 * 20:a("wTileMap") + 12 * 20])
-    before = len(coin_menus)
+    before, pages = len(coin_menus), len(coin_pages)
     p.button("a", 2)
-    coin_wait(lambda: len(coin_menus) > before)
+    coin_wait(lambda: len(coin_pages) == pages + 1)
+    coin_tick(90, True)
+    assert len(coin_menus) == before, "greeting skipped its page acknowledgement"
+    if money == 10000:
+        p.screen.image.save("/tmp/" + rom + "-coin-welcome.png")
+    p.button("a", 2)
+    coin_wait(lambda: len(coin_pages) == pages + 2)
+    p.button("a", 2)
+    coin_wait(lambda: len(coin_menus) > before)  # no extra press after the question
+    assert len(coin_pages) == pages + 2
     coin_tick(30, True)
     maximum = 2 if money >= 10000 else 1
     assert p.memory[a("wMaxMenuItem")] == maximum
@@ -2705,7 +2724,18 @@ for money in (0, 999, 1000, 9999, 10000, 10001, 50000):
                 p.button("down", 2)
                 coin_tick(20)
             assert p.memory[a("wCurrentMenuItem")] == maximum
+        pages = len(coin_pages)
         p.button("b" if cancel == "b" else "a", 2)
+        coin_wait(lambda: len(coin_pages) == pages + 1)
+        coin_tick(30, True)
+        assert p.memory[a("wFontLoaded")] & 1, "farewell was skipped"
+        p.button("b", 2)  # show the last original farewell line
+        coin_tick(180, True)
+        assert len(coin_pages) == pages + 1
+        assert p.memory[a("wFontLoaded")] & 1
+        if money == 10000:
+            p.screen.image.save("/tmp/" + rom + "-coin-farewell.png")
+        p.button("b", 2)  # acknowledge that line, with no extra close press
         coin_tick(120, True)
         assert not p.memory[a("wFontLoaded")] & 1, (money, cancel, "extra close press")
         assert p.memory[a("wUpdateSpritesEnabled")] == 1 and p.memory[a("hWY")] == 144
@@ -2732,6 +2762,13 @@ for money, coins, case, row, result, balance, total in (
     coin_wait(lambda: len(coin_results) > before)
     coin_tick(180, True)
     assert coin_results[-1] == result
+    if result == 2:
+        tm = a("wTileMap")
+        assert list(p.memory[tm + 14 * 20 + 1:tm + 14 * 20 + 6]) == [0x83, 0xA0, 0xAD, 0xAA, 0xA4]  # Danke
+        message = (list(p.memory[tm + 14 * 20 + 1:tm + 14 * 20 + 18]) +
+                   list(p.memory[tm + 16 * 20 + 1:tm + 16 * 20 + 18]))
+        assert not any(0xF6 <= tile <= 0xFF for tile in message), "thanks still names a quantity"
+        p.screen.image.save("/tmp/" + rom + "-coin-thanks.png")
     assert money_value() == balance
     assert list(p.memory[a("wPlayerCoins"):a("wPlayerCoins") + 2]) == coin_bytes(total)
     p.button("b", 2)  # one press acknowledges the result and closes
@@ -2753,7 +2790,8 @@ coin_tick(120)
 assert not p.memory[a("wFontLoaded")] & 1
 p.hook_deregister(*sym["HandleMenuInput_"])
 p.hook_deregister(*sym["ExpandedCoinShop.print"])
-print("PASS: compact coin menu, 10000 threshold/order, both bundles, limits/errors, snapshot and one-press Back/B/result close")
+p.hook_deregister(*sym["ManualTextScroll"])
+print("PASS: compact coin menu, 10000 threshold/order, both bundles, limits/errors, snapshot, original greeting/farewell and single page acknowledgements")
 
 ship_stock = [(0x4F, 20000), (0x51, 3000), (0x52, 5000),
               (0x53, 10000), (0x0A, 5000), (0x36, 10000)]
@@ -2796,10 +2834,13 @@ for service, label, map_id, x, y, moves in [
             break
     assert service_menus, (service, "NPC menu never opened")
     p.button_release("a")
-    for _ in range(900):
+    for frame in range(900):
+        if service == "coin-shop" and frame % 20 == 0:
+            p.button("a", 2)
         p.tick(1, False)
         if service_ready:
             break
+    p.button_release("a")
     assert service_ready, (service, "menu never accepted input")
     p.tick(12, True)
     assert p.memory[a("wFontLoaded")] & 1, service
