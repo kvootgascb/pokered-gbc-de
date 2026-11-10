@@ -53,24 +53,27 @@ OakPostgameTalk::
 	ld c, 0
 	write_feature_byte
 .handled
+	call DisableWaitingAfterTextDisplay
 	scf
 	ret
 .invitation
-	text "Als junger Trainer"
-	line "habe ich oft"
-	cont "gekämpft ..."
-	para "Kämpfst Du mit mir?"
-	line "Der Erinnerung"
-	cont "wegen, CHAMPION!"
-	prompt
+	text "Früher habe ich"
+	line "oft gekämpft ..."
+	para "Der Erinnerung"
+	line "wegen, CHAMPION!"
+	para "Willst Du gegen"
+	line "mich kämpfen?"
+	done
 .wonText
-	text "Wunderbar! Du hast"
-	line "mich an früher"
-	cont "erinnert!"
+	text ""
+	line "Wunderbar!"
+	para "Du hast mich an"
+	line "früher erinnert!"
 	prompt
 .lostText
-	text "Ein spannender"
-	line "Kampf, nicht wahr?"
+	text ""
+	line "Ein spannender"
+	cont "Kampf, nicht wahr?"
 	prompt
 
 ResolveOakPostgameBattle::
@@ -136,13 +139,15 @@ GiveOakReward:
 	scf
 	ret
 .gift
-	text "Ein junges #MON"
-	line "begleitet Dich."
-	para "Hier, nimm es mit!"
+	text "Als Dank für den"
+	line "Kampf möchte ich"
+	para "Dir dieses #MON"
+	line "anvertrauen."
 	prompt
 .comeBack
-	text "Dein Team ist voll."
+	text "Dein Team ist"
+	line "leider voll."
 	para "Mach bitte Platz."
-	line "Ich bewahre Dein"
-	cont "Geschenk für Dich!"
-	prompt
+	para "Ich bewahre Dein"
+	line "Geschenk für Dich!"
+	done

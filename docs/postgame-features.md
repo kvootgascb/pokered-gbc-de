@@ -19,6 +19,14 @@ sind gleich wahrscheinlich. Mit vollem Team bleibt das Geschenk zur Abholung
 gespeichert. Solange es wartet, gibt es keinen weiteren Eich-Kampf, auch nach
 einem weiteren Top-Vier-Sieg. Nach der Abholung ist ein neuer Sieg nötig.
 
+Die Einladung wird seitenweise mit A/B bestätigt; nach der abschließenden
+Kampffrage erscheint Ja/Nein ohne weiteren Tastendruck. Nein oder B schließt
+den Dialog direkt. Die Kampftexte lassen eine eigene Zeile für den automatisch
+vorangestellten Trainernamen frei. Beim Geschenk sagt Eich:
+„Als Dank für den Kampf möchte ich Dir dieses Pokémon anvertrauen.“
+Bei vollem Team wird jede Seite normal bestätigt und die letzte Seite mit
+einem Tastendruck geschlossen.
+
 Die M.S. Anne verwendet beim Verlassen über die Gangway ihren ursprünglichen
 Abfahrtsablauf. Kabinen- oder Deckwechsel verbrauchen den Besuch nicht.
 Classic verbirgt nach dem Champion-Sieg den erneuten Zugang, ohne die erweiterte

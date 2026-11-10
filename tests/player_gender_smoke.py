@@ -1032,6 +1032,111 @@ def enter_npc_map(
     p.memory[a("wSpritePlayerStateData1FacingDirection")] = 4  # up
 
 
+# Native Oak conversations: page acknowledgements, direct Yes/No and one close.
+oak_pages, oak_choices = [], []
+
+
+def oak_page(_):
+    tilemap = a("wTileMap")
+    assert all(p.memory[tilemap + y * 20 + x] == 0x7C
+               for y in range(13, 17) for x in (0, 19)), "Oak text crossed the box border"
+    oak_pages.append(bytes(p.memory[tilemap + 14 * 20:tilemap + 17 * 20]))
+
+
+def oak_setup(pending=0, full=False):
+    def setup():
+        p.memory[3, 0xD003] |= 1
+        p.memory[3, 0xD004] = 1
+        p.memory[3, 0xD00E] = pending
+        p.memory[a("wMissableObjectFlags") + 0x2E // 8] &= ~(1 << (0x2E % 8))
+        if full:
+            p.memory[a("wPartyCount")] = 6
+    enter_npc_map(5, [84, 0, 0, 0], map_id=0x28, width=5, y=3, setup=setup)
+
+
+def oak_wait(predicate):
+    for _ in range(1200):
+        p.tick(1, False)
+        if predicate():
+            return
+    raise AssertionError(("Oak dialogue stalled", hex(p.register_file.PC)))
+
+
+hook("ManualTextScroll", oak_page)
+hook("YesNoChoice", lambda _: oak_choices.append(True))
+for decline in ("b", "no"):
+    oak_setup()
+    pages, choices = len(oak_pages), len(oak_choices)
+    p.button("a", 2)
+    oak_wait(lambda: len(oak_pages) == pages + 1)
+    p.tick(120, False)
+    assert len(oak_pages) == pages + 1 and len(oak_choices) == choices
+    p.button("a", 2)
+    oak_wait(lambda: len(oak_pages) == pages + 2)
+    p.button("a", 2)
+    oak_wait(lambda: len(oak_choices) == choices + 1)
+    p.tick(60, True)  # no third press to reveal Yes/No
+    assert len(oak_pages) == pages + 2
+    p.screen.image.save("/tmp/" + rom + "-oak-question.png")
+    if decline == "no":
+        p.button("down", 2)
+        p.tick(20, False)
+        assert p.memory[a("wCurrentMenuItem")] == 1
+    p.button("b" if decline == "b" else "a", 2)
+    p.tick(120, False)
+    assert not p.memory[a("wFontLoaded")] & 1, "Oak decline needs another press"
+    assert p.memory[3, 0xD004] == 1 and p.memory[a("wIsInBattle")] == 0
+
+# A full team keeps the gift and needs only the two page turns plus one close.
+oak_setup(0x99, full=True)
+pages = len(oak_pages)
+p.button("a", 2)
+oak_wait(lambda: len(oak_pages) == pages + 1)
+p.button("a", 2)
+oak_wait(lambda: len(oak_pages) == pages + 2)
+p.button("a", 2)
+p.tick(180, True)
+assert len(oak_pages) == pages + 2
+p.screen.image.save("/tmp/" + rom + "-oak-full-team.png")
+p.button("b", 2)
+p.tick(120, False)
+assert not p.memory[a("wFontLoaded")] & 1
+assert p.memory[3, 0xD00E] == 0x99 and p.memory[a("wPartyCount")] == 6
+
+# Returning with a free slot delivers the pending gift once, including nickname UI.
+oak_setup(0x99)
+p.button("a", 2)
+for frame in range(1800):
+    if frame % 20 == 0:
+        p.button("b", 2)
+    p.tick(1, False)
+    if p.memory[a("wPartyCount")] == 2 and not p.memory[a("wFontLoaded")] & 1:
+        break
+assert p.memory[a("wPartyCount")] == 2 and p.memory[3, 0xD00E] == 0
+assert not p.memory[a("wFontLoaded")] & 1, "Oak gift dialogue did not close"
+assert p.memory[a("wPartyMon2Species")] == 0x99
+# Render both results with the native trainer-name prefix. Use the native
+# pointer setter: these pointers store the high byte first.
+for result in (0, 1):
+    oak_setup()
+    p.memory[a("wTrainerClass")] = 0x1A
+    p.memory[a("wBattleResult")] = result
+    call("SaveTrainerName")
+    bank, win = sym["OakPostgameTalk.wonText"]
+    p.memory[0x2000] = bank
+    p.memory[a("hLoadedROMBank")] = bank
+    p.register_file.HL = win
+    lose = a("OakPostgameTalk.lostText")
+    p.register_file.D, p.register_file.E = lose >> 8, lose & 255
+    call("SaveEndBattleTextPointers")
+    p.register_file.HL = a("TrainerEndBattleText")
+    pages = len(oak_pages)
+    call("PrintText", 1200, "a")
+    assert len(oak_pages) >= pages + 2
+p.hook_deregister(*sym["ManualTextScroll"])
+p.hook_deregister(*sym["YesNoChoice"])
+print("PASS: Oak pages fit, Yes/No opens directly, No/B closes once, full team retains gift and retry grants it once")
+
 # Execute the full departure animation and automatic exit, rather than only
 # the ship-availability helpers. No user save file is needed for these cases.
 anne_departures = []
