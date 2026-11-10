@@ -1196,7 +1196,7 @@ def active_missables():
 
 
 rumor_cases = [
-    (0, 10, 4, 17, 10, 17, 11, 0x0B, "OakRumorTalk"),
+    (0, 10, 4, 7, 6, 5, 6, 0x0B, "OakRumorTalk"),
     (0x44, 7, 7, 8, 5, 8, 6, 0x0E, "MewRumorTalk"),
     (8, 10, 3, 8, 13, 8, 12, 0x2F, "FossilRumorTalk"),
 ]
@@ -1220,6 +1220,9 @@ for map_id, width, obj, x, y, px, py, pic, talk in rumor_cases:
             assert p.memory[a("wSpriteStateData1") + obj * 16 + 2] == 255
             continue
         assert p.memory[a("wSpriteStateData1") + obj * 16] == pic
+        assert p.memory[a("wSpriteStateData1") + obj * 16 + 2] != 255, (
+            talk, "NPC is not visible from the player position"
+        )
         positions = set()
         for _ in range(45):
             p.tick(20, False)

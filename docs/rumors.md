@@ -10,7 +10,9 @@ ursprünglichen Bewegungsregeln.
 
 ## Älterer Trainer in Alabastia
 
-Nach dem ersten Champion-Sieg rechts neben Eichs Labor, Ausgangspunkt (17, 10).
+Nach dem ersten Champion-Sieg rechts vor dem Spielerhaus, Ausgangspunkt (7, 6).
+Er ist bereits vom Feld direkt vor der Haustür (5, 6) sichtbar. Seine Laufstrecke
+von (6, 6) bis (8, 6) hält den Ausgang und den Weg nach Süden frei.
 Ein neuer älterer Trainer mit dem Gambler-Sprite erzählt:
 
 > Hast du schon gehört?
