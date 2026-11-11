@@ -1,0 +1,18 @@
+POKÉMON DX · SPIELSTAND-EDITOR
+
+1. ZIP-Datei entpacken.
+2. Pokemon-DX-Saveeditor.html mit Firefox, Chrome oder Edge öffnen.
+   Es ist keine Installation und keine Internetverbindung nötig.
+3. Im Spiel mit SICHERN speichern und den Emulator schließen.
+4. Die normale .sav-Datei im Editor öffnen.
+5. Team und Beutel bearbeiten und „Bearbeitete .sav speichern“ wählen.
+   Der Editor lädt eine neue Datei herunter. Das Original bleibt erhalten.
+6. Die neue Datei passend zur ROM benennen (z. B. pokeblue.sav), im
+   Emulator verwenden und das Spiel mit WEITER normal laden.
+   Keinen alten Emulator-Schnellspeicherstand laden.
+
+Unterstützt: normale 32-KB-.sav-Dateien der Rot-/Blau-DX-ROM,
+aktuelle I2-Spielstände, ältere I1-Spielstände und das ursprüngliche Layout.
+Emulator-Schnellspeicherstände (.sgm / Save States) sind nicht geeignet.
+
+Alle Dateien bleiben auf Deinem Gerät. Der Editor lädt nichts hoch.

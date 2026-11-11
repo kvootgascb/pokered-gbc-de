@@ -11,6 +11,10 @@ It builds the following ROMs:
 
 Die ROM-Dateinamen und das Spielstandformat bleiben unverändert.
 
+Zum Bearbeiten von Team und Beutel gibt es einen lokalen
+[Savegame-Editor](tools/save-editor/README.md). Die fertige HTML-Datei läuft
+ohne Installation oder Internetverbindung im Browser.
+
 To set up the repository, see [**INSTALL.md**](INSTALL.md).
 
 
